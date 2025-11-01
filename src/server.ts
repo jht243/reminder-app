@@ -1239,7 +1239,8 @@ const httpServer = createServer(
                            ext === ".html" ? "text/html" : "application/octet-stream";
         res.writeHead(200, { 
           "Content-Type": contentType,
-          "Access-Control-Allow-Origin": "*"
+          "Access-Control-Allow-Origin": "*",
+          "Cache-Control": "no-cache"
         });
         fs.createReadStream(assetPath).pipe(res);
         return;
