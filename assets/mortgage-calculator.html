@@ -11,22 +11,27 @@
 
       body {
         margin: 0;
-        padding: 0;
+        padding: 24px 0;
         display: flex;
         justify-content: center;
+        align-items: flex-start;
         background: transparent;
         color: #e2e8f0;
+        overflow-x: hidden;
       }
 
       .app {
-        width: min(720px, 100%);
-        padding: 24px;
+        width: 100%;
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 0 24px 32px;
         display: grid;
         gap: 18px;
         background: transparent;
         border: none;
         border-radius: 0;
         box-shadow: none;
+        box-sizing: border-box;
       }
 
       header h1 {
@@ -286,7 +291,7 @@
 
       .result-carousel {
         position: relative;
-        padding: 0 28px;
+        padding: 0 18px;
       }
 
       .carousel-nav {
@@ -324,11 +329,11 @@
       }
 
       #cardPrev {
-        left: -26px;
+        left: 6px;
       }
 
       #cardNext {
-        right: -26px;
+        right: 6px;
       }
 
       .carousel-window {
@@ -359,6 +364,153 @@
 
       .slide-content.tight {
         gap: 16px;
+      }
+
+      .slide-content.breakdown {
+        gap: 20px;
+      }
+
+      .breakdown-card {
+        display: grid;
+        gap: 24px;
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .breakdown-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+        gap: 32px;
+        align-items: start;
+      }
+
+      .breakdown-chart {
+        position: relative;
+        background: linear-gradient(135deg, rgba(30, 33, 56, 0.8), rgba(25, 28, 48, 0.85));
+        border: 1px solid rgba(71, 85, 105, 0.3);
+        border-radius: 12px;
+        padding: 32px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 12px rgba(10, 13, 28, 0.35);
+      }
+
+      .breakdown-chart canvas {
+        width: 220px;
+        height: 220px;
+      }
+
+      .breakdown-chart .chart-value {
+        position: absolute;
+        text-align: center;
+        color: #f1f5f9;
+        font-weight: 700;
+        font-size: 26px;
+        letter-spacing: -0.01em;
+      }
+
+      .breakdown-chart .chart-value span {
+        display: block;
+        margin-top: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(148, 163, 184, 0.65);
+      }
+
+      .breakdown-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .breakdown-row {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(30, 33, 56, 0.8), rgba(25, 28, 48, 0.85));
+        border: 1px solid rgba(71, 85, 105, 0.3);
+        box-shadow: 0 4px 12px rgba(10, 13, 28, 0.35);
+      }
+
+      .breakdown-pill {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        font-size: 16px;
+        font-weight: 600;
+        color: #0f172a;
+      }
+
+      .breakdown-pill.primary {
+        background: linear-gradient(150deg, rgba(14, 165, 233, 0.95), rgba(14, 165, 233, 0.65));
+      }
+
+      .breakdown-pill.accent {
+        background: linear-gradient(150deg, rgba(99, 102, 241, 0.9), rgba(59, 130, 246, 0.7));
+      }
+
+      .breakdown-pill.subtle {
+        background: linear-gradient(150deg, rgba(16, 185, 129, 0.9), rgba(45, 212, 191, 0.7));
+      }
+
+      .breakdown-details {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .breakdown-details .label {
+        font-size: 12px;
+        color: #e2e8f0;
+        font-weight: 600;
+      }
+
+      .breakdown-details .hint {
+        font-size: 11px;
+        color: rgba(148, 163, 184, 0.6);
+        letter-spacing: 0;
+        line-height: 1.4;
+      }
+
+      .breakdown-row input[type="number"] {
+        width: 100px;
+        text-align: right;
+        font-size: 15px;
+        padding: 6px 8px;
+        border-radius: 8px;
+        border: 1px solid rgba(100, 116, 139, 0.4);
+        background: rgba(15, 23, 42, 0.5);
+        color: #e2e8f0;
+        transition: border-color 0.2s ease, background 0.2s ease;
+      }
+
+      .breakdown-row input[type="number"]:focus {
+        border-color: #0ea5e9;
+        background: rgba(14, 165, 233, 0.1);
+        outline: none;
+        color: #f1f5f9;
+      }
+
+      .breakdown-row .value {
+        font-size: 15px;
+        font-weight: 700;
+        color: #f1f5f9;
+        text-align: right;
+        letter-spacing: -0.01em;
+      }
+
+      .breakdown-footnote {
+        font-size: 12px;
+        color: rgba(148, 163, 184, 0.6);
+        letter-spacing: 0;
+        line-height: 1.4;
+        margin-top: 4px;
       }
 
       .slide-header h2 {
@@ -585,6 +737,20 @@
         button {
           flex: 1 1 100%;
         }
+
+        .breakdown-layout {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+
+        .breakdown-chart {
+          padding: 24px;
+        }
+
+        .breakdown-chart canvas {
+          width: 180px;
+          height: 180px;
+        }
       }
     </style>
   </head>
@@ -770,6 +936,67 @@
                     <span>Updates automatically as you edit.</span>
                     <button class="secondary" id="resetBtn" type="button">Reset defaults</button>
                   </div>
+                </div>
+              </div>
+            </div>
+            <div class="carousel-slide" data-card="breakdown">
+              <div class="slide-content breakdown">
+                <header class="slide-header">
+                  <h2>Monthly payment breakdown</h2>
+                  <p>Visualize and adjust the components of your monthly payment.</p>
+                </header>
+                <div class="breakdown-card">
+                  <div class="breakdown-layout">
+                    <div class="breakdown-chart">
+                      <canvas id="breakdownChart" width="220" height="220"></canvas>
+                      <div class="chart-value" id="chartTotal">
+                        $0<span>/mo</span>
+                      </div>
+                    </div>
+                    <div class="breakdown-list">
+                      <div class="breakdown-row">
+                        <div class="breakdown-pill primary">💰</div>
+                        <div class="breakdown-details">
+                          <span class="label">Principal & interest</span>
+                          <span class="hint">Scheduled P&I payment</span>
+                        </div>
+                        <span class="value" id="breakdown_p_and_i">$0</span>
+                      </div>
+                      <div class="breakdown-row">
+                        <div class="breakdown-pill accent">🏡</div>
+                        <div class="breakdown-details">
+                          <span class="label">Property tax</span>
+                          <span class="hint">Monthly property tax</span>
+                        </div>
+                        <input type="number" id="breakdown_tax_input" min="0" step="1" placeholder="0" />
+                      </div>
+                      <div class="breakdown-row">
+                        <div class="breakdown-pill accent">🛡️</div>
+                        <div class="breakdown-details">
+                          <span class="label">Homeowner's insurance</span>
+                          <span class="hint">Monthly insurance cost</span>
+                        </div>
+                        <input type="number" id="breakdown_ins_input" min="0" step="1" placeholder="0" />
+                      </div>
+                      <div class="breakdown-row">
+                        <div class="breakdown-pill subtle">🏘️</div>
+                        <div class="breakdown-details">
+                          <span class="label">HOA dues</span>
+                          <span class="hint">Monthly association fees</span>
+                        </div>
+                        <input type="number" id="breakdown_hoa_input" min="0" step="1" placeholder="0" />
+                      </div>
+                      <div class="breakdown-row" id="breakdown_mi_row">
+                        <div class="breakdown-pill subtle">🔒</div>
+                        <div class="breakdown-details">
+                          <span class="label">Mortgage insurance</span>
+                          <span class="hint">Monthly MI/PMI payment</span>
+                        </div>
+                        <span class="value" id="breakdown_mi">$0</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="breakdown-footnote">Adjust tax, insurance, and HOA values above to update your monthly payment across all slides.</p>
                 </div>
               </div>
             </div>
@@ -1531,6 +1758,121 @@
           }
         };
 
+        const breakdownInputs = {
+          tax: $("breakdown_tax_input"),
+          ins: $("breakdown_ins_input"),
+          hoa: $("breakdown_hoa_input"),
+        };
+
+        const breakdownOutputs = {
+          p_and_i: $("breakdown_p_and_i"),
+          mi: $("breakdown_mi"),
+          chartTotal: $("chartTotal"),
+          canvas: $("breakdownChart"),
+        };
+
+        const drawDonutChart = (ctx, data, colors) => {
+          const canvas = ctx.canvas;
+          const centerX = canvas.width / 2;
+          const centerY = canvas.height / 2;
+          const radius = 85;
+          const holeRadius = 65;
+
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          const total = data.reduce((sum, val) => sum + val, 0);
+          if (total === 0) return;
+
+          let currentAngle = -Math.PI / 2;
+
+          data.forEach((value, index) => {
+            const sliceAngle = (value / total) * 2 * Math.PI;
+            
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+            ctx.arc(centerX, centerY, holeRadius, currentAngle + sliceAngle, currentAngle, true);
+            ctx.closePath();
+            
+            const gradient = ctx.createLinearGradient(centerX - radius, centerY - radius, centerX + radius, centerY + radius);
+            gradient.addColorStop(0, colors[index][0]);
+            gradient.addColorStop(1, colors[index][1]);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            currentAngle += sliceAngle;
+          });
+        };
+
+        const renderBreakdown = (calc) => {
+          const { derived } = calc;
+          
+          if (!breakdownOutputs.canvas) return;
+          
+          const tax_monthly = derived.tax_monthly;
+          const ins_monthly = derived.ins_monthly;
+          const hoa_monthly = derived.hoa_monthly;
+          const p_and_i = derived.p_and_i;
+          const mi = derived.monthly_mi_initial;
+          
+          const total = p_and_i + tax_monthly + ins_monthly + hoa_monthly + mi;
+          
+          if (breakdownOutputs.p_and_i) {
+            breakdownOutputs.p_and_i.textContent = formatCurrency(p_and_i);
+          }
+          
+          if (breakdownOutputs.mi) {
+            breakdownOutputs.mi.textContent = formatCurrency(mi);
+          }
+          
+          if (breakdownInputs.tax) {
+            breakdownInputs.tax.value = Math.round(tax_monthly);
+          }
+          
+          if (breakdownInputs.ins) {
+            breakdownInputs.ins.value = Math.round(ins_monthly);
+          }
+          
+          if (breakdownInputs.hoa) {
+            breakdownInputs.hoa.value = Math.round(hoa_monthly);
+          }
+          
+          if (breakdownOutputs.chartTotal) {
+            breakdownOutputs.chartTotal.innerHTML = `${formatCurrency(total)}<span>/mo</span>`;
+          }
+          
+          const ctx = breakdownOutputs.canvas.getContext("2d");
+          const data = [p_and_i, tax_monthly, ins_monthly, hoa_monthly];
+          if (mi > 0) data.push(mi);
+          
+          const colors = [
+            ["rgba(14, 165, 233, 0.95)", "rgba(14, 165, 233, 0.7)"],
+            ["rgba(99, 102, 241, 0.9)", "rgba(59, 130, 246, 0.75)"],
+            ["rgba(99, 102, 241, 0.85)", "rgba(59, 130, 246, 0.7)"],
+            ["rgba(16, 185, 129, 0.9)", "rgba(45, 212, 191, 0.75)"],
+            ["rgba(16, 185, 129, 0.85)", "rgba(45, 212, 191, 0.7)"],
+          ];
+          
+          drawDonutChart(ctx, data, colors);
+        };
+
+        const syncBreakdownToMain = () => {
+          if (breakdownInputs.tax && inputs.property_tax_input) {
+            const monthlyTax = toNumber(breakdownInputs.tax.value);
+            const yearlyTax = monthlyTax * 12;
+            inputs.property_tax_input.value = yearlyTax.toFixed(2);
+          }
+          
+          if (breakdownInputs.ins && inputs.homeowners_insurance_yearly) {
+            const monthlyIns = toNumber(breakdownInputs.ins.value);
+            const yearlyIns = monthlyIns * 12;
+            inputs.homeowners_insurance_yearly.value = Math.round(yearlyIns);
+          }
+          
+          if (breakdownInputs.hoa && inputs.hoa_monthly) {
+            inputs.hoa_monthly.value = Math.round(toNumber(breakdownInputs.hoa.value));
+          }
+        };
+
         const calculateAndRender = () => {
           if (!validateInputs()) {
             return;
@@ -1538,6 +1880,7 @@
           const params = readParams();
           const calc = mortgageCalculator.calculate_mortgage(params);
           renderSummary(calc);
+          renderBreakdown(calc);
         };
 
         const CAROUSEL_STORAGE_KEY = "mortgage-carousel-index";
@@ -1675,6 +2018,18 @@
               if (evt.key === "Enter") handler();
             });
           }
+        });
+
+        Object.values(breakdownInputs).forEach((el) => {
+          if (!el) return;
+          const handler = () => {
+            syncBreakdownToMain();
+            calculateAndRender();
+          };
+          el.addEventListener("change", handler);
+          el.addEventListener("keyup", (evt) => {
+            if (evt.key === "Enter") handler();
+          });
         });
 
         setDefaults(baseDefaults);
