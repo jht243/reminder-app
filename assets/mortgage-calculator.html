@@ -297,8 +297,9 @@
       }
 
       .carousel-nav {
-        position: sticky;
-        top: calc(50vh - 21px);
+        position: fixed;
+        top: 50vh;
+        transform: translateY(-50%);
         width: 42px;
         height: 42px;
         border-radius: 999px;
@@ -310,7 +311,7 @@
         cursor: pointer;
         box-shadow: 0 6px 24px rgba(14, 165, 233, 0.25);
         transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-        z-index: 10;
+        z-index: 100;
         font-size: 24px;
         backdrop-filter: blur(2px);
       }
@@ -327,7 +328,7 @@
         color: #0ea5e9;
         box-shadow: 0 10px 28px rgba(14, 165, 233, 0.35);
         outline: none;
-        transform: scale(1.06);
+        transform: translateY(-50%) scale(1.06);
       }
 
       #cardPrev {
