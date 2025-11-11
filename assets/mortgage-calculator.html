@@ -709,6 +709,7 @@
       }
       .modal-dialog p { margin: 0; color: rgba(148,163,184,0.8); font-size: 13px; }
       .modal-dialog input[type="email"] { display:block; width: 100%; max-width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(100,116,139,0.35); background: rgba(15,23,42,0.5); color: #e2e8f0; font-size: 14px; }
+      .modal-dialog textarea { display:block; width: 100%; max-width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(100,116,139,0.35); background: rgba(15,23,42,0.5); color: #e2e8f0; font-size: 14px; min-height: 100px; }
       .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px; }
       .modal-actions button { background: rgba(37,40,65,0.8); border: 1px solid rgba(100,116,139,0.35); color: rgba(226,232,240,0.92); padding: 8px 12px; font: inherit; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 8px; cursor: pointer; }
       .modal-actions button.primary { color: #0ea5e9; border-color: rgba(14,165,233,0.5); background: rgba(14,165,233,0.12); }
@@ -1192,6 +1193,7 @@
                   <div class="actions">
                     <span>Updates automatically as you edit.</span>
                     <button class="secondary" id="resetBtn" type="button">Reset defaults</button>
+                    <button class="secondary" id="feedbackBtn" type="button">Feedback</button>
                   </div>
                 </div>
               </div>
@@ -2270,6 +2272,97 @@
             mergeProgramDefaults();
             calculateAndRender();
           });
+        }
+
+        // Feedback modal & tracking
+        const feedbackBtn = $("feedbackBtn");
+        if (feedbackBtn) {
+          let fbOverlay, fbTextarea, fbStatusEl, fbCancelBtn, fbSubmitBtn;
+
+          const ensureFeedbackModal = () => {
+            if (fbOverlay) return;
+            fbOverlay = document.createElement('div');
+            fbOverlay.className = 'modal-overlay';
+            fbOverlay.innerHTML = `
+              <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="fbTitle">
+                <h3 id="fbTitle">Share feedback</h3>
+                <p>Tell us what worked or what could be improved.</p>
+                <textarea id="fbText" placeholder="Your feedback..."></textarea>
+                <div id="fbStatus" class="modal-status"></div>
+                <div class="modal-actions">
+                  <button type="button" id="fbCancel">Cancel</button>
+                  <button type="button" id="fbSubmit" class="primary">Send</button>
+                </div>
+              </div>`;
+            document.body.appendChild(fbOverlay);
+            fbTextarea = fbOverlay.querySelector('#fbText');
+            fbStatusEl = fbOverlay.querySelector('#fbStatus');
+            fbCancelBtn = fbOverlay.querySelector('#fbCancel');
+            fbSubmitBtn = fbOverlay.querySelector('#fbSubmit');
+
+            const onCancel = () => { fbOverlay.style.display = 'none'; };
+            fbCancelBtn.addEventListener('click', onCancel);
+            fbOverlay.addEventListener('click', (e) => { if (e.target === fbOverlay) onCancel(); });
+            fbTextarea.addEventListener('keydown', (e) => {
+              if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'enter') submitFeedback();
+            });
+            fbSubmitBtn.addEventListener('click', () => submitFeedback());
+          };
+
+          const openFeedback = () => {
+            ensureFeedbackModal();
+            if (fbStatusEl) fbStatusEl.textContent = '';
+            if (fbTextarea) fbTextarea.value = '';
+            fbOverlay.style.display = 'flex';
+            setTimeout(() => fbTextarea?.focus(), 0);
+          };
+
+          const TRACK_ENDPOINTS = [
+            'https://mortgage-calculator-open-ai.onrender.com/api/track',
+            'http://localhost:8000/api/track',
+            '/api/track',
+          ];
+
+          const postJson = async (url, payload) => {
+            return fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              mode: 'cors',
+              body: JSON.stringify(payload),
+            });
+          };
+
+          const submitFeedback = async () => {
+            const feedback = (fbTextarea?.value || '').trim();
+            if (!feedback) {
+              if (fbStatusEl) fbStatusEl.textContent = 'Please enter feedback.';
+              return;
+            }
+            if (fbStatusEl) fbStatusEl.textContent = 'Sending…';
+            try { emitTelemetry('user_feedback', { feedback }); } catch (_) {}
+
+            try {
+              let ok = false;
+              for (const url of TRACK_ENDPOINTS) {
+                try {
+                  const resp = await postJson(url, { event: 'user_feedback', data: { feedback } });
+                  if (resp && resp.ok) { ok = true; break; }
+                } catch (_) {
+                  // try next endpoint
+                }
+              }
+              if (ok) {
+                if (fbStatusEl) fbStatusEl.textContent = 'Thanks for your feedback!';
+                fbOverlay.style.display = 'none';
+              } else {
+                if (fbStatusEl) fbStatusEl.textContent = 'Failed to send feedback. Please try again.';
+              }
+            } catch (err) {
+              if (fbStatusEl) fbStatusEl.textContent = 'Failed to send feedback. Please try again.';
+            }
+          };
+
+          feedbackBtn.addEventListener('click', (e) => { e.preventDefault(); openFeedback(); });
         }
 
         const recalcButton = $("calculateBtn");
