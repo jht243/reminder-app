@@ -55,7 +55,7 @@ async function fetchFredLatestRate(): Promise<{ raw: number; adjusted: number; o
   const FRED_API_KEY = process.env.FRED_API_KEY;
   const seriesId = process.env.FRED_SERIES_ID || "MORTGAGE30US";
   if (!FRED_API_KEY) {
-    console.error("FRED_API_KEY not set");
+    console.error("[FRED] FRED_API_KEY not set");
     return null;
   }
 
@@ -67,23 +67,50 @@ async function fetchFredLatestRate(): Promise<{ raw: number; adjusted: number; o
   url.searchParams.set("limit", "14");
 
   try {
+    console.log("[FRED] Fetching latest rate", {
+      seriesId,
+      url: url.toString(),
+    });
     const resp = await fetch(url.toString());
     if (!resp.ok) throw new Error(`FRED error ${resp.status}`);
     const data = await resp.json();
     const obs = Array.isArray(data?.observations) ? data.observations : [];
     const firstValid = obs.find((o: any) => o && o.value && o.value !== ".");
-    if (!firstValid) return null;
+    if (!firstValid) {
+      console.error("[FRED] No valid observations returned", {
+        seriesId,
+        sample: obs.slice(0, 5),
+      });
+      return null;
+    }
     const raw = parseFloat(firstValid.value);
-    if (!Number.isFinite(raw)) return null;
+    if (!Number.isFinite(raw)) {
+      console.error("[FRED] Observation value not numeric", {
+        seriesId,
+        observation: firstValid,
+      });
+      return null;
+    }
     const adjusted = raw + 0.5;
+    console.log("[FRED] Received observation", {
+      observationDate: firstValid.date,
+      raw,
+      adjusted,
+    });
     return { raw, adjusted, observationDate: firstValid.date, source: seriesId };
   } catch (e) {
-    console.error("FRED fetch failed:", e);
+    console.error("[FRED] Fetch failed", e);
     return null;
   }
 }
 
 async function handleRate(req: IncomingMessage, res: ServerResponse) {
+  const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  console.log("[Rate] Request received", {
+    requestId,
+    method: req.method,
+    url: req.url,
+  });
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Headers", "content-type");
   res.setHeader("Content-Type", "application/json");
@@ -94,6 +121,7 @@ async function handleRate(req: IncomingMessage, res: ServerResponse) {
   }
 
   if (req.method !== "GET") {
+    console.warn("[Rate] Unsupported method", { requestId, method: req.method });
     res.writeHead(405).end(JSON.stringify({ error: "Method not allowed" }));
     return;
   }
@@ -101,13 +129,23 @@ async function handleRate(req: IncomingMessage, res: ServerResponse) {
   const now = Date.now();
   const TTL = 60 * 60 * 1000; // 1 hour
   if (fredRateCache && now - fredRateCache.ts < TTL) {
+    console.log("[Rate] Serving cached value", {
+      requestId,
+      cachedAt: fredRateCache.ts,
+      ratePercent: fredRateCache.payload?.ratePercent,
+    });
     res.setHeader("Cache-Control", "public, max-age=3600");
     res.writeHead(200).end(JSON.stringify(fredRateCache.payload));
     return;
   }
 
+  console.log("[Rate] Cache miss, fetching fresh value", {
+    requestId,
+    cachePresent: Boolean(fredRateCache),
+  });
   const result = await fetchFredLatestRate();
   if (!result) {
+    console.error("[Rate] Failed to obtain FRED rate", { requestId });
     res.setHeader("Cache-Control", "no-store");
     res.writeHead(503).end(JSON.stringify({ error: "FRED unavailable" }));
     return;
@@ -121,6 +159,10 @@ async function handleRate(req: IncomingMessage, res: ServerResponse) {
     source: result.source,
   };
   fredRateCache = { ts: now, payload };
+  console.log("[Rate] Returning fresh value", {
+    requestId,
+    payload,
+  });
   res.setHeader("Cache-Control", "public, max-age=3600");
   res.writeHead(200).end(JSON.stringify(payload));
 }
