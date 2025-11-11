@@ -100,6 +100,7 @@
       .collapsible-content {
         padding: 14px 16px;
         margin-top: 0;
+        touch-action: auto;
       }
 
       .collapsible-content .grid + .grid {
@@ -174,6 +175,7 @@
         display: grid;
         gap: 14px;
         grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        touch-action: auto;
       }
 
       .grid.duo-columns {
@@ -355,10 +357,13 @@
 
       .carousel-window {
         width: 100%;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: visible;
         touch-action: auto;
         overscroll-behavior: auto;
         -webkit-overflow-scrolling: touch;
+        height: auto !important;
+        min-height: 0;
       }
 
       .carousel-track {
@@ -597,17 +602,7 @@
         gap: 6px;
       }
       .rate-refresh {
-        appearance: none;
-        border: none;
-        padding: 4px;
-        border-radius: 999px;
-        background: rgba(14, 165, 233, 0.12);
-        color: rgba(14, 165, 233, 0.85);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: transform 0.2s ease, background 0.2s ease;
+        display: none !important;
       }
       .rate-refresh:hover { background: rgba(14, 165, 233, 0.18); }
       .rate-refresh:focus-visible {
@@ -643,7 +638,7 @@
       .rate-cta {
         position: absolute;
         right: 0;
-        top: 52px;
+        top: 44px;
         background: linear-gradient(135deg, rgba(14,165,233,0.18), rgba(14,165,233,0.06));
         border: 1px solid rgba(14,165,233,0.28);
         color: rgba(226, 244, 255, 0.9);
@@ -2234,16 +2229,6 @@
             else slide.removeAttribute("aria-current");
           });
 
-          const windowEl = document.querySelector('.carousel-window');
-          if (windowEl) {
-            requestAnimationFrame(() => {
-              const cur = carousel.slides[clamped];
-              const content = cur ? cur.querySelector('.slide-content') : null;
-              const h = content ? Math.ceil(content.getBoundingClientRect().height) : 0;
-              if (h > 0) windowEl.style.height = `${h}px`;
-            });
-          }
-
           persistCarouselIndex();
 
           // Persist widget state in host if available
@@ -2447,6 +2432,21 @@
             setTimeout(() => emailInput?.focus(), 0);
           };
 
+          const SUBSCRIBE_ENDPOINTS = [
+            '/api/subscribe',
+            'https://mortgage-calculator-open-ai.onrender.com/api/subscribe',
+            'http://localhost:8000/api/subscribe',
+          ];
+
+          const postJson = async (url, payload) => {
+            return fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              mode: 'cors',
+              body: JSON.stringify(payload),
+            });
+          };
+
           const submit = async () => {
             const email = (emailInput?.value || '').trim();
             if (!email || !email.includes('@')) {
@@ -2457,20 +2457,31 @@
 
             try {
               emitTelemetry("notify_me_subscribe", { type: "rates", email });
-              const resp = await fetch("/api/subscribe", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  email,
-                  settlementId: "mortgage_rates",
-                  settlementName: "Mortgage Rates",
-                  deadline: null,
-                  turnstileToken: "auto-verified-fallback",
-                }),
-              });
-              const raw = await resp.text();
+              let resp = null;
+              let raw = '';
               let data = {};
-              try { data = raw ? JSON.parse(raw) : {}; } catch (_) { /* keep raw */ }
+              const payload = {
+                email,
+                settlementId: 'mortgage_rates',
+                settlementName: 'Mortgage Rates',
+                deadline: null,
+                turnstileToken: 'auto-verified-fallback',
+              };
+              for (const url of SUBSCRIBE_ENDPOINTS) {
+                try {
+                  resp = await postJson(url, payload);
+                  raw = await resp.text();
+                  try { data = raw ? JSON.parse(raw) : {}; } catch (_) { data = {}; }
+                  if (resp.ok && (data?.success || data?.id)) break;
+                } catch (_) {
+                  // try next endpoint
+                }
+              }
+              if (!resp) {
+                statusEl.textContent = 'Subscription failed: no response from any endpoint';
+                return;
+              }
+              // raw/data already populated with the last attempt
               if (resp.ok && (data?.success || data?.id)) {
                 const code = Math.random().toString(36).slice(2, 8).toUpperCase();
                 statusEl.textContent = data.message || "You're subscribed!";
