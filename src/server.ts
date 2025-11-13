@@ -146,7 +146,7 @@ async function handleExportPdf(req: IncomingMessage, res: ServerResponse) {
         doc.fillColor("#e5e7eb").fontSize(12).text("Monthly Payment Breakdown");
         doc.moveDown(0.2);
         const maxWidth = 540; // page width minus margins
-        doc.image(buf, { fit: [maxWidth, 300], align: "left" });
+        doc.image(buf, { fit: [maxWidth, 300] });
       } catch (err) {
         console.error("Failed to embed chart image", err);
       }

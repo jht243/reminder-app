@@ -2341,11 +2341,13 @@
         // Export PDF button
         const exportBtn = $("exportPdfBtn");
         if (exportBtn) {
-          const EXPORT_ENDPOINTS = [
-            'https://mortgage-calculator-open-ai.onrender.com/api/export-pdf',
-            'http://localhost:8000/api/export-pdf',
-            '/api/export-pdf',
-          ];
+          const isHttp = (function () {
+            try { return typeof location !== 'undefined' && /^https?:/i.test(location.protocol); } catch (_) { return false; }
+          })();
+          const EXPORT_ENDPOINTS = isHttp
+            ? ['/api/export-pdf', 'https://mortgage-calculator-open-ai.onrender.com/api/export-pdf', 'http://localhost:8000/api/export-pdf']
+            : ['https://mortgage-calculator-open-ai.onrender.com/api/export-pdf', 'http://localhost:8000/api/export-pdf', '/api/export-pdf'];
+          console.debug('Export PDF endpoints', { isHttp, EXPORT_ENDPOINTS });
 
           const postForBlob = async (url, payload) => {
             return fetch(url, {
@@ -2371,7 +2373,10 @@
             } catch (_) {}
           };
 
-          exportBtn.addEventListener('click', async () => {
+          try { emitTelemetry('export_pdf_bound', {}); } catch (_) {}
+          console.debug('Export PDF: binding click handler');
+
+          const onExportClick = async () => {
             try {
               // Ensure latest calc
               const params = readParams();
@@ -2414,7 +2419,9 @@
               console.error('Export PDF error', err);
               showToast('error', 'Export failed');
             }
-          });
+          };
+          exportBtn.addEventListener('click', onExportClick);
+          try { globalThis.__exportPdf = onExportClick; } catch (_) {}
         }
 
         // Feedback modal & tracking
