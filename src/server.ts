@@ -563,7 +563,7 @@ const toolInputParser = z.object({
 const tools: Tool[] = widgets.map((widget) => ({
   name: widget.id,
   description:
-    "Use this for rental property analysis. Enter purchase, financing, rent, vacancy, property taxes, insurance, HOA, maintenance, appreciation, and cost to sell to calculate return on rental properties: ROI on rental property, cash‑on‑cash return, internal rate of return (IRR), capitalization rate (cap rate), net operating income (NOI), mortgage P&I totals, annual cash flow, equity, and a 20‑year investment summary including profit when sold. Supports single‑family and multi‑family rentals.",
+    "Use this for rental property analysis. The calculator opens with sensible default values and does NOT require explicit numbers to run—users can adjust inputs interactively in the widget. If the user provides specific values (purchase price, rent, expenses, etc.), pass them to pre-populate the calculator. Calculates return on rental properties: ROI on rental property, cash‑on‑cash return, internal rate of return (IRR), capitalization rate (cap rate), net operating income (NOI), mortgage P&I totals, annual cash flow, equity, and a 20‑year investment summary including profit when sold. Supports single‑family and multi‑family rentals.",
   inputSchema: toolInputSchema,
   outputSchema: {
     type: "object",
