@@ -665,7 +665,7 @@ export default function Calculator() {
           if (a < 128) continue;
           
           totalPixels++;
-          
+
           // Detect skin tones and body-like colors (not background)
           const brightness = (r + g + b) / 3;
           const isLikelyBody = brightness > 50 && brightness < 240 && 
@@ -1534,55 +1534,55 @@ export default function Calculator() {
       <div>
         {/* Conditionally render tabs only if NOT photo calculator */}
         {!isPhoto && (
-            <div style={styles.tabs}>
-            <div
-                style={styles.tab(units === "US")}
+        <div style={styles.tabs}>
+          <div
+            style={styles.tab(units === "US")}
                 onClick={() => updateVal("units", "US")}
-            >
-                US Units
-            </div>
-            <div
-                style={styles.tab(units === "Metric")}
+          >
+            US Units
+          </div>
+          <div
+            style={styles.tab(units === "Metric")}
                 onClick={() => updateVal("units", "Metric")}
-            >
-                Metric Units
-            </div>
-            </div>
+          >
+            Metric Units
+          </div>
+        </div>
         )}
 
         <div style={styles.card}>
           
           {/* Conditionally render Age & Gender Row if NOT photo calculator */}
           {!isPhoto && (
-              <div style={styles.row}>
+          <div style={styles.row}>
                 <div style={styles.column}>
-                    <div style={styles.label}>Age</div>
+            <div style={styles.label}>Age</div>
                     <NumberControl 
-                    value={age} 
+              value={age}
                     onChange={(val) => updateVal("age", val)} 
                     min={2} 
                     max={120} 
                     label="Age" 
                     suffix="yrs"
                     />
-                </div>
+          </div>
 
                 <div style={styles.column}>
-                    <div style={styles.label}>Gender</div>
+            <div style={styles.label}>Gender</div>
                     <div style={styles.toggleContainer}>
                         <div 
                             style={styles.toggleBtn(gender === "male")} 
                             onClick={() => updateVal("gender", "male")}
                         >
-                            Male
+                Male
                         </div>
                         <div 
                             style={styles.toggleBtn(gender === "female")} 
                             onClick={() => updateVal("gender", "female")}
                         >
-                            Female
-                        </div>
-                    </div>
+                Female
+            </div>
+          </div>
                 </div>
               </div>
           )}
@@ -1591,10 +1591,10 @@ export default function Calculator() {
           {!isPhoto && (
               <>
                 {/* Row 2: Height & Weight */}
-                <div style={styles.row}>
+          <div style={styles.row}>
                     <div style={styles.column}>
-                        <div style={styles.label}>Height</div>
-                        {units === "US" ? (
+            <div style={styles.label}>Height</div>
+            {units === "US" ? (
                             <NumberControl 
                                 value={totalInches.toString()} 
                                 onChange={handleTotalInchesChange} 
@@ -1607,21 +1607,21 @@ export default function Calculator() {
                                     </span>
                                 }
                             />
-                        ) : (
+            ) : (
                             <NumberControl 
-                                value={heightCm} 
+                  value={heightCm}
                                 onChange={(val) => updateVal("heightCm", val, "height")} 
                                 min={50} max={300} suffix="cm" 
-                            />
-                        )}
-                    </div>
+                />
+            )}
+          </div>
 
                     {(isBMI || isBF || isCalorie) && (
                     <div style={styles.column}>
-                        <div style={styles.label}>Weight</div>
-                        {units === "US" ? (
+            <div style={styles.label}>Weight</div>
+            {units === "US" ? (
                             <NumberControl 
-                                value={weightLbs} 
+                  value={weightLbs}
                                 onChange={(val) => updateVal("weightLbs", val, "weight")} 
                                 min={20} max={500} suffix="lbs" 
                             />
@@ -1730,12 +1730,12 @@ export default function Calculator() {
                       <div style={styles.label}>Front Photo</div>
                       <label style={{...styles.photoUploadArea, backgroundImage: frontPhoto ? `url(${frontPhoto})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center'}}>
                           {!frontPhoto && (
-                              <>
+              <>
                                 <Camera size={32} color={COLORS.primary} style={{marginBottom: 8}} />
                                 <span style={{fontSize: 12, color: COLORS.primary, fontWeight: 600}}>Tap to Upload</span>
                               </>
                           )}
-                          <input 
+                <input
                             type="file" 
                             accept="image/*" 
                             style={{display: 'none'}}
@@ -1750,8 +1750,8 @@ export default function Calculator() {
                               <>
                                 <Camera size={32} color={COLORS.primary} style={{marginBottom: 8}} />
                                 <span style={{fontSize: 12, color: COLORS.primary, fontWeight: 600}}>Tap to Upload</span>
-                              </>
-                          )}
+              </>
+            )}
                           <input 
                             type="file" 
                             accept="image/*" 
@@ -1759,7 +1759,7 @@ export default function Calculator() {
                             onChange={(e) => handlePhotoUpload(e, 'sidePhoto')}
                           />
                       </label>
-                  </div>
+          </div>
               </div>
           )}
 
@@ -1796,7 +1796,7 @@ export default function Calculator() {
              <div style={styles.bmiBarWrapper}>
                 <div style={styles.bmiBarContainer}>
                   {/* Pointer outside the overflow-hidden track */}
-                  {calculatedBmi !== null && (
+      {calculatedBmi !== null && (
                     <div style={styles.bmiPointer(bmiPointerPercent)}>
                       <div style={styles.bmiPointerLabel}>{calculatedBmi}</div>
                       <div style={styles.bmiPointerShape} />
@@ -1874,8 +1874,8 @@ export default function Calculator() {
           <div style={{padding: "0 24px 24px 24px"}}>
              <div style={{fontSize: "24px", fontWeight: 800, color: "#15803D", marginBottom: "8px"}}>
                Body Fat: {bodyFatResult.percent}%
-             </div>
-             
+            </div>
+
              {/* Visual Bar */}
              <div style={{textAlign: "center", marginBottom: "24px", position: "relative"}}>
                 <div style={{fontSize: "14px", fontWeight: 700, marginBottom: "4px"}}>{bodyFatResult.percent}%</div>
@@ -1923,8 +1923,8 @@ export default function Calculator() {
                     </tr>
                 </tbody>
              </table>
-          </div>
-        </div>
+              </div>
+            </div>
       )}
 
       {isCalorie && calorieResult && (
@@ -1935,7 +1935,7 @@ export default function Calculator() {
           <div style={{marginBottom: "16px", fontSize: "14px", color: COLORS.textSecondary}}>
             The results show a number of daily calorie estimates that can be used as a guideline for how many calories to consume each day to maintain, lose, or gain weight at a chosen rate.
           </div>
-          <div style={styles.list}>
+            <div style={styles.list}>
             {/* Maintain */}
             <div style={{...styles.listItem, alignItems: "center"}}>
                 <span style={{fontWeight: 600}}>Maintain weight</span>
