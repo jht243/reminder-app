@@ -24797,59 +24797,6 @@ var loadSavedData = () => {
     "My Photo Health Calculator": { values: { ...DEFAULT_VALUES }, touched: {}, result: null }
   };
 };
-var getHydrationData = () => {
-  if (typeof window === "undefined") return {};
-  const oa = window.openai;
-  if (!oa) return {};
-  const candidates = [oa.toolOutput, oa.structuredContent, oa.result?.structuredContent, oa.toolInput];
-  for (const c of candidates) {
-    if (c && typeof c === "object" && Object.keys(c).length > 0) return c;
-  }
-  return {};
-};
-var mergeHydrationData = (loaded, data) => {
-  if (!data || !data.height_cm && !data.weight_kg && !data.age_years && !data.summary) return loaded;
-  if (!loaded || !loaded["BMI Calculator"]) return loaded;
-  const current = loaded["BMI Calculator"];
-  if (!current) return loaded;
-  const values = current.values || DEFAULT_VALUES;
-  const touched = current.touched || {};
-  const isTouch = (field) => touched[field];
-  const hCm = data.height_cm;
-  const wKg = data.weight_kg;
-  const hFt = hCm ? Math.floor(Number(hCm) / 2.54 / 12) : null;
-  const hIn = hCm ? Math.round(Number(hCm) / 2.54 % 12) : null;
-  const wLbs = wKg ? Math.round(Number(wKg) * 2.20462) : null;
-  const shouldUpdate = (group) => !isTouch(group);
-  const newValues = { ...values };
-  if (shouldUpdate("height")) {
-    if (hCm) newValues.heightCm = String(hCm);
-    if (hFt !== null) newValues.heightFt = String(hFt);
-    if (hIn !== null) newValues.heightIn = String(hIn);
-  }
-  if (shouldUpdate("weight")) {
-    if (wKg) newValues.weightKg = String(wKg);
-    if (wLbs !== null) newValues.weightLbs = String(wLbs);
-  }
-  if (shouldUpdate("age") && data.age_years) {
-    newValues.age = String(data.age_years);
-  }
-  if (shouldUpdate("gender") && data.gender) {
-    newValues.gender = data.gender === "female" ? "female" : "male";
-  }
-  if (shouldUpdate("activity") && data.activity_level) {
-    newValues.activityLevel = data.activity_level;
-  }
-  return {
-    ...loaded,
-    "BMI Calculator": {
-      ...current,
-      values: newValues,
-      result: data.summary || current.result,
-      touched
-    }
-  };
-};
 function Calculator({ initialData: initialData2 }) {
   console.log("[BMI Calculator] Component mounting with initialData:", initialData2);
   const [calculatorType, setCalculatorType] = (0, import_react3.useState)("BMI Calculator");
@@ -24857,28 +24804,56 @@ function Calculator({ initialData: initialData2 }) {
   const [calculators, setCalculators] = (0, import_react3.useState)(() => {
     console.log("[BMI Calculator] Initializing state...");
     const loaded = loadSavedData();
-    return mergeHydrationData(loaded, initialData2);
-  });
-  (0, import_react3.useEffect)(() => {
-    const checkHydration = () => {
-      const lateData = getHydrationData();
-      if (lateData && Object.keys(lateData).length > 0) {
-        setCalculators((prev) => mergeHydrationData(prev, lateData));
+    console.log("[BMI Calculator] Loaded saved data:", loaded);
+    if (initialData2 && (initialData2.height_cm || initialData2.weight_kg || initialData2.summary)) {
+      console.log("[BMI Calculator] Applying initialData to BMI Calculator");
+      const current = loaded["BMI Calculator"];
+      let heightFt2 = current.values.heightFt;
+      let heightIn2 = current.values.heightIn;
+      let weightLbs2 = current.values.weightLbs;
+      if (initialData2.height_cm) {
+        const hCm = Number(initialData2.height_cm);
+        if (hCm > 0) {
+          const totalInches2 = hCm / 2.54;
+          heightFt2 = String(Math.floor(totalInches2 / 12));
+          heightIn2 = String(Math.round(totalInches2 % 12));
+        }
       }
-    };
-    checkHydration();
-    const interval = setInterval(checkHydration, 500);
-    const timeout = setTimeout(() => clearInterval(interval), 3e3);
-    const handleGlobals = (ev) => {
-      checkHydration();
-    };
-    window.addEventListener("openai:set_globals", handleGlobals);
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
-      window.removeEventListener("openai:set_globals", handleGlobals);
-    };
-  }, []);
+      if (initialData2.weight_kg) {
+        const wKg = Number(initialData2.weight_kg);
+        if (wKg > 0) {
+          weightLbs2 = String(Math.round(wKg * 2.20462));
+        }
+      }
+      loaded["BMI Calculator"] = {
+        ...current,
+        values: {
+          ...current.values,
+          heightCm: initialData2.height_cm ? String(initialData2.height_cm) : current.values.heightCm,
+          weightKg: initialData2.weight_kg ? String(initialData2.weight_kg) : current.values.weightKg,
+          heightFt: heightFt2,
+          heightIn: heightIn2,
+          weightLbs: weightLbs2,
+          age: initialData2.age_years ? String(initialData2.age_years) : current.values.age,
+          gender: initialData2.gender === "female" ? "female" : "male",
+          activityLevel: initialData2.activity_level || "moderate"
+        },
+        // Mark these as touched so they aren't overwritten by syncing logic
+        touched: {
+          height: true,
+          weight: true,
+          age: true,
+          gender: true,
+          activity: true
+        },
+        // Pre-populate result if summary exists
+        result: initialData2.summary || current.result
+      };
+    } else {
+      console.log("[BMI Calculator] No initialData to apply, using defaults");
+    }
+    return loaded;
+  });
   const [showSubscribeModal, setShowSubscribeModal] = (0, import_react3.useState)(false);
   const [email, setEmail] = (0, import_react3.useState)("");
   const [turnstileToken, setTurnstileToken] = (0, import_react3.useState)(null);
@@ -26677,7 +26652,7 @@ var ErrorBoundary = class extends import_react4.default.Component {
     return this.props.children;
   }
 };
-var getHydrationData2 = () => {
+var getHydrationData = () => {
   console.log("[Hydration] Starting hydration check...");
   if (typeof window === "undefined") {
     console.log("[Hydration] Window is undefined");
@@ -26709,15 +26684,31 @@ var container = document.getElementById("bmi-health-calculator-root");
 if (!container) {
   throw new Error("bmi-health-calculator-root element not found");
 }
-var initialData = getHydrationData2();
 var root = (0, import_client.createRoot)(container);
-root.render(
-  /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(import_react4.default.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(ErrorBoundary, { children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Calculator, { initialData }) }) })
-);
+var renderApp = (data) => {
+  root.render(
+    /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(import_react4.default.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(ErrorBoundary, { children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Calculator, { initialData: data }, Date.now()) }) })
+  );
+};
+var initialData = getHydrationData();
+renderApp(initialData);
 window.addEventListener("openai:set_globals", (ev) => {
   const globals = ev?.detail?.globals;
   if (globals) {
     console.log("[Hydration] Late event received:", globals);
+    const candidates = [
+      globals.toolOutput,
+      globals.structuredContent,
+      globals.result?.structuredContent,
+      globals.toolInput
+    ];
+    for (const candidate of candidates) {
+      if (candidate && typeof candidate === "object" && Object.keys(candidate).length > 0) {
+        console.log("[Hydration] Re-rendering with late data:", candidate);
+        renderApp(candidate);
+        return;
+      }
+    }
   }
 });
 /*! Bundled license information:

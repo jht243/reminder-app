@@ -229,76 +229,6 @@ const loadSavedData = (): Record<CalculatorType, CalculatorData> => {
   };
 };
 
-const getHydrationData = (): any => {
-  if (typeof window === 'undefined') return {};
-  const oa = (window as any).openai;
-  if (!oa) return {};
-  const candidates = [oa.toolOutput, oa.structuredContent, oa.result?.structuredContent, oa.toolInput];
-  for (const c of candidates) {
-    if (c && typeof c === 'object' && Object.keys(c).length > 0) return c;
-  }
-  return {};
-};
-
-const mergeHydrationData = (loaded: Record<CalculatorType, CalculatorData>, data: any) => {
-    if (!data || (!data.height_cm && !data.weight_kg && !data.age_years && !data.summary)) return loaded;
-    if (!loaded || !loaded["BMI Calculator"]) return loaded;
-    
-    const current = loaded["BMI Calculator"];
-    if (!current) return loaded;
-
-    const values = current.values || DEFAULT_VALUES;
-    const touched = current.touched || {};
-    
-    const isTouch = (field: string) => touched[field as keyof typeof touched];
-
-    const hCm = data.height_cm;
-    const wKg = data.weight_kg;
-    
-    // Calculate derived units
-    const hFt = hCm ? Math.floor((Number(hCm) / 2.54) / 12) : null;
-    const hIn = hCm ? Math.round((Number(hCm) / 2.54) % 12) : null;
-    const wLbs = wKg ? Math.round(Number(wKg) * 2.20462) : null;
-
-    // Helper to check if we should update a field (if not touched by user)
-    const shouldUpdate = (group: string) => !isTouch(group);
-
-    const newValues = { ...values };
-
-    if (shouldUpdate("height")) {
-        if (hCm) newValues.heightCm = String(hCm);
-        if (hFt !== null) newValues.heightFt = String(hFt);
-        if (hIn !== null) newValues.heightIn = String(hIn);
-    }
-
-    if (shouldUpdate("weight")) {
-        if (wKg) newValues.weightKg = String(wKg);
-        if (wLbs !== null) newValues.weightLbs = String(wLbs);
-    }
-
-    if (shouldUpdate("age") && data.age_years) {
-        newValues.age = String(data.age_years);
-    }
-
-    if (shouldUpdate("gender") && data.gender) {
-        newValues.gender = data.gender === "female" ? "female" : "male";
-    }
-
-    if (shouldUpdate("activity") && data.activity_level) {
-        newValues.activityLevel = data.activity_level;
-    }
-
-    return {
-        ...loaded,
-        "BMI Calculator": {
-            ...current,
-            values: newValues,
-            result: data.summary || current.result,
-            touched: touched 
-        }
-    };
-};
-
 export default function Calculator({ initialData }: { initialData?: any }) {
   console.log("[BMI Calculator] Component mounting with initialData:", initialData);
   
@@ -308,36 +238,63 @@ export default function Calculator({ initialData }: { initialData?: any }) {
   const [calculators, setCalculators] = useState<Record<CalculatorType, CalculatorData>>(() => {
     console.log("[BMI Calculator] Initializing state...");
     const loaded = loadSavedData();
-    return mergeHydrationData(loaded, initialData);
+    console.log("[BMI Calculator] Loaded saved data:", loaded);
+    
+    // If initialData provides inputs, override the defaults for BMI calculator
+    if (initialData && (initialData.height_cm || initialData.weight_kg || initialData.summary)) {
+       console.log("[BMI Calculator] Applying initialData to BMI Calculator");
+       const current = loaded["BMI Calculator"];
+       
+       // Calculate derived US units if metric data is provided
+       let heightFt = current.values.heightFt;
+       let heightIn = current.values.heightIn;
+       let weightLbs = current.values.weightLbs;
+       
+       if (initialData.height_cm) {
+         const hCm = Number(initialData.height_cm);
+         if (hCm > 0) {
+           const totalInches = hCm / 2.54;
+           heightFt = String(Math.floor(totalInches / 12));
+           heightIn = String(Math.round(totalInches % 12));
+         }
+       }
+       
+       if (initialData.weight_kg) {
+         const wKg = Number(initialData.weight_kg);
+         if (wKg > 0) {
+           weightLbs = String(Math.round(wKg * 2.20462));
+         }
+       }
+
+       loaded["BMI Calculator"] = {
+         ...current,
+         values: {
+           ...current.values,
+           heightCm: initialData.height_cm ? String(initialData.height_cm) : current.values.heightCm,
+           weightKg: initialData.weight_kg ? String(initialData.weight_kg) : current.values.weightKg,
+           heightFt,
+           heightIn,
+           weightLbs,
+           age: initialData.age_years ? String(initialData.age_years) : current.values.age,
+           gender: initialData.gender === "female" ? "female" : "male",
+           activityLevel: initialData.activity_level || "moderate"
+         },
+         // Mark these as touched so they aren't overwritten by syncing logic
+         touched: {
+           height: true,
+           weight: true,
+           age: true,
+           gender: true,
+           activity: true
+         },
+         // Pre-populate result if summary exists
+         result: initialData.summary || current.result
+       };
+    } else {
+      console.log("[BMI Calculator] No initialData to apply, using defaults");
+    }
+    return loaded;
   });
-
-  // Late Hydration Effect
-  useEffect(() => {
-    const checkHydration = () => {
-        const lateData = getHydrationData();
-        if (lateData && Object.keys(lateData).length > 0) {
-            setCalculators(prev => mergeHydrationData(prev, lateData));
-        }
-    };
-
-    // Check immediately
-    checkHydration();
-
-    // Check periodically for a few seconds
-    const interval = setInterval(checkHydration, 500);
-    const timeout = setTimeout(() => clearInterval(interval), 3000);
-
-    // Listen for event
-    const handleGlobals = (ev: any) => {
-        checkHydration();
-    };
-    window.addEventListener('openai:set_globals', handleGlobals);
-    return () => {
-        clearInterval(interval);
-        clearTimeout(timeout);
-        window.removeEventListener('openai:set_globals', handleGlobals);
-    };
-  }, []);
 
   // Subscription State
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);

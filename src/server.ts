@@ -186,8 +186,8 @@ function computeSummary(args: any) {
   const idealWeightMax = Math.round((idealWeight * 1.1) * 10) / 10;
 
   // Body Fat (U.S. Navy Method)
-  // Male: 495 / (1.0324 - 0.19077(log10(waist-neck)) + 0.15456(log10(height))) - 450
-  // Female: 495 / (1.29579 - 0.35004(log10(waist+hip-neck)) + 0.22100(log10(height))) - 450
+    // Male: 495 / (1.0324 - 0.19077(log10(waist-neck)) + 0.15456(log10(height))) - 450
+    // Female: 495 / (1.29579 - 0.35004(log10(waist+hip-neck)) + 0.22100(log10(height))) - 450
   let bodyFat = null;
   if (waist && neck && height) {
       const h = height;
@@ -587,7 +587,7 @@ function createBmiHealthCalculatorServer(): Server {
             meta["openai/userText"],
             meta["openai/lastUserMessage"],
             meta["openai/inputText"],
-              meta["openai/requestText"],
+            meta["openai/requestText"],
           ];
           const userText = candidates.find((t) => typeof t === "string" && t.trim().length > 0) || "";
 
@@ -688,48 +688,48 @@ function createBmiHealthCalculatorServer(): Server {
         if (args.activity_level) inferredQuery.push(`activity: ${args.activity_level}`);
 
         logAnalytics("tool_call_success", {
-            toolName: request.params.name,
-            params: args,
-            inferredQuery: inferredQuery.length > 0 ? inferredQuery.join(", ") : "BMI Health Calculator",
-            responseTime,
+          toolName: request.params.name,
+          params: args,
+          inferredQuery: inferredQuery.length > 0 ? inferredQuery.join(", ") : "BMI Health Calculator",
+          responseTime,
 
-            device: deviceCategory,
-            userLocation: userLocation
-              ? {
-                  city: userLocation.city,
-                  region: userLocation.region,
-                  country: userLocation.country,
-                  timezone: userLocation.timezone,
-                }
-              : null,
-            userLocale,
-            userAgent,
-          });
+          device: deviceCategory,
+          userLocation: userLocation
+            ? {
+                city: userLocation.city,
+                region: userLocation.region,
+                country: userLocation.country,
+                timezone: userLocation.timezone,
+              }
+            : null,
+          userLocale,
+          userAgent,
+        });
 
-          // Use a stable template URI so toolOutput reliably hydrates the component
-          const widgetMetadata = widgetMeta(widget, false);
-          console.log(`[MCP] Tool called: ${request.params.name}, returning templateUri: ${(widgetMetadata as any)["openai/outputTemplate"]}`);
+        // Use a stable template URI so toolOutput reliably hydrates the component
+        const widgetMetadata = widgetMeta(widget, false);
+        console.log(`[MCP] Tool called: ${request.params.name}, returning templateUri: ${(widgetMetadata as any)["openai/outputTemplate"]}`);
 
-          // Build structured content once so we can log it and return it.
-          // For the health calculator, expose fields relevant to BMI/Body Fat
+        // Build structured content once so we can log it and return it.
+        // For the health calculator, expose fields relevant to BMI/Body Fat
         const structured = {
-            ready: true,
-            timestamp: new Date().toISOString(),
-            height_cm: args.height_cm,
-            weight_kg: args.weight_kg,
-            age_years: args.age_years,
-            gender: args.gender,
+          ready: true,
+          timestamp: new Date().toISOString(),
+          height_cm: args.height_cm,
+          weight_kg: args.weight_kg,
+          age_years: args.age_years,
+          gender: args.gender,
             activity_level: args.activity_level,
           input_source: usedDefaults ? "default" : "user",
-            // Summary + follow-ups for natural language UX
-            summary: computeSummary(args),
-            suggested_followups: [
-              "How much weight should I lose?",
-              "What is a healthy BMI range?",
-              "Calculate body fat percentage",
+          // Summary + follow-ups for natural language UX
+          summary: computeSummary(args),
+          suggested_followups: [
+            "How much weight should I lose?",
+            "What is a healthy BMI range?",
+            "Calculate body fat percentage",
               "What is my TDEE?"
-            ],
-          } as const;
+          ],
+        } as const;
 
         // Embed the widget resource in _meta to mirror official examples and improve hydration reliability
         const metaForReturn = {
@@ -761,14 +761,14 @@ function createBmiHealthCalculatorServer(): Server {
                reason: "No calculation inputs provided"
              });
           } else {
-             logAnalytics("tool_call_success", {
-               responseTime,
-               params: request.params.arguments || {},
-               inferredQuery: inferredQuery.join(", "),
-               userLocation,
-               userLocale,
-               device: deviceCategory,
-             });
+          logAnalytics("tool_call_success", {
+            responseTime,
+            params: request.params.arguments || {},
+            inferredQuery: inferredQuery.join(", "),
+            userLocation,
+            userLocale,
+            device: deviceCategory,
+          });
           }
         } catch {}
 

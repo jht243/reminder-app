@@ -100,31 +100,50 @@ const getHydrationData = (): any => {
 
 console.log("[Main] BMI Health Calculator main.tsx loading...");
 
+// Get initial data
 const container = document.getElementById("bmi-health-calculator-root");
 
 if (!container) {
   throw new Error("bmi-health-calculator-root element not found");
 }
 
-// Get initial data
-const initialData = getHydrationData();
-
 const root = createRoot(container);
-root.render(
-  <React.StrictMode>
-    <ErrorBoundary>
-      <BmiHealthHelloWorld initialData={initialData} />
-    </ErrorBoundary>
-  </React.StrictMode>
-);
+
+const renderApp = (data: any) => {
+  root.render(
+    <React.StrictMode>
+      <ErrorBoundary>
+        <BmiHealthHelloWorld key={Date.now()} initialData={data} />
+      </ErrorBoundary>
+    </React.StrictMode>
+  );
+};
+
+// Initial render
+const initialData = getHydrationData();
+renderApp(initialData);
 
 // Listen for late hydration events (Apps SDK pattern)
 window.addEventListener('openai:set_globals', (ev: any) => {
   const globals = ev?.detail?.globals;
   if (globals) {
-    // We might need to re-render or update state if this event fires late
-    // For now, we rely on the component to handle updates if we passed a way to do so,
-    // or just log it. A full implementation would pass a state setter down or use a context.
     console.log("[Hydration] Late event received:", globals);
+    
+    // Extract data from the event globals similar to getHydrationData
+    const candidates = [
+      globals.toolOutput,
+      globals.structuredContent,
+      globals.result?.structuredContent,
+      globals.toolInput
+    ];
+    
+    for (const candidate of candidates) {
+       if (candidate && typeof candidate === 'object' && Object.keys(candidate).length > 0) {
+          console.log("[Hydration] Re-rendering with late data:", candidate);
+          // Force re-mount by changing key, ensuring initialData is applied fresh
+          renderApp(candidate);
+          return;
+       }
+    }
   }
 });
