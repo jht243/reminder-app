@@ -24806,49 +24806,53 @@ function Calculator({ initialData: initialData2 }) {
     const loaded = loadSavedData();
     console.log("[BMI Calculator] Loaded saved data:", loaded);
     if (initialData2 && (initialData2.height_cm || initialData2.weight_kg || initialData2.summary)) {
-      console.log("[BMI Calculator] Applying initialData to BMI Calculator");
-      const current = loaded["BMI Calculator"];
-      let heightFt2 = current.values.heightFt;
-      let heightIn2 = current.values.heightIn;
-      let weightLbs2 = current.values.weightLbs;
-      if (initialData2.height_cm) {
-        const hCm = Number(initialData2.height_cm);
-        if (hCm > 0) {
-          const totalInches2 = hCm / 2.54;
-          heightFt2 = String(Math.floor(totalInches2 / 12));
-          heightIn2 = String(Math.round(totalInches2 % 12));
+      try {
+        console.log("[BMI Calculator] Applying initialData to BMI Calculator");
+        const current = loaded["BMI Calculator"];
+        let heightFt2 = current.values.heightFt;
+        let heightIn2 = current.values.heightIn;
+        let weightLbs2 = current.values.weightLbs;
+        if (initialData2.height_cm) {
+          const hCm = Number(initialData2.height_cm);
+          if (!isNaN(hCm) && hCm > 0) {
+            const totalInches2 = hCm / 2.54;
+            heightFt2 = String(Math.floor(totalInches2 / 12));
+            heightIn2 = String(Math.round(totalInches2 % 12));
+          }
         }
-      }
-      if (initialData2.weight_kg) {
-        const wKg = Number(initialData2.weight_kg);
-        if (wKg > 0) {
-          weightLbs2 = String(Math.round(wKg * 2.20462));
+        if (initialData2.weight_kg) {
+          const wKg = Number(initialData2.weight_kg);
+          if (!isNaN(wKg) && wKg > 0) {
+            weightLbs2 = String(Math.round(wKg * 2.20462));
+          }
         }
+        loaded["BMI Calculator"] = {
+          ...current,
+          values: {
+            ...current.values,
+            heightCm: initialData2.height_cm ? String(initialData2.height_cm) : current.values.heightCm,
+            weightKg: initialData2.weight_kg ? String(initialData2.weight_kg) : current.values.weightKg,
+            heightFt: heightFt2,
+            heightIn: heightIn2,
+            weightLbs: weightLbs2,
+            age: initialData2.age_years ? String(initialData2.age_years) : current.values.age,
+            gender: initialData2.gender === "female" ? "female" : "male",
+            activityLevel: initialData2.activity_level || "moderate"
+          },
+          // Mark these as touched so they aren't overwritten by syncing logic
+          touched: {
+            height: true,
+            weight: true,
+            age: true,
+            gender: true,
+            activity: true
+          },
+          // Pre-populate result if summary exists
+          result: initialData2.summary || current.result
+        };
+      } catch (e) {
+        console.error("[BMI Calculator] Failed to apply initialData:", e);
       }
-      loaded["BMI Calculator"] = {
-        ...current,
-        values: {
-          ...current.values,
-          heightCm: initialData2.height_cm ? String(initialData2.height_cm) : current.values.heightCm,
-          weightKg: initialData2.weight_kg ? String(initialData2.weight_kg) : current.values.weightKg,
-          heightFt: heightFt2,
-          heightIn: heightIn2,
-          weightLbs: weightLbs2,
-          age: initialData2.age_years ? String(initialData2.age_years) : current.values.age,
-          gender: initialData2.gender === "female" ? "female" : "male",
-          activityLevel: initialData2.activity_level || "moderate"
-        },
-        // Mark these as touched so they aren't overwritten by syncing logic
-        touched: {
-          height: true,
-          weight: true,
-          age: true,
-          gender: true,
-          activity: true
-        },
-        // Pre-populate result if summary exists
-        result: initialData2.summary || current.result
-      };
     } else {
       console.log("[BMI Calculator] No initialData to apply, using defaults");
     }

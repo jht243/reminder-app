@@ -242,54 +242,59 @@ export default function Calculator({ initialData }: { initialData?: any }) {
     
     // If initialData provides inputs, override the defaults for BMI calculator
     if (initialData && (initialData.height_cm || initialData.weight_kg || initialData.summary)) {
-       console.log("[BMI Calculator] Applying initialData to BMI Calculator");
-       const current = loaded["BMI Calculator"];
-       
-       // Calculate derived US units if metric data is provided
-       let heightFt = current.values.heightFt;
-       let heightIn = current.values.heightIn;
-       let weightLbs = current.values.weightLbs;
-       
-       if (initialData.height_cm) {
-         const hCm = Number(initialData.height_cm);
-         if (hCm > 0) {
-           const totalInches = hCm / 2.54;
-           heightFt = String(Math.floor(totalInches / 12));
-           heightIn = String(Math.round(totalInches % 12));
+       try {
+         console.log("[BMI Calculator] Applying initialData to BMI Calculator");
+         const current = loaded["BMI Calculator"];
+         
+         // Calculate derived US units if metric data is provided
+         let heightFt = current.values.heightFt;
+         let heightIn = current.values.heightIn;
+         let weightLbs = current.values.weightLbs;
+         
+         if (initialData.height_cm) {
+           const hCm = Number(initialData.height_cm);
+           if (!isNaN(hCm) && hCm > 0) {
+             const totalInches = hCm / 2.54;
+             heightFt = String(Math.floor(totalInches / 12));
+             heightIn = String(Math.round(totalInches % 12));
+           }
          }
-       }
-       
-       if (initialData.weight_kg) {
-         const wKg = Number(initialData.weight_kg);
-         if (wKg > 0) {
-           weightLbs = String(Math.round(wKg * 2.20462));
+         
+         if (initialData.weight_kg) {
+           const wKg = Number(initialData.weight_kg);
+           if (!isNaN(wKg) && wKg > 0) {
+             weightLbs = String(Math.round(wKg * 2.20462));
+           }
          }
-       }
 
-       loaded["BMI Calculator"] = {
-         ...current,
-         values: {
-           ...current.values,
-           heightCm: initialData.height_cm ? String(initialData.height_cm) : current.values.heightCm,
-           weightKg: initialData.weight_kg ? String(initialData.weight_kg) : current.values.weightKg,
-           heightFt,
-           heightIn,
-           weightLbs,
-           age: initialData.age_years ? String(initialData.age_years) : current.values.age,
-           gender: initialData.gender === "female" ? "female" : "male",
-           activityLevel: initialData.activity_level || "moderate"
-         },
-         // Mark these as touched so they aren't overwritten by syncing logic
-         touched: {
-           height: true,
-           weight: true,
-           age: true,
-           gender: true,
-           activity: true
-         },
-         // Pre-populate result if summary exists
-         result: initialData.summary || current.result
-       };
+         loaded["BMI Calculator"] = {
+           ...current,
+           values: {
+             ...current.values,
+             heightCm: initialData.height_cm ? String(initialData.height_cm) : current.values.heightCm,
+             weightKg: initialData.weight_kg ? String(initialData.weight_kg) : current.values.weightKg,
+             heightFt,
+             heightIn,
+             weightLbs,
+             age: initialData.age_years ? String(initialData.age_years) : current.values.age,
+             gender: initialData.gender === "female" ? "female" : "male",
+             activityLevel: initialData.activity_level || "moderate"
+           },
+           // Mark these as touched so they aren't overwritten by syncing logic
+           touched: {
+             height: true,
+             weight: true,
+             age: true,
+             gender: true,
+             activity: true
+           },
+           // Pre-populate result if summary exists
+           result: initialData.summary || current.result
+         };
+       } catch (e) {
+         console.error("[BMI Calculator] Failed to apply initialData:", e);
+         // Proceed with loaded defaults
+       }
     } else {
       console.log("[BMI Calculator] No initialData to apply, using defaults");
     }
