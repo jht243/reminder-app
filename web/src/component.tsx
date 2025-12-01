@@ -413,31 +413,48 @@ export default function RetirementCalculatorHelloWorld({ initialData }: { initia
     const infl = parseFloat(inflation) / 100;
     const incIncrease = parseFloat(incomeIncrease) / 100;
     
-    // 1. Calculate "What you'll need" at Retirement Age
+    // 1. Calculate "What you'll need" at Retirement Age (Gross Need)
     const yearsPre = retirementAgeNum - currentAgeNum;
     const yearsPost = lifeExpectancyNum - retirementAgeNum;
     
-    // Monthly shortfall in today's dollars
+    // Gross expenses and income in retirement (annual)
+    const annualExpensesToday = parseFloat(budget) * 12;
+    const annualIncomeToday = parseFloat(otherIncome) * 12;
+    
+    // Monthly shortfall logic for graph/gap analysis
     const monthlyShortfallToday = Math.max(0, parseFloat(budget) - parseFloat(otherIncome));
     const annualShortfallToday = monthlyShortfallToday * 12;
-    
-    // Annual shortfall at retirement (inflated)
     const annualShortfallAtRetire = annualShortfallToday * Math.pow(1 + infl, yearsPre);
     
-    // Need: Present value of all retirement expenses
+    // Gross Need Calculation (Total Cost of Retirement)
+    const annualExpensesAtRetire = annualExpensesToday * Math.pow(1 + infl, yearsPre);
+    const annualIncomeAtRetire = annualIncomeToday * Math.pow(1 + infl, yearsPre);
+    
+    // Need: Present value of all retirement expenses (Gross)
     // Use a fixed 4% safe withdrawal rate assumption - independent of investment strategy choice
     // Assuming Start-of-Year withdrawals (Need money at beginning of period)
     const safeWithdrawalRate = 0.04;
-    let neededAtRetirement = 0;
+    
+    let grossNeedAtRetirement = 0;
+    let incomeValueAtRetirement = 0;
+    let netNeedAtRetirement = 0; // Shortfall funded by portfolio
+
     for (let i = 0; i < yearsPost; i++) {
-        // Each year's expense discounted back to retirement age using fixed rate
-        const yearlyExpense = annualShortfallAtRetire * Math.pow(1 + infl, i);
-        neededAtRetirement += yearlyExpense / Math.pow(1 + safeWithdrawalRate, i);
+        // Discounted Values
+        const yearlyExpense = annualExpensesAtRetire * Math.pow(1 + infl, i);
+        const yearlyIncome = annualIncomeAtRetire * Math.pow(1 + infl, i);
+        const yearlyShortfall = annualShortfallAtRetire * Math.pow(1 + infl, i);
+        
+        const discountFactor = Math.pow(1 + safeWithdrawalRate, i);
+        
+        grossNeedAtRetirement += yearlyExpense / discountFactor;
+        incomeValueAtRetirement += yearlyIncome / discountFactor;
+        netNeedAtRetirement += yearlyShortfall / discountFactor;
     }
 
-    // 2. Required Contribution Calculation
+    // 2. Required Contribution Calculation (Gap Analysis for Portfolio)
     const fvSavings = savingsNum * Math.pow(1 + preRate, yearsPre);
-    const gap = neededAtRetirement - fvSavings;
+    const gap = netNeedAtRetirement - fvSavings;
     
     let initialAnnualContribNeeded = 0;
     let accumFactor = 0;
@@ -448,7 +465,7 @@ export default function RetirementCalculatorHelloWorld({ initialData }: { initia
         initialAnnualContribNeeded = gap / accumFactor;
     }
     
-    // 3. Calculate "What you'll have" using proper FV formula
+    // 3. Calculate "What you'll have" using proper FV formula (Liquid Portfolio)
     let annualContrib = parseFloat(contributions);
     if (contributionMode === "%") {
         annualContrib = incomeNum * (parseFloat(contributions) / 100);
@@ -474,7 +491,11 @@ export default function RetirementCalculatorHelloWorld({ initialData }: { initia
         }
     }
     
-    const whatYouHave = Math.round(fvInitial + fvContributions);
+    // Graph still tracks liquid assets
+    const whatYouHaveLiquid = Math.round(fvInitial + fvContributions);
+    
+    // Summary "Have" includes income value to compare against Gross Need
+    const totalWealthAtRetirement = whatYouHaveLiquid + incomeValueAtRetirement;
     
     // 4. Generate Graph Data for visualization
     const graphData = [];
@@ -537,16 +558,17 @@ export default function RetirementCalculatorHelloWorld({ initialData }: { initia
             simIdealContrib *= (1 + incIncrease);
         }
     }
-    const whatYouNeed = neededAtRetirement;
+    const whatYouNeed = grossNeedAtRetirement;
 
     updateResult({
-        have: Math.round(whatYouHave),
+        have: Math.round(totalWealthAtRetirement),
         need: Math.round(whatYouNeed),
         graphData,
         runOutAgeCurrent: runOutAgeCurrent || lifeExpectancyNum,
         runOutAgeIdeal: runOutAgeIdeal || lifeExpectancyNum,
         monthlyContribNeeded: Math.round(initialAnnualContribNeeded / 12),
-        currentMonthlyContrib: Math.round(simCurrentContrib / 12)
+        currentMonthlyContrib: Math.round(simCurrentContrib / 12),
+        monthlyShortfall: monthlyShortfallToday
     });
   };
 

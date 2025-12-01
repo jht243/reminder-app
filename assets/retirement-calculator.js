@@ -48953,17 +48953,28 @@ function RetirementCalculatorHelloWorld({ initialData: initialData2 }) {
     const incIncrease = parseFloat(incomeIncrease) / 100;
     const yearsPre = retirementAgeNum - currentAgeNum;
     const yearsPost = lifeExpectancyNum - retirementAgeNum;
+    const annualExpensesToday = parseFloat(budget) * 12;
+    const annualIncomeToday = parseFloat(otherIncome) * 12;
     const monthlyShortfallToday = Math.max(0, parseFloat(budget) - parseFloat(otherIncome));
     const annualShortfallToday = monthlyShortfallToday * 12;
     const annualShortfallAtRetire = annualShortfallToday * Math.pow(1 + infl, yearsPre);
+    const annualExpensesAtRetire = annualExpensesToday * Math.pow(1 + infl, yearsPre);
+    const annualIncomeAtRetire = annualIncomeToday * Math.pow(1 + infl, yearsPre);
     const safeWithdrawalRate = 0.04;
-    let neededAtRetirement = 0;
+    let grossNeedAtRetirement = 0;
+    let incomeValueAtRetirement = 0;
+    let netNeedAtRetirement = 0;
     for (let i = 0; i < yearsPost; i++) {
-      const yearlyExpense = annualShortfallAtRetire * Math.pow(1 + infl, i);
-      neededAtRetirement += yearlyExpense / Math.pow(1 + safeWithdrawalRate, i);
+      const yearlyExpense = annualExpensesAtRetire * Math.pow(1 + infl, i);
+      const yearlyIncome = annualIncomeAtRetire * Math.pow(1 + infl, i);
+      const yearlyShortfall = annualShortfallAtRetire * Math.pow(1 + infl, i);
+      const discountFactor = Math.pow(1 + safeWithdrawalRate, i);
+      grossNeedAtRetirement += yearlyExpense / discountFactor;
+      incomeValueAtRetirement += yearlyIncome / discountFactor;
+      netNeedAtRetirement += yearlyShortfall / discountFactor;
     }
     const fvSavings = savingsNum * Math.pow(1 + preRate, yearsPre);
-    const gap = neededAtRetirement - fvSavings;
+    const gap = netNeedAtRetirement - fvSavings;
     let initialAnnualContribNeeded = 0;
     let accumFactor = 0;
     for (let k = 0; k < yearsPre; k++) {
@@ -48989,7 +49000,8 @@ function RetirementCalculatorHelloWorld({ initialData: initialData2 }) {
         fvContributions = annualContrib * (Math.pow(1 + preRate, yearsPre) - Math.pow(1 + incIncrease, yearsPre)) / (preRate - incIncrease);
       }
     }
-    const whatYouHave = Math.round(fvInitial + fvContributions);
+    const whatYouHaveLiquid = Math.round(fvInitial + fvContributions);
+    const totalWealthAtRetirement = whatYouHaveLiquid + incomeValueAtRetirement;
     const graphData = [];
     let simCurrent = savingsNum;
     let simIdeal = savingsNum;
@@ -49034,15 +49046,16 @@ function RetirementCalculatorHelloWorld({ initialData: initialData2 }) {
         simIdealContrib *= 1 + incIncrease;
       }
     }
-    const whatYouNeed = neededAtRetirement;
+    const whatYouNeed = grossNeedAtRetirement;
     updateResult({
-      have: Math.round(whatYouHave),
+      have: Math.round(totalWealthAtRetirement),
       need: Math.round(whatYouNeed),
       graphData,
       runOutAgeCurrent: runOutAgeCurrent || lifeExpectancyNum,
       runOutAgeIdeal: runOutAgeIdeal || lifeExpectancyNum,
       monthlyContribNeeded: Math.round(initialAnnualContribNeeded / 12),
-      currentMonthlyContrib: Math.round(simCurrentContrib / 12)
+      currentMonthlyContrib: Math.round(simCurrentContrib / 12),
+      monthlyShortfall: monthlyShortfallToday
     });
   };
   const calculate2 = () => {
