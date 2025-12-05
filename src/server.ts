@@ -1275,14 +1275,26 @@ async function verifyTurnstile(token: string): Promise<boolean> {
 async function subscribeToButtondown(email: string, topicId: string, topicName: string) {
   const BUTTONDOWN_API_KEY = process.env.BUTTONDOWN_API_KEY;
   
+  console.log("[Buttondown] subscribeToButtondown called", { email, topicId, topicName });
+  console.log("[Buttondown] API key present:", !!BUTTONDOWN_API_KEY, "length:", BUTTONDOWN_API_KEY?.length ?? 0);
+
   if (!BUTTONDOWN_API_KEY) {
     throw new Error("BUTTONDOWN_API_KEY not set in environment variables");
   }
 
   const metadata: Record<string, any> = {
     topicName,
+    source: "retirement-calculator",
     subscribedAt: new Date().toISOString(),
   };
+
+  const requestBody = {
+    email_address: email,
+    tags: [topicId],
+    metadata,
+  };
+
+  console.log("[Buttondown] Sending request body:", JSON.stringify(requestBody));
 
   const response = await fetch("https://api.buttondown.email/v1/subscribers", {
     method: "POST",
@@ -1290,12 +1302,10 @@ async function subscribeToButtondown(email: string, topicId: string, topicName: 
       "Authorization": `Token ${BUTTONDOWN_API_KEY}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      email_address: email,
-      tags: [topicId],
-      metadata,
-    }),
+    body: JSON.stringify(requestBody),
   });
+
+  console.log("[Buttondown] Response status:", response.status, response.statusText);
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -1364,7 +1374,16 @@ async function updateButtondownSubscriber(email: string, topicId: string, topicN
   const updatedMetadata = {
     ...existingMetadata,
     [topicKey]: topicData,
+    source: "retirement-calculator",
   };
+
+  const updateRequestBody = {
+    tags: updatedTags,
+    metadata: updatedMetadata,
+  };
+
+  console.log("[Buttondown] updateButtondownSubscriber called", { email, topicId, topicName, subscriberId });
+  console.log("[Buttondown] Sending update request body:", JSON.stringify(updateRequestBody));
 
   const updateResponse = await fetch(`https://api.buttondown.email/v1/subscribers/${subscriberId}`, {
     method: "PATCH",
@@ -1372,11 +1391,10 @@ async function updateButtondownSubscriber(email: string, topicId: string, topicN
       "Authorization": `Token ${BUTTONDOWN_API_KEY}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      tags: updatedTags,
-      metadata: updatedMetadata,
-    }),
+    body: JSON.stringify(updateRequestBody),
   });
+
+  console.log("[Buttondown] Update response status:", updateResponse.status, updateResponse.statusText);
 
   if (!updateResponse.ok) {
     const errorText = await updateResponse.text();
