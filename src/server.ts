@@ -211,7 +211,7 @@ function widgetMeta(widget: PortfolioOptimizerWidget, bustCache: boolean = false
       "A comprehensive portfolio optimizer for portfolio optimization. Call this tool immediately with NO arguments to let the user enter their data manually. Only provide arguments if the user has explicitly stated them.",
     "openai/componentDescriptions": {
       "metrics-form": "Input form for income, savings, and age.",
-      "portfolio-card": "Card displaying the calculated Retirement and retirement category.",
+      "portfolio-card": "Card displaying the calculated portfolio projection and allocation.",
       "projected-savings-card": "Card showing the estimated projected savings.",
     },
     "openai/widgetKeywords": [
@@ -1474,7 +1474,7 @@ async function handleSubscribe(req: IncomingMessage, res: ServerResponse) {
       await subscribeToButtondown(email, topicId, topicName);
       res.writeHead(200).end(JSON.stringify({ 
         success: true, 
-        message: "Successfully subscribed! You'll receive retirement planning tips and updates." 
+        message: "Successfully subscribed! You'll receive portfolio optimization tips and updates." 
       }));
     } catch (subscribeError: any) {
       const rawMessage = String(subscribeError?.message ?? "").trim();
