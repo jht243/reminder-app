@@ -25072,9 +25072,16 @@ var StrategyCard = ({ strategy, potentialYield, onOptimize, userHeldAssets }) =>
 };
 function YieldOptimizer({ initialData: initialData2 }) {
   const savedData = loadSavedData();
-  const [inputMode, setInputMode] = (0, import_react3.useState)(() => savedData.inputMode || "dollar");
+  console.log("[YieldOptimizer] Hydrating with initialData:", initialData2);
+  const hasAmountData = initialData2?.btc_amount || initialData2?.eth_amount || initialData2?.sol_amount;
+  const hasDollarData = initialData2?.btc || initialData2?.eth || initialData2?.sol;
+  const [inputMode, setInputMode] = (0, import_react3.useState)(() => {
+    if (hasAmountData) return "amount";
+    if (hasDollarData) return "dollar";
+    return savedData.inputMode || "dollar";
+  });
   const [holdings, setHoldings] = (0, import_react3.useState)(() => {
-    if (initialData2?.btc || initialData2?.eth) {
+    if (hasDollarData) {
       return {
         btc: String(initialData2.btc || 0),
         eth: String(initialData2.eth || 0),
@@ -25094,7 +25101,27 @@ function YieldOptimizer({ initialData: initialData2 }) {
     }
     return savedData.holdings;
   });
-  const [amounts, setAmounts] = (0, import_react3.useState)(() => savedData.amounts || DEFAULT_HOLDINGS);
+  const [amounts, setAmounts] = (0, import_react3.useState)(() => {
+    if (hasAmountData) {
+      return {
+        btc: String(initialData2.btc_amount || 0),
+        eth: String(initialData2.eth_amount || 0),
+        sol: String(initialData2.sol_amount || 0),
+        ada: "0",
+        link: "0",
+        avax: "0",
+        dot: "0",
+        xrp: "0",
+        bnb: "0",
+        doge: "0",
+        matic: "0",
+        atom: "0",
+        uni: "0",
+        other: "0"
+      };
+    }
+    return savedData.amounts || DEFAULT_HOLDINGS;
+  });
   const [prices, setPrices] = (0, import_react3.useState)({});
   const [pricesLoading, setPricesLoading] = (0, import_react3.useState)(false);
   const [currentYieldPercent, setCurrentYieldPercent] = (0, import_react3.useState)(() => {

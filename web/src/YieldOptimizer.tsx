@@ -422,12 +422,24 @@ const StrategyCard = ({ strategy, potentialYield, onOptimize, userHeldAssets }: 
 export default function YieldOptimizer({ initialData }: { initialData?: any }) {
   const savedData = loadSavedData();
   
-  // Input mode: dollar or amount
-  const [inputMode, setInputMode] = useState<InputMode>(() => savedData.inputMode || "dollar");
+  // Debug: log initialData for hydration verification
+  console.log("[YieldOptimizer] Hydrating with initialData:", initialData);
+  
+  // Check if initialData has coin amounts (btc_amount, eth_amount, sol_amount)
+  const hasAmountData = initialData?.btc_amount || initialData?.eth_amount || initialData?.sol_amount;
+  // Check if initialData has dollar values
+  const hasDollarData = initialData?.btc || initialData?.eth || initialData?.sol;
+  
+  // Input mode: dollar or amount - determine from initialData first, then savedData
+  const [inputMode, setInputMode] = useState<InputMode>(() => {
+    if (hasAmountData) return "amount";
+    if (hasDollarData) return "dollar";
+    return savedData.inputMode || "dollar";
+  });
   
   // Dollar holdings
   const [holdings, setHoldings] = useState<CryptoHoldings>(() => {
-    if (initialData?.btc || initialData?.eth) {
+    if (hasDollarData) {
       return {
         btc: String(initialData.btc || 0),
         eth: String(initialData.eth || 0),
@@ -448,8 +460,18 @@ export default function YieldOptimizer({ initialData }: { initialData?: any }) {
     return savedData.holdings;
   });
   
-  // Coin amount holdings
-  const [amounts, setAmounts] = useState<CryptoHoldings>(() => savedData.amounts || DEFAULT_HOLDINGS);
+  // Coin amount holdings - hydrate from initialData if coin amounts provided
+  const [amounts, setAmounts] = useState<CryptoHoldings>(() => {
+    if (hasAmountData) {
+      return {
+        btc: String(initialData.btc_amount || 0),
+        eth: String(initialData.eth_amount || 0),
+        sol: String(initialData.sol_amount || 0),
+        ada: "0", link: "0", avax: "0", dot: "0", xrp: "0", bnb: "0", doge: "0", matic: "0", atom: "0", uni: "0", other: "0"
+      };
+    }
+    return savedData.amounts || DEFAULT_HOLDINGS;
+  });
   
   // Live crypto prices
   const [prices, setPrices] = useState<CryptoPrices>({});
