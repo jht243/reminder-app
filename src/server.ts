@@ -258,11 +258,11 @@ function widgetMeta(widget: CryptoPortfolioOptimizerWidget, bustCache: boolean =
     "openai/widgetCSP": {
       connect_domains: [
         "https://api.stlouisfed.org",
-        "https://crypto-portfolio-optimizer-svpa.onrender.com",
+        "https://crypto-portfolio-optimizer-jn05.onrender.com",
         "http://localhost:8010"
       ],
       script_src_domains: [
-        "https://crypto-portfolio-optimizer-svpa.onrender.com"
+        "https://crypto-portfolio-optimizer-jn05.onrender.com"
       ],
       resource_domains: [],
     },

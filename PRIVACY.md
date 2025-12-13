@@ -67,7 +67,7 @@ We may update this policy periodically. Significant changes will be noted in the
 ## Contact
 
 For privacy questions or data deletion requests:
-- **Email**: support@crypto-portfolio-optimizer.onrender.com
+- **Email**: support@crypto-portfolio-optimizer-jn05.onrender.com
 - **GitHub**: Open an issue on the project repository
 - **Deletion requests**: Include the UTC timestamp of your ChatGPT session; we will delete associated logs within 7 business days.
 
