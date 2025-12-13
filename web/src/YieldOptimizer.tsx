@@ -810,12 +810,23 @@ export default function YieldOptimizer({ initialData }: { initialData?: any }) {
       )}
 
       {/* Current vs Optimized Comparison */}
-      {totalPortfolio > 0 && (
+      {totalPortfolio > 0 && (() => {
+        const isUnderperforming = currentAnnualYield < potentialAnnualYield;
+        return (
         <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
-          <div style={{ flex: 1, backgroundColor: COLORS.card, borderRadius: 16, padding: 16, textAlign: "center", border: `1px solid ${COLORS.border}` }}>
-            <div style={{ fontSize: 12, color: COLORS.textSecondary, marginBottom: 4 }}>Current Yield</div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: COLORS.textMain }}>${Math.round(currentAnnualYield).toLocaleString()}</div>
-            <div style={{ fontSize: 12, color: COLORS.textSecondary }}>{currentYieldPercent || 0}% APY</div>
+          <div style={{ 
+            flex: 1, 
+            backgroundColor: isUnderperforming ? "#FEF2F2" : COLORS.card, 
+            borderRadius: 16, 
+            padding: 16, 
+            textAlign: "center", 
+            border: isUnderperforming ? "2px solid #EF4444" : `1px solid ${COLORS.border}` 
+          }}>
+            <div style={{ fontSize: 12, color: isUnderperforming ? "#DC2626" : COLORS.textSecondary, marginBottom: 4 }}>
+              {isUnderperforming ? "📉 Current Yield" : "Current Yield"}
+            </div>
+            <div style={{ fontSize: 24, fontWeight: 800, color: isUnderperforming ? "#DC2626" : COLORS.textMain }}>${Math.round(currentAnnualYield).toLocaleString()}</div>
+            <div style={{ fontSize: 12, color: isUnderperforming ? "#EF4444" : COLORS.textSecondary }}>{currentYieldPercent || 0}% APY</div>
           </div>
           <div style={{ flex: 1, backgroundColor: COLORS.accentLight, borderRadius: 16, padding: 16, textAlign: "center", border: `2px solid ${COLORS.primary}` }}>
             <div style={{ fontSize: 12, color: COLORS.primaryDark, marginBottom: 4 }}>Optimized Yield</div>
@@ -823,7 +834,8 @@ export default function YieldOptimizer({ initialData }: { initialData?: any }) {
             <div style={{ fontSize: 12, color: COLORS.primaryDark }}>~{optimizedApy}% APY</div>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* Strategy Options */}
       {totalPortfolio > 0 && (

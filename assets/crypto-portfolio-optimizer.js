@@ -25394,31 +25394,41 @@ function YieldOptimizer({ initialData: initialData2 }) {
         "% average optimized APY across strategies"
       ] })
     ] }),
-    totalPortfolio > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 12, marginBottom: 20 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, backgroundColor: COLORS.card, borderRadius: 16, padding: 16, textAlign: "center", border: `1px solid ${COLORS.border}` }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 12, color: COLORS.textSecondary, marginBottom: 4 }, children: "Current Yield" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 24, fontWeight: 800, color: COLORS.textMain }, children: [
-          "$",
-          Math.round(currentAnnualYield).toLocaleString()
+    totalPortfolio > 0 && (() => {
+      const isUnderperforming = currentAnnualYield < potentialAnnualYield;
+      return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 12, marginBottom: 20 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
+          flex: 1,
+          backgroundColor: isUnderperforming ? "#FEF2F2" : COLORS.card,
+          borderRadius: 16,
+          padding: 16,
+          textAlign: "center",
+          border: isUnderperforming ? "2px solid #EF4444" : `1px solid ${COLORS.border}`
+        }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 12, color: isUnderperforming ? "#DC2626" : COLORS.textSecondary, marginBottom: 4 }, children: isUnderperforming ? "\u{1F4C9} Current Yield" : "Current Yield" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 24, fontWeight: 800, color: isUnderperforming ? "#DC2626" : COLORS.textMain }, children: [
+            "$",
+            Math.round(currentAnnualYield).toLocaleString()
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 12, color: isUnderperforming ? "#EF4444" : COLORS.textSecondary }, children: [
+            currentYieldPercent || 0,
+            "% APY"
+          ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 12, color: COLORS.textSecondary }, children: [
-          currentYieldPercent || 0,
-          "% APY"
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, backgroundColor: COLORS.accentLight, borderRadius: 16, padding: 16, textAlign: "center", border: `2px solid ${COLORS.primary}` }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 12, color: COLORS.primaryDark, marginBottom: 4 }, children: "Optimized Yield" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 24, fontWeight: 800, color: COLORS.primary }, children: [
+            "$",
+            Math.round(potentialAnnualYield).toLocaleString()
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 12, color: COLORS.primaryDark }, children: [
+            "~",
+            optimizedApy,
+            "% APY"
+          ] })
         ] })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, backgroundColor: COLORS.accentLight, borderRadius: 16, padding: 16, textAlign: "center", border: `2px solid ${COLORS.primary}` }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 12, color: COLORS.primaryDark, marginBottom: 4 }, children: "Optimized Yield" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 24, fontWeight: 800, color: COLORS.primary }, children: [
-          "$",
-          Math.round(potentialAnnualYield).toLocaleString()
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 12, color: COLORS.primaryDark }, children: [
-          "~",
-          optimizedApy,
-          "% APY"
-        ] })
-      ] })
-    ] }),
+      ] });
+    })(),
     totalPortfolio > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: styles.card, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 16, fontWeight: 700, color: COLORS.textMain, marginBottom: 8 }, children: "Recommended Yield Strategies" }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 12, color: COLORS.textSecondary, marginBottom: 16 }, children: "These strategies are customized based on your choices above" }),
