@@ -24556,15 +24556,19 @@ var Calendar = createLucideIcon("calendar", __iconNode3);
 var __iconNode4 = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
 var Check = createLucideIcon("check", __iconNode4);
 
+// node_modules/lucide-react/dist/esm/icons/chevron-right.js
+var __iconNode5 = [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]];
+var ChevronRight = createLucideIcon("chevron-right", __iconNode5);
+
 // node_modules/lucide-react/dist/esm/icons/clock.js
-var __iconNode5 = [
+var __iconNode6 = [
   ["path", { d: "M12 6v6l4 2", key: "mmk7yg" }],
   ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }]
 ];
-var Clock = createLucideIcon("clock", __iconNode5);
+var Clock = createLucideIcon("clock", __iconNode6);
 
 // node_modules/lucide-react/dist/esm/icons/crown.js
-var __iconNode6 = [
+var __iconNode7 = [
   [
     "path",
     {
@@ -24574,10 +24578,10 @@ var __iconNode6 = [
   ],
   ["path", { d: "M5 21h14", key: "11awu3" }]
 ];
-var Crown = createLucideIcon("crown", __iconNode6);
+var Crown = createLucideIcon("crown", __iconNode7);
 
 // node_modules/lucide-react/dist/esm/icons/flame.js
-var __iconNode7 = [
+var __iconNode8 = [
   [
     "path",
     {
@@ -24586,10 +24590,10 @@ var __iconNode7 = [
     }
   ]
 ];
-var Flame = createLucideIcon("flame", __iconNode7);
+var Flame = createLucideIcon("flame", __iconNode8);
 
 // node_modules/lucide-react/dist/esm/icons/graduation-cap.js
-var __iconNode8 = [
+var __iconNode9 = [
   [
     "path",
     {
@@ -24600,10 +24604,10 @@ var __iconNode8 = [
   ["path", { d: "M22 10v6", key: "1lu8f3" }],
   ["path", { d: "M6 12.5V16a6 3 0 0 0 12 0v-3.5", key: "1r8lef" }]
 ];
-var GraduationCap = createLucideIcon("graduation-cap", __iconNode8);
+var GraduationCap = createLucideIcon("graduation-cap", __iconNode9);
 
 // node_modules/lucide-react/dist/esm/icons/heart.js
-var __iconNode9 = [
+var __iconNode10 = [
   [
     "path",
     {
@@ -24612,10 +24616,10 @@ var __iconNode9 = [
     }
   ]
 ];
-var Heart = createLucideIcon("heart", __iconNode9);
+var Heart = createLucideIcon("heart", __iconNode10);
 
 // node_modules/lucide-react/dist/esm/icons/house.js
-var __iconNode10 = [
+var __iconNode11 = [
   ["path", { d: "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8", key: "5wwlr5" }],
   [
     "path",
@@ -24625,10 +24629,10 @@ var __iconNode10 = [
     }
   ]
 ];
-var House = createLucideIcon("house", __iconNode10);
+var House = createLucideIcon("house", __iconNode11);
 
 // node_modules/lucide-react/dist/esm/icons/pen.js
-var __iconNode11 = [
+var __iconNode12 = [
   [
     "path",
     {
@@ -24637,10 +24641,10 @@ var __iconNode11 = [
     }
   ]
 ];
-var Pen = createLucideIcon("pen", __iconNode11);
+var Pen = createLucideIcon("pen", __iconNode12);
 
 // node_modules/lucide-react/dist/esm/icons/plane.js
-var __iconNode12 = [
+var __iconNode13 = [
   [
     "path",
     {
@@ -24649,39 +24653,33 @@ var __iconNode12 = [
     }
   ]
 ];
-var Plane = createLucideIcon("plane", __iconNode12);
+var Plane = createLucideIcon("plane", __iconNode13);
+
+// node_modules/lucide-react/dist/esm/icons/plus.js
+var __iconNode14 = [
+  ["path", { d: "M5 12h14", key: "1ays0h" }],
+  ["path", { d: "M12 5v14", key: "s699le" }]
+];
+var Plus = createLucideIcon("plus", __iconNode14);
 
 // node_modules/lucide-react/dist/esm/icons/repeat.js
-var __iconNode13 = [
+var __iconNode15 = [
   ["path", { d: "m17 2 4 4-4 4", key: "nntrym" }],
   ["path", { d: "M3 11v-1a4 4 0 0 1 4-4h14", key: "84bu3i" }],
   ["path", { d: "m7 22-4-4 4-4", key: "1wqhfi" }],
   ["path", { d: "M21 13v1a4 4 0 0 1-4 4H3", key: "1rx37r" }]
 ];
-var Repeat = createLucideIcon("repeat", __iconNode13);
+var Repeat = createLucideIcon("repeat", __iconNode15);
 
 // node_modules/lucide-react/dist/esm/icons/search.js
-var __iconNode14 = [
+var __iconNode16 = [
   ["path", { d: "m21 21-4.34-4.34", key: "14j7rj" }],
   ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }]
 ];
-var Search = createLucideIcon("search", __iconNode14);
-
-// node_modules/lucide-react/dist/esm/icons/send.js
-var __iconNode15 = [
-  [
-    "path",
-    {
-      d: "M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z",
-      key: "1ffxy3"
-    }
-  ],
-  ["path", { d: "m21.854 2.147-10.94 10.939", key: "12cjpa" }]
-];
-var Send = createLucideIcon("send", __iconNode15);
+var Search = createLucideIcon("search", __iconNode16);
 
 // node_modules/lucide-react/dist/esm/icons/shopping-cart.js
-var __iconNode16 = [
+var __iconNode17 = [
   ["circle", { cx: "8", cy: "21", r: "1", key: "jimo8o" }],
   ["circle", { cx: "19", cy: "21", r: "1", key: "13723u" }],
   [
@@ -24692,10 +24690,10 @@ var __iconNode16 = [
     }
   ]
 ];
-var ShoppingCart = createLucideIcon("shopping-cart", __iconNode16);
+var ShoppingCart = createLucideIcon("shopping-cart", __iconNode17);
 
 // node_modules/lucide-react/dist/esm/icons/star.js
-var __iconNode17 = [
+var __iconNode18 = [
   [
     "path",
     {
@@ -24704,82 +24702,96 @@ var __iconNode17 = [
     }
   ]
 ];
-var Star = createLucideIcon("star", __iconNode17);
+var Star = createLucideIcon("star", __iconNode18);
 
 // node_modules/lucide-react/dist/esm/icons/stethoscope.js
-var __iconNode18 = [
+var __iconNode19 = [
   ["path", { d: "M11 2v2", key: "1539x4" }],
   ["path", { d: "M5 2v2", key: "1yf1q8" }],
   ["path", { d: "M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1", key: "rb5t3r" }],
   ["path", { d: "M8 15a6 6 0 0 0 12 0v-3", key: "x18d4x" }],
   ["circle", { cx: "20", cy: "10", r: "2", key: "ts1r5v" }]
 ];
-var Stethoscope = createLucideIcon("stethoscope", __iconNode18);
+var Stethoscope = createLucideIcon("stethoscope", __iconNode19);
 
 // node_modules/lucide-react/dist/esm/icons/trash-2.js
-var __iconNode19 = [
+var __iconNode20 = [
   ["path", { d: "M10 11v6", key: "nco0om" }],
   ["path", { d: "M14 11v6", key: "outv1u" }],
   ["path", { d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6", key: "miytrc" }],
   ["path", { d: "M3 6h18", key: "d0wm0j" }],
   ["path", { d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2", key: "e791ji" }]
 ];
-var Trash2 = createLucideIcon("trash-2", __iconNode19);
+var Trash2 = createLucideIcon("trash-2", __iconNode20);
 
 // node_modules/lucide-react/dist/esm/icons/users.js
-var __iconNode20 = [
+var __iconNode21 = [
   ["path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", key: "1yyitq" }],
   ["path", { d: "M16 3.128a4 4 0 0 1 0 7.744", key: "16gr8j" }],
   ["path", { d: "M22 21v-2a4 4 0 0 0-3-3.87", key: "kshegd" }],
   ["circle", { cx: "9", cy: "7", r: "4", key: "nufk8" }]
 ];
-var Users = createLucideIcon("users", __iconNode20);
+var Users = createLucideIcon("users", __iconNode21);
 
 // node_modules/lucide-react/dist/esm/icons/x.js
-var __iconNode21 = [
+var __iconNode22 = [
   ["path", { d: "M18 6 6 18", key: "1bl5f8" }],
   ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
 ];
-var X = createLucideIcon("x", __iconNode21);
+var X = createLucideIcon("x", __iconNode22);
 
 // src/ReminderApp.tsx
 var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
 var COLORS = {
+  // Primary sage green palette
   primary: "#2D5A3D",
-  primaryLight: "#56C596",
-  primaryBg: "#E8F5E9",
-  success: "#2E7D32",
-  warning: "#F59E0B",
-  danger: "#D32F2F",
-  bg: "#F5F7F5",
+  primaryLight: "#4A7C59",
+  primaryBg: "#E8F0E8",
+  primarySoft: "#D4E5D4",
+  // Semantic colors
+  success: "#3D7A5A",
+  warning: "#D4A574",
+  danger: "#C97070",
+  // Background colors - cream/off-white tones
+  bg: "#E8E4DE",
+  // Warm cream background
   card: "#FFFFFF",
-  cardAlt: "#FAFBFA",
-  textMain: "#1A1A1A",
-  textSecondary: "#5F6368",
-  textMuted: "#9CA3AF",
-  border: "#E0E5E0",
-  inputBg: "#F8FAF8",
-  gold: "#F59E0B",
-  accent: "#3D7A5A",
-  accentLight: "#E6F4EA"
+  cardAlt: "#F8F6F3",
+  // Slightly warm white
+  // Text colors - softer blacks
+  textMain: "#2C3E2C",
+  // Dark sage for main text
+  textSecondary: "#5A6B5A",
+  textMuted: "#8A998A",
+  // UI elements
+  border: "#D8DED8",
+  // Very soft border
+  inputBg: "#F5F3F0",
+  gold: "#D4A574",
+  // Warm gold/tan
+  accent: "#4A7C59",
+  accentLight: "#E8F0E8",
+  // Icon backgrounds (circular)
+  iconBg: "#E8F0E8",
+  iconBgAlt: "#D4E5D4"
 };
 var PRIORITY_COLORS = {
-  low: "#10B981",
-  medium: "#F59E0B",
-  high: "#F97316",
-  urgent: "#EF4444"
+  low: "#6B9B7A",
+  medium: "#D4A574",
+  high: "#D49A6A",
+  urgent: "#C97070"
 };
 var CATEGORY_CONFIG = {
-  work: { icon: Briefcase, color: "#3B82F6", label: "Work" },
-  family: { icon: Users, color: "#EC4899", label: "Family" },
-  health: { icon: Stethoscope, color: "#10B981", label: "Health" },
-  errands: { icon: ShoppingCart, color: "#F59E0B", label: "Errands" },
-  finance: { icon: Briefcase, color: "#8B5CF6", label: "Finance" },
-  social: { icon: Heart, color: "#EF4444", label: "Social" },
-  learning: { icon: GraduationCap, color: "#06B6D4", label: "Learning" },
-  travel: { icon: Plane, color: "#6366F1", label: "Travel" },
-  home: { icon: House, color: "#84CC16", label: "Home" },
-  other: { icon: Star, color: "#64748B", label: "Other" }
+  work: { icon: Briefcase, color: "#4A7C59", bg: "#E8F0E8", label: "Work" },
+  family: { icon: Users, color: "#B87A9E", bg: "#F5E8F0", label: "Family" },
+  health: { icon: Stethoscope, color: "#5A9B7A", bg: "#E8F5F0", label: "Health" },
+  errands: { icon: ShoppingCart, color: "#D4A574", bg: "#F5F0E8", label: "Errands" },
+  finance: { icon: Briefcase, color: "#7A6B9B", bg: "#F0E8F5", label: "Finance" },
+  social: { icon: Heart, color: "#C97070", bg: "#F5E8E8", label: "Social" },
+  learning: { icon: GraduationCap, color: "#5A8B9B", bg: "#E8F0F5", label: "Learning" },
+  travel: { icon: Plane, color: "#6B7A9B", bg: "#E8ECF5", label: "Travel" },
+  home: { icon: House, color: "#7A9B6B", bg: "#ECF5E8", label: "Home" },
+  other: { icon: Star, color: "#8A998A", bg: "#F0F0F0", label: "Other" }
 };
 var STORAGE_KEY = "REMINDER_APP_DATA";
 var STATS_KEY = "REMINDER_APP_STATS";
@@ -25530,42 +25542,113 @@ function ReminderApp({ initialData: initialData2 }) {
     setToast("Progress reset! Start fresh.");
     console.log("[Reset] All progress cleared");
   };
-  const CategoryIcon = ({ cat }) => {
+  const CategoryIcon = ({ cat, size = 32 }) => {
     const config = CATEGORY_CONFIG[cat];
     const Icon2 = config.icon;
-    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon2, { size: 16, color: config.color });
+    const iconSize = size * 0.5;
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
+      width: size,
+      height: size,
+      borderRadius: "50%",
+      backgroundColor: config.bg,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0
+    }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon2, { size: iconSize, color: config.color }) });
   };
   const inputStyle = { boxSizing: "border-box" };
-  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', backgroundColor: COLORS.bg, minHeight: "100%", padding: 16 }, children: [
-    toast && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 16, right: 16, padding: "12px 20px", borderRadius: 10, backgroundColor: COLORS.primary, color: "#fff", fontWeight: 600, fontSize: 14, zIndex: 1e3, boxShadow: "0 4px 16px rgba(0,0,0,0.2)" }, children: toast }),
-    achievement && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", padding: 28, borderRadius: 20, backgroundColor: COLORS.card, boxShadow: "0 12px 40px rgba(0,0,0,0.25)", zIndex: 1001, textAlign: "center" }, children: [
+  const cardShadow = "0 2px 8px rgba(0,0,0,0.04)";
+  const cardRadius = 20;
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', backgroundColor: COLORS.bg, minHeight: "100%", padding: 16, fontWeight: 400 }, children: [
+    toast && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
+      position: "fixed",
+      top: 16,
+      right: 16,
+      padding: "14px 24px",
+      borderRadius: 50,
+      backgroundColor: COLORS.primary,
+      color: "#fff",
+      fontWeight: 500,
+      fontSize: 14,
+      zIndex: 1e3,
+      boxShadow: "0 4px 20px rgba(45,90,61,0.3)"
+    }, children: toast }),
+    achievement && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
+      position: "fixed",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%,-50%)",
+      padding: 32,
+      borderRadius: 24,
+      backgroundColor: COLORS.card,
+      boxShadow: "0 16px 48px rgba(0,0,0,0.15)",
+      zIndex: 1001,
+      textAlign: "center"
+    }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 56 }, children: achievement.icon }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { style: { color: COLORS.primary, margin: "12px 0 4px", fontSize: 18, fontWeight: 700 }, children: "Achievement Unlocked!" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { color: COLORS.textMain, fontWeight: 600, margin: 0, fontSize: 16 }, children: achievement.name })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { style: { color: COLORS.primary, margin: "12px 0 4px", fontSize: 18, fontWeight: 600 }, children: "Achievement Unlocked!" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { color: COLORS.textMain, fontWeight: 500, margin: 0, fontSize: 16 }, children: achievement.name })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { backgroundColor: COLORS.primary, borderRadius: 14, padding: "14px 18px", marginBottom: 10, color: "#fff" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 10 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { size: 22 }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 18, fontWeight: 700 }, children: "Smart Reminders" })
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
+      backgroundColor: COLORS.primary,
+      borderRadius: cardRadius,
+      padding: "16px 20px",
+      marginBottom: 12,
+      color: "#fff",
+      boxShadow: "0 4px 16px rgba(45,90,61,0.2)"
+    }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 12 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
+          width: 36,
+          height: 36,
+          borderRadius: "50%",
+          backgroundColor: "rgba(255,255,255,0.15)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { size: 18 }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 18, fontWeight: 600, letterSpacing: "-0.3px" }, children: "Smart Reminders" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 12, fontSize: 13 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 4, backgroundColor: "rgba(255,255,255,0.15)", padding: "4px 10px", borderRadius: 8 }, title: "Your current level", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 8, fontSize: 13 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          backgroundColor: "rgba(255,255,255,0.12)",
+          padding: "6px 14px",
+          borderRadius: 50
+        }, title: "Your current level", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Crown, { size: 14, color: COLORS.gold }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontWeight: 600 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontWeight: 500 }, children: [
             "Level ",
             levelInfo.level
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 4, backgroundColor: "rgba(255,255,255,0.15)", padding: "4px 10px", borderRadius: 8 }, title: "Total points earned", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          backgroundColor: "rgba(255,255,255,0.12)",
+          padding: "6px 14px",
+          borderRadius: 50
+        }, title: "Total points earned", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { size: 14, color: COLORS.gold }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontWeight: 600 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontWeight: 500 }, children: [
             stats.totalPoints,
             " pts"
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 4, backgroundColor: stats.currentStreak > 0 ? "rgba(245,158,11,0.3)" : "rgba(255,255,255,0.15)", padding: "4px 10px", borderRadius: 8 }, title: "Days in a row completing reminders", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          backgroundColor: stats.currentStreak > 0 ? "rgba(212,165,116,0.3)" : "rgba(255,255,255,0.12)",
+          padding: "6px 14px",
+          borderRadius: 50
+        }, title: "Days in a row", children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Flame, { size: 14, color: stats.currentStreak > 0 ? COLORS.gold : "rgba(255,255,255,0.5)" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontWeight: 600 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontWeight: 500 }, children: [
             stats.currentStreak,
             " day streak"
           ] })
@@ -25573,38 +25656,53 @@ function ReminderApp({ initialData: initialData2 }) {
       ] })
     ] }) }),
     hint && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
-      backgroundColor: COLORS.accentLight,
-      borderRadius: 10,
-      padding: "12px 16px",
-      marginBottom: 14,
-      border: `1px solid ${COLORS.primaryLight}`
+      backgroundColor: COLORS.card,
+      borderRadius: cardRadius,
+      padding: "16px 20px",
+      marginBottom: 12,
+      boxShadow: cardShadow
     }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 12 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 28 }, children: hint.icon }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 14 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
+          width: 48,
+          height: 48,
+          borderRadius: "50%",
+          backgroundColor: COLORS.iconBg,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 24
+        }, children: hint.icon }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 13, fontWeight: 600, color: COLORS.primary, marginBottom: 2 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 15, fontWeight: 600, color: COLORS.textMain, marginBottom: 2 }, children: [
             hint.name,
             " ",
-            hint.points > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontWeight: 500, color: COLORS.textMuted }, children: [
+            hint.points > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontWeight: 400, color: COLORS.textMuted }, children: [
               "\u2022 +",
               hint.points,
               " pts"
             ] })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14, color: COLORS.textMain }, children: hint.text })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 13, color: COLORS.textSecondary }, children: hint.text })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { textAlign: "right", fontSize: 12, color: COLORS.textMuted }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
+          fontSize: 12,
+          color: COLORS.textMuted,
+          backgroundColor: COLORS.cardAlt,
+          padding: "4px 10px",
+          borderRadius: 50
+        }, children: [
           completedTaskCount,
           "/",
           totalTaskCount
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginTop: 10, display: "flex", alignItems: "center", gap: 10 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, height: 6, backgroundColor: COLORS.border, borderRadius: 3, overflow: "hidden" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginTop: 14, display: "flex", alignItems: "center", gap: 12 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { flex: 1, height: 6, backgroundColor: COLORS.primaryBg, borderRadius: 50, overflow: "hidden" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
           height: "100%",
           width: `${completedTaskCount / totalTaskCount * 100}%`,
-          backgroundColor: COLORS.primaryLight,
-          borderRadius: 3,
+          backgroundColor: COLORS.primary,
+          borderRadius: 50,
           transition: "width 0.3s ease"
         } }) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
@@ -25617,8 +25715,8 @@ function ReminderApp({ initialData: initialData2 }) {
               background: "none",
               border: "none",
               cursor: "pointer",
-              padding: "2px 6px",
-              borderRadius: 4,
+              padding: "4px 8px",
+              borderRadius: 50,
               opacity: 0.6
             },
             title: "Reset all progress",
@@ -25628,17 +25726,38 @@ function ReminderApp({ initialData: initialData2 }) {
       ] })
     ] }),
     completedTaskCount === totalTaskCount && totalTaskCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
-      backgroundColor: `${COLORS.gold}15`,
-      borderRadius: 10,
-      padding: "12px 16px",
-      marginBottom: 14,
+      backgroundColor: COLORS.card,
+      borderRadius: cardRadius,
+      padding: "16px 20px",
+      marginBottom: 12,
       textAlign: "center",
-      border: `1px solid ${COLORS.gold}`
+      boxShadow: cardShadow
     }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 20 }, children: "\u{1F3C6}" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { marginLeft: 8, fontSize: 14, fontWeight: 600, color: COLORS.textMain }, children: "All progression tasks complete! You're a reminder master!" })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 24 }, children: "\u{1F3C6}" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { marginLeft: 10, fontSize: 15, fontWeight: 500, color: COLORS.textMain }, children: "All tasks complete! You're a reminder master!" })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 14, padding: 16, marginBottom: 14, border: `1px solid ${COLORS.border}` }, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
+      backgroundColor: COLORS.card,
+      borderRadius: cardRadius,
+      padding: 20,
+      marginBottom: 12,
+      boxShadow: cardShadow
+    }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
+          width: 40,
+          height: 40,
+          borderRadius: "50%",
+          backgroundColor: COLORS.iconBg,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { size: 20, color: COLORS.primary }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 15, fontWeight: 600, color: COLORS.textMain }, children: "Create New Task" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 12, color: COLORS.textMuted }, children: "Type naturally to add a reminder" })
+        ] })
+      ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative" }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
           "input",
@@ -25649,33 +25768,66 @@ function ReminderApp({ initialData: initialData2 }) {
             value: input,
             onChange: (e) => setInput(e.target.value),
             onKeyDown: handleKeyDown,
-            style: { ...inputStyle, width: "100%", padding: "14px 50px 14px 16px", borderRadius: 10, border: `2px solid ${parsed ? COLORS.primaryLight : COLORS.border}`, backgroundColor: COLORS.inputBg, fontSize: 16, outline: "none", transition: "border-color 0.2s" }
+            style: {
+              ...inputStyle,
+              width: "100%",
+              padding: "14px 54px 14px 18px",
+              borderRadius: 50,
+              border: `2px solid ${parsed ? COLORS.primaryLight : COLORS.border}`,
+              backgroundColor: COLORS.inputBg,
+              fontSize: 15,
+              outline: "none",
+              transition: "border-color 0.2s"
+            }
           }
         ),
-        parsed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: createFromParsed, style: { position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", width: 36, height: 36, borderRadius: 8, border: "none", backgroundColor: COLORS.primary, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { size: 18 }) })
+        parsed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "button",
+          {
+            onClick: createFromParsed,
+            style: {
+              position: "absolute",
+              right: 6,
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              border: "none",
+              backgroundColor: COLORS.primary,
+              color: "#fff",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 2px 8px rgba(45,90,61,0.3)"
+            },
+            children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { size: 20 })
+          }
+        )
       ] }),
-      parsed && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginTop: 14, padding: 14, backgroundColor: COLORS.accentLight, borderRadius: 10 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 16, fontWeight: 600, color: COLORS.textMain }, children: parsed.title }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 12, color: COLORS.textMuted, backgroundColor: COLORS.card, padding: "3px 8px", borderRadius: 6 }, children: [
+      parsed && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginTop: 16, padding: 16, backgroundColor: COLORS.cardAlt, borderRadius: 16 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 15, fontWeight: 600, color: COLORS.textMain }, children: parsed.title }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 11, color: COLORS.textMuted, backgroundColor: COLORS.card, padding: "4px 10px", borderRadius: 50 }, children: [
             parsed.confidence,
-            "%"
+            "% match"
           ] })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", flexWrap: "wrap", gap: 8 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", borderRadius: 8, backgroundColor: COLORS.card, fontSize: 13, color: COLORS.textSecondary }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 50, backgroundColor: COLORS.card, fontSize: 13, color: COLORS.textSecondary }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Calendar, { size: 14 }),
             " ",
             formatDate(parsed.dueDate),
             parsed.dueTime && ` ${formatTime(parsed.dueTime)}`
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", borderRadius: 8, fontSize: 13, backgroundColor: `${CATEGORY_CONFIG[parsed.category].color}18`, color: CATEGORY_CONFIG[parsed.category].color }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CategoryIcon, { cat: parsed.category }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 50, fontSize: 13, backgroundColor: CATEGORY_CONFIG[parsed.category].bg, color: CATEGORY_CONFIG[parsed.category].color }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CategoryIcon, { cat: parsed.category, size: 20 }),
             " ",
             CATEGORY_CONFIG[parsed.category].label
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { padding: "5px 10px", borderRadius: 8, fontSize: 13, fontWeight: 500, backgroundColor: `${PRIORITY_COLORS[parsed.priority]}18`, color: PRIORITY_COLORS[parsed.priority], textTransform: "capitalize" }, children: parsed.priority }),
-          parsed.recurrence !== "none" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 4, padding: "5px 10px", borderRadius: 8, fontSize: 13, backgroundColor: `${COLORS.primary}15`, color: COLORS.primary, fontWeight: 500 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { padding: "6px 12px", borderRadius: 50, fontSize: 13, fontWeight: 500, backgroundColor: `${PRIORITY_COLORS[parsed.priority]}20`, color: PRIORITY_COLORS[parsed.priority], textTransform: "capitalize" }, children: parsed.priority }),
+          parsed.recurrence !== "none" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 4, padding: "6px 12px", borderRadius: 50, fontSize: 13, backgroundColor: COLORS.iconBg, color: COLORS.primary, fontWeight: 500 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Repeat, { size: 13 }),
             " ",
             formatRecurrence(parsed)
@@ -25683,31 +25835,41 @@ function ReminderApp({ initialData: initialData2 }) {
         ] })
       ] })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 10, marginBottom: 14, alignItems: "center", flexWrap: "wrap" }, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
+      backgroundColor: COLORS.card,
+      borderRadius: cardRadius,
+      padding: "14px 20px",
+      marginBottom: 12,
+      boxShadow: cardShadow,
+      display: "flex",
+      gap: 12,
+      alignItems: "center",
+      flexWrap: "wrap"
+    }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8 }, children: [
-        overdueCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { padding: "6px 12px", borderRadius: 8, fontSize: 13, fontWeight: 600, backgroundColor: `${COLORS.danger}15`, color: COLORS.danger }, children: [
+        overdueCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { padding: "6px 14px", borderRadius: 50, fontSize: 13, fontWeight: 500, backgroundColor: `${COLORS.danger}15`, color: COLORS.danger }, children: [
           overdueCount,
           " overdue"
         ] }),
-        todayCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { padding: "6px 12px", borderRadius: 8, fontSize: 13, fontWeight: 600, backgroundColor: `${COLORS.warning}15`, color: COLORS.warning }, children: [
+        todayCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { padding: "6px 14px", borderRadius: 50, fontSize: 13, fontWeight: 500, backgroundColor: `${COLORS.gold}20`, color: COLORS.gold }, children: [
           todayCount,
           " today"
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { padding: "6px 12px", borderRadius: 8, fontSize: 13, fontWeight: 600, backgroundColor: COLORS.accentLight, color: COLORS.primary }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { padding: "6px 14px", borderRadius: 50, fontSize: 13, fontWeight: 500, backgroundColor: COLORS.iconBg, color: COLORS.primary }, children: [
           reminders.filter((r) => !r.completed).length,
           " pending"
         ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative" }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { size: 16, color: COLORS.textMuted, style: { position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)" } }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "text", placeholder: "Search", value: search, onChange: (e) => setSearch(e.target.value), style: { ...inputStyle, width: 120, padding: "8px 10px 8px 32px", borderRadius: 8, border: `1px solid ${COLORS.border}`, backgroundColor: COLORS.card, fontSize: 14, outline: "none" } })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { size: 16, color: COLORS.textMuted, style: { position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" } }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "text", placeholder: "Search", value: search, onChange: (e) => setSearch(e.target.value), style: { ...inputStyle, width: 130, padding: "10px 14px 10px 36px", borderRadius: 50, border: "none", backgroundColor: COLORS.inputBg, fontSize: 14, outline: "none" } })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { value: filterCategory, onChange: (e) => setFilterCategory(e.target.value), style: { ...inputStyle, padding: "8px 12px", borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card, cursor: "pointer" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { value: filterCategory, onChange: (e) => setFilterCategory(e.target.value), style: { ...inputStyle, padding: "10px 16px", borderRadius: 50, border: "none", fontSize: 14, backgroundColor: COLORS.inputBg, cursor: "pointer" }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "all", children: "All" }),
           Object.entries(CATEGORY_CONFIG).map(([k, v]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: k, children: v.label }, k))
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { value: filterStatus, onChange: (e) => setFilterStatus(e.target.value), style: { ...inputStyle, padding: "8px 12px", borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card, cursor: "pointer" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { value: filterStatus, onChange: (e) => setFilterStatus(e.target.value), style: { ...inputStyle, padding: "10px 16px", borderRadius: 50, border: "none", fontSize: 14, backgroundColor: COLORS.inputBg, cursor: "pointer" }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "all", children: "All" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "pending", children: "Pending" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "completed", children: "Done" }),
@@ -25715,64 +25877,137 @@ function ReminderApp({ initialData: initialData2 }) {
         ] })
       ] })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { backgroundColor: COLORS.card, borderRadius: 14, border: `1px solid ${COLORS.border}`, overflow: "hidden" }, children: filtered.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { textAlign: "center", padding: 40, color: COLORS.textMuted }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { size: 44, color: COLORS.border, style: { marginBottom: 12 } }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { fontSize: 16, margin: 0, fontWeight: 500 }, children: "No reminders yet" }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { backgroundColor: COLORS.card, borderRadius: cardRadius, boxShadow: cardShadow, overflow: "hidden" }, children: filtered.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { textAlign: "center", padding: 48, color: COLORS.textMuted }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
+        width: 64,
+        height: 64,
+        borderRadius: "50%",
+        backgroundColor: COLORS.iconBg,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        margin: "0 auto 16px"
+      }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { size: 28, color: COLORS.textMuted }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { fontSize: 16, margin: 0, fontWeight: 500, color: COLORS.textMain }, children: "No reminders yet" }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { fontSize: 14, marginTop: 6, color: COLORS.textMuted }, children: "Type above to create your first one!" })
-    ] }) : filtered.map((r, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { padding: "14px 16px", borderBottom: i < filtered.length - 1 ? `1px solid ${COLORS.border}` : "none", backgroundColor: r.completed ? COLORS.cardAlt : COLORS.card, opacity: r.completed ? 0.7 : 1 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 12 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => r.completed ? uncomplete(r) : complete(r), style: { width: 24, height: 24, borderRadius: "50%", border: `2px solid ${r.completed ? COLORS.success : COLORS.border}`, backgroundColor: r.completed ? COLORS.success : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }, children: r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { size: 14, color: "#fff" }) }),
+    ] }) : filtered.map((r, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
+      padding: "16px 20px",
+      borderBottom: i < filtered.length - 1 ? `1px solid ${COLORS.border}` : "none",
+      backgroundColor: r.completed ? COLORS.cardAlt : COLORS.card,
+      opacity: r.completed ? 0.7 : 1
+    }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 14 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "button",
+        {
+          onClick: () => r.completed ? uncomplete(r) : complete(r),
+          style: {
+            width: 28,
+            height: 28,
+            borderRadius: "50%",
+            border: `2px solid ${r.completed ? COLORS.success : COLORS.border}`,
+            backgroundColor: r.completed ? COLORS.success : "transparent",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0
+          },
+          children: r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { size: 14, color: "#fff" })
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CategoryIcon, { cat: r.category, size: 40 }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 15, fontWeight: 500, color: COLORS.textMain, textDecoration: r.completed ? "line-through" : "none" }, children: r.title }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 8px", borderRadius: 6, fontSize: 12, backgroundColor: `${CATEGORY_CONFIG[r.category].color}12`, color: CATEGORY_CONFIG[r.category].color }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CategoryIcon, { cat: r.category }),
-            " ",
-            CATEGORY_CONFIG[r.category].label
-          ] }),
-          isOverdue(r) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { padding: "2px 8px", borderRadius: 6, fontSize: 12, fontWeight: 600, backgroundColor: `${COLORS.danger}12`, color: COLORS.danger }, children: "Overdue" }),
-          r.recurrence !== "none" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "inline-flex", alignItems: "center", gap: 3, padding: "2px 8px", borderRadius: 6, fontSize: 12, backgroundColor: `${COLORS.primary}10`, color: COLORS.primary }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Repeat, { size: 12 }),
+          isOverdue(r) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { padding: "3px 10px", borderRadius: 50, fontSize: 11, fontWeight: 500, backgroundColor: `${COLORS.danger}15`, color: COLORS.danger }, children: "Overdue" }),
+          r.recurrence !== "none" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", borderRadius: 50, fontSize: 11, backgroundColor: COLORS.iconBg, color: COLORS.primary }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Repeat, { size: 11 }),
             " ",
             formatRecurrence(r)
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 13, color: isOverdue(r) ? COLORS.danger : COLORS.textMuted, marginTop: 4, display: "flex", alignItems: "center", gap: 6 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 13, color: isOverdue(r) ? COLORS.danger : COLORS.textMuted, marginTop: 4, display: "flex", alignItems: "center", gap: 8 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { size: 13 }),
           " ",
           formatDate(r.dueDate),
           r.dueTime && ` at ${formatTime(r.dueTime)}`,
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { marginLeft: 6, padding: "2px 8px", borderRadius: 6, fontSize: 12, backgroundColor: `${PRIORITY_COLORS[r.priority]}12`, color: PRIORITY_COLORS[r.priority], textTransform: "capitalize" }, children: r.priority })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { padding: "3px 10px", borderRadius: 50, fontSize: 11, backgroundColor: `${PRIORITY_COLORS[r.priority]}15`, color: PRIORITY_COLORS[r.priority], textTransform: "capitalize" }, children: r.priority })
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 6 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8 }, children: [
         !r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
           "button",
           {
             onClick: () => setSnoozePopup(r),
             title: "Snooze",
             style: {
-              width: 32,
-              height: 32,
-              borderRadius: 8,
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
               border: "none",
               backgroundColor: COLORS.inputBg,
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              transition: "all 0.2s ease"
+              justifyContent: "center"
             },
-            children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14 }, children: "\u{1F4A4}" })
+            children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 16 }, children: "\u{1F4A4}" })
           }
         ),
-        !r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setEditing(r), title: "Edit", style: { width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { size: 16, color: COLORS.textMuted }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => del(r.id), title: "Delete", style: { width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { size: 16, color: COLORS.danger }) })
+        !r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "button",
+          {
+            onClick: () => setEditing(r),
+            title: "Edit",
+            style: {
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              border: "none",
+              backgroundColor: COLORS.inputBg,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            },
+            children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { size: 16, color: COLORS.textMuted })
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "button",
+          {
+            onClick: () => del(r.id),
+            title: "Delete",
+            style: {
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              border: "none",
+              backgroundColor: `${COLORS.danger}10`,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            },
+            children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { size: 16, color: COLORS.danger })
+          }
+        )
       ] })
     ] }) }, r.id)) }),
-    snoozePopup && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 16, width: "100%", maxWidth: 320, padding: 24, textAlign: "center" }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 40, marginBottom: 12 }, children: "\u{1F4A4}" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { style: { margin: "0 0 8px", fontSize: 18, fontWeight: 700, color: COLORS.textMain }, children: "Snooze Reminder" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { style: { margin: "0 0 20px", fontSize: 14, color: COLORS.textSecondary, lineHeight: 1.4 }, children: [
+    snoozePopup && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 24, width: "100%", maxWidth: 320, padding: 28, textAlign: "center", boxShadow: "0 16px 48px rgba(0,0,0,0.15)" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
+        width: 64,
+        height: 64,
+        borderRadius: "50%",
+        backgroundColor: COLORS.iconBg,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        margin: "0 auto 16px",
+        fontSize: 32
+      }, children: "\u{1F4A4}" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { style: { margin: "0 0 8px", fontSize: 18, fontWeight: 600, color: COLORS.textMain }, children: "Snooze Reminder" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { style: { margin: "0 0 24px", fontSize: 14, color: COLORS.textSecondary, lineHeight: 1.4 }, children: [
         '"',
         snoozePopup.title,
         '"'
@@ -25784,21 +26019,21 @@ function ReminderApp({ initialData: initialData2 }) {
             onClick: () => snooze(snoozePopup, 15),
             style: {
               padding: "14px 20px",
-              borderRadius: 10,
+              borderRadius: 50,
               border: "none",
-              backgroundColor: COLORS.accentLight,
+              backgroundColor: COLORS.iconBg,
               color: COLORS.primary,
               fontSize: 15,
-              fontWeight: 600,
+              fontWeight: 500,
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: 8
+              gap: 10
             },
             children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { size: 18 }),
-              " Snooze for 15 minutes"
+              " 15 minutes"
             ]
           }
         ),
@@ -25808,21 +26043,21 @@ function ReminderApp({ initialData: initialData2 }) {
             onClick: () => snooze(snoozePopup, 60),
             style: {
               padding: "14px 20px",
-              borderRadius: 10,
+              borderRadius: 50,
               border: "none",
-              backgroundColor: COLORS.accentLight,
+              backgroundColor: COLORS.iconBg,
               color: COLORS.primary,
               fontSize: 15,
-              fontWeight: 600,
+              fontWeight: 500,
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: 8
+              gap: 10
             },
             children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { size: 18 }),
-              " Snooze for 1 hour"
+              " 1 hour"
             ]
           }
         ),
@@ -25832,21 +26067,21 @@ function ReminderApp({ initialData: initialData2 }) {
             onClick: () => snooze(snoozePopup, 1440),
             style: {
               padding: "14px 20px",
-              borderRadius: 10,
+              borderRadius: 50,
               border: "none",
-              backgroundColor: COLORS.accentLight,
+              backgroundColor: COLORS.iconBg,
               color: COLORS.primary,
               fontSize: 15,
-              fontWeight: 600,
+              fontWeight: 500,
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: 8
+              gap: 10
             },
             children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Calendar, { size: 18 }),
-              " Snooze for 1 day"
+              " 1 day"
             ]
           }
         )
@@ -25856,37 +26091,37 @@ function ReminderApp({ initialData: initialData2 }) {
         {
           onClick: () => setSnoozePopup(null),
           style: {
-            marginTop: 16,
-            padding: "12px 24px",
-            borderRadius: 10,
-            border: `1px solid ${COLORS.border}`,
-            backgroundColor: COLORS.card,
+            marginTop: 20,
+            padding: "12px 28px",
+            borderRadius: 50,
+            border: "none",
+            backgroundColor: COLORS.inputBg,
             fontSize: 14,
             fontWeight: 500,
             cursor: "pointer",
-            color: COLORS.textSecondary
+            color: COLORS.textMuted
           },
           children: "Cancel"
         }
       )
     ] }) }),
-    editing && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16, overflowY: "auto" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 16, width: "100%", maxWidth: 420, padding: 20, maxHeight: "90vh", overflowY: "auto" }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { style: { margin: 0, fontSize: 18, fontWeight: 700, color: COLORS.textMain }, children: "Edit Reminder" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setEditing(null), style: { width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 18 }) })
+    editing && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16, overflowY: "auto" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 24, width: "100%", maxWidth: 420, padding: 24, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 16px 48px rgba(0,0,0,0.15)" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { style: { margin: 0, fontSize: 18, fontWeight: 600, color: COLORS.textMain }, children: "Edit Reminder" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setEditing(null), style: { width: 36, height: 36, borderRadius: "50%", border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 18, color: COLORS.textMuted }) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginBottom: 14 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }, children: "Title" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "text", value: editing.title, onChange: (e) => setEditing({ ...editing, title: e.target.value }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 } })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginBottom: 16 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, fontWeight: 500, color: COLORS.textMuted, display: "block", marginBottom: 8 }, children: "Title" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "text", value: editing.title, onChange: (e) => setEditing({ ...editing, title: e.target.value }), style: { ...inputStyle, width: "100%", padding: 14, borderRadius: 14, border: "none", backgroundColor: COLORS.inputBg, fontSize: 15 } })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }, children: "Category" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", { value: editing.category, onChange: (e) => setEditing({ ...editing, category: e.target.value }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 }, children: Object.entries(CATEGORY_CONFIG).map(([k, v]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: k, children: v.label }, k)) })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, fontWeight: 500, color: COLORS.textMuted, display: "block", marginBottom: 8 }, children: "Category" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", { value: editing.category, onChange: (e) => setEditing({ ...editing, category: e.target.value }), style: { ...inputStyle, width: "100%", padding: 14, borderRadius: 14, border: "none", backgroundColor: COLORS.inputBg, fontSize: 14 }, children: Object.entries(CATEGORY_CONFIG).map(([k, v]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: k, children: v.label }, k)) })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }, children: "Priority" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { value: editing.priority, onChange: (e) => setEditing({ ...editing, priority: e.target.value }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, fontWeight: 500, color: COLORS.textMuted, display: "block", marginBottom: 8 }, children: "Priority" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { value: editing.priority, onChange: (e) => setEditing({ ...editing, priority: e.target.value }), style: { ...inputStyle, width: "100%", padding: 14, borderRadius: 14, border: "none", backgroundColor: COLORS.inputBg, fontSize: 14 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "low", children: "Low" }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "medium", children: "Medium" }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "high", children: "High" }),
@@ -25894,9 +26129,9 @@ function ReminderApp({ initialData: initialData2 }) {
           ] })
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginBottom: 14, padding: 14, backgroundColor: COLORS.accentLight, borderRadius: 10 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.primary, display: "block", marginBottom: 10 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Repeat, { size: 14, style: { marginRight: 6, verticalAlign: "middle" } }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginBottom: 16, padding: 16, backgroundColor: COLORS.cardAlt, borderRadius: 16 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { style: { fontSize: 13, fontWeight: 500, color: COLORS.textMain, display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: 28, height: 28, borderRadius: "50%", backgroundColor: COLORS.iconBg, display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Repeat, { size: 14, color: COLORS.primary }) }),
           "Repeat Settings"
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginBottom: 12 }, children: [
@@ -25913,7 +26148,7 @@ function ReminderApp({ initialData: initialData2 }) {
                   setEditing({ ...editing, recurrence: val, recurrenceInterval: void 0, recurrenceUnit: void 0 });
                 }
               },
-              style: { ...inputStyle, width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card },
+              style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 12, border: "none", fontSize: 14, backgroundColor: COLORS.card },
               children: [
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "none", children: "One-time (no repeat)" }),
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "daily", children: "Daily" }),
@@ -25927,7 +26162,7 @@ function ReminderApp({ initialData: initialData2 }) {
         ] }),
         editing.recurrence === "custom" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, color: COLORS.textSecondary, display: "block", marginBottom: 4 }, children: "Every" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, color: COLORS.textMuted, display: "block", marginBottom: 6 }, children: "Every" }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
               "input",
               {
@@ -25936,18 +26171,18 @@ function ReminderApp({ initialData: initialData2 }) {
                 max: "365",
                 value: editing.recurrenceInterval || 2,
                 onChange: (e) => setEditing({ ...editing, recurrenceInterval: parseInt(e.target.value) || 1 }),
-                style: { ...inputStyle, width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card }
+                style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 12, border: "none", fontSize: 14, backgroundColor: COLORS.card }
               }
             )
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, color: COLORS.textSecondary, display: "block", marginBottom: 4 }, children: "Unit" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, color: COLORS.textMuted, display: "block", marginBottom: 6 }, children: "Unit" }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
               "select",
               {
                 value: editing.recurrenceUnit || "days",
                 onChange: (e) => setEditing({ ...editing, recurrenceUnit: e.target.value }),
-                style: { ...inputStyle, width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card },
+                style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 12, border: "none", fontSize: 14, backgroundColor: COLORS.card },
                 children: [
                   /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "days", children: "Days" }),
                   /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "weeks", children: "Weeks" }),
@@ -25960,32 +26195,32 @@ function ReminderApp({ initialData: initialData2 }) {
         ] }),
         editing.recurrence !== "none" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, color: COLORS.textSecondary, display: "block", marginBottom: 4 }, children: "Start Date" }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "date", value: editing.dueDate, onChange: (e) => setEditing({ ...editing, dueDate: e.target.value }), style: { ...inputStyle, width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card } })
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, color: COLORS.textMuted, display: "block", marginBottom: 6 }, children: "Start Date" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "date", value: editing.dueDate, onChange: (e) => setEditing({ ...editing, dueDate: e.target.value }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 12, border: "none", fontSize: 14, backgroundColor: COLORS.card } })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, color: COLORS.textSecondary, display: "block", marginBottom: 4 }, children: "End Date (optional)" }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "date", value: editing.endDate || "", onChange: (e) => setEditing({ ...editing, endDate: e.target.value || void 0 }), style: { ...inputStyle, width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card } })
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, color: COLORS.textMuted, display: "block", marginBottom: 6 }, children: "End Date (optional)" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "date", value: editing.endDate || "", onChange: (e) => setEditing({ ...editing, endDate: e.target.value || void 0 }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 12, border: "none", fontSize: 14, backgroundColor: COLORS.card } })
           ] })
         ] })
       ] }),
-      editing.recurrence === "none" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }, children: [
+      editing.recurrence === "none" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }, children: "Date" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "date", value: editing.dueDate, onChange: (e) => setEditing({ ...editing, dueDate: e.target.value }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 } })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, fontWeight: 500, color: COLORS.textMuted, display: "block", marginBottom: 8 }, children: "Date" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "date", value: editing.dueDate, onChange: (e) => setEditing({ ...editing, dueDate: e.target.value }), style: { ...inputStyle, width: "100%", padding: 14, borderRadius: 14, border: "none", backgroundColor: COLORS.inputBg, fontSize: 14 } })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }, children: "Time" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "time", value: editing.dueTime || "", onChange: (e) => setEditing({ ...editing, dueTime: e.target.value || void 0 }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 } })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, fontWeight: 500, color: COLORS.textMuted, display: "block", marginBottom: 8 }, children: "Time" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "time", value: editing.dueTime || "", onChange: (e) => setEditing({ ...editing, dueTime: e.target.value || void 0 }), style: { ...inputStyle, width: "100%", padding: 14, borderRadius: 14, border: "none", backgroundColor: COLORS.inputBg, fontSize: 14 } })
         ] })
       ] }),
-      editing.recurrence !== "none" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginBottom: 14 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }, children: "Reminder Time" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "time", value: editing.dueTime || "", onChange: (e) => setEditing({ ...editing, dueTime: e.target.value || void 0 }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 } })
+      editing.recurrence !== "none" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginBottom: 16 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, fontWeight: 500, color: COLORS.textMuted, display: "block", marginBottom: 8 }, children: "Reminder Time" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "time", value: editing.dueTime || "", onChange: (e) => setEditing({ ...editing, dueTime: e.target.value || void 0 }), style: { ...inputStyle, width: "100%", padding: 14, borderRadius: 14, border: "none", backgroundColor: COLORS.inputBg, fontSize: 14 } })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 12 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setEditing(null), style: { flex: 1, padding: 14, borderRadius: 10, border: `1px solid ${COLORS.border}`, backgroundColor: COLORS.card, fontSize: 15, fontWeight: 600, cursor: "pointer" }, children: "Cancel" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => updateReminder(editing), style: { flex: 1, padding: 14, borderRadius: 10, border: "none", backgroundColor: COLORS.primary, color: "#fff", fontSize: 15, fontWeight: 600, cursor: "pointer" }, children: "Save" })
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setEditing(null), style: { flex: 1, padding: 16, borderRadius: 50, border: "none", backgroundColor: COLORS.inputBg, fontSize: 15, fontWeight: 500, cursor: "pointer", color: COLORS.textMuted }, children: "Cancel" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => updateReminder(editing), style: { flex: 1, padding: 16, borderRadius: 50, border: "none", backgroundColor: COLORS.primary, color: "#fff", fontSize: 15, fontWeight: 500, cursor: "pointer", boxShadow: "0 4px 12px rgba(45,90,61,0.3)" }, children: "Save" })
       ] })
     ] }) })
   ] });
@@ -26222,6 +26457,14 @@ lucide-react/dist/esm/icons/check.js:
    * See the LICENSE file in the root directory of this source tree.
    *)
 
+lucide-react/dist/esm/icons/chevron-right.js:
+  (**
+   * @license lucide-react v0.554.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
 lucide-react/dist/esm/icons/clock.js:
   (**
    * @license lucide-react v0.554.0 - ISC
@@ -26286,6 +26529,14 @@ lucide-react/dist/esm/icons/plane.js:
    * See the LICENSE file in the root directory of this source tree.
    *)
 
+lucide-react/dist/esm/icons/plus.js:
+  (**
+   * @license lucide-react v0.554.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
 lucide-react/dist/esm/icons/repeat.js:
   (**
    * @license lucide-react v0.554.0 - ISC
@@ -26295,14 +26546,6 @@ lucide-react/dist/esm/icons/repeat.js:
    *)
 
 lucide-react/dist/esm/icons/search.js:
-  (**
-   * @license lucide-react v0.554.0 - ISC
-   *
-   * This source code is licensed under the ISC license.
-   * See the LICENSE file in the root directory of this source tree.
-   *)
-
-lucide-react/dist/esm/icons/send.js:
   (**
    * @license lucide-react v0.554.0 - ISC
    *
