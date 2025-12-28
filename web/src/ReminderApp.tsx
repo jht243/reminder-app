@@ -869,6 +869,9 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const [quickFilter, setQuickFilter] = useState<"all" | "urgent" | "today" | "overdue" | "completed" | Category>("all");
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
   
+  // Track when tasks were first viewed (for glow effect)
+  const [viewedTasks, setViewedTasks] = useState<Record<string, number>>({});
+  
   const [toast, setToast] = useState<string | null>(null);
   const [achievement, setAchievement] = useState<{ name: string; icon: string } | null>(null);
   
@@ -2022,12 +2025,36 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
                 </button>
                 
                 {/* Section Items */}
-                {!isCollapsed && sectionReminders.map((r, i) => (
-                  <div key={r.id} style={{ 
+                {!isCollapsed && sectionReminders.map((r, i) => {
+                  // Check if task is new (created within last hour) and should glow
+                  const isNew = r.createdAt && (Date.now() - new Date(r.createdAt).getTime()) < 3600000;
+                  const viewedAt = viewedTasks[r.id];
+                  const shouldGlow = isNew && (!viewedAt || (Date.now() - viewedAt) < 10000);
+                  
+                  return (
+                  <div 
+                    key={r.id} 
+                    ref={(el) => {
+                      // Use Intersection Observer to track when task enters viewport
+                      if (el && isNew && !viewedTasks[r.id]) {
+                        const observer = new IntersectionObserver((entries) => {
+                          entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                              setViewedTasks(prev => ({ ...prev, [r.id]: Date.now() }));
+                              observer.disconnect();
+                            }
+                          });
+                        }, { threshold: 0.5 });
+                        observer.observe(el);
+                      }
+                    }}
+                    style={{ 
                     padding: "12px 16px", 
                     borderBottom: i < sectionReminders.length - 1 ? `1px solid ${COLORS.border}` : "none",
                     backgroundColor: r.completed ? COLORS.cardAlt : COLORS.card,
-                    opacity: r.completed ? 0.7 : 1
+                    opacity: r.completed ? 0.7 : 1,
+                    boxShadow: shouldGlow ? `inset 0 0 0 2px ${COLORS.primary}40, 0 0 12px ${COLORS.primary}30` : "none",
+                    transition: "box-shadow 0.5s ease-out"
                   }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       {/* Compact checkbox */}
@@ -2114,7 +2141,8 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             );
           })}

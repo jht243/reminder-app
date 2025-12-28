@@ -25474,6 +25474,7 @@ function ReminderApp({ initialData: initialData2 }) {
   const [sortAsc, setSortAsc] = (0, import_react3.useState)(true);
   const [quickFilter, setQuickFilter] = (0, import_react3.useState)("all");
   const [collapsedSections, setCollapsedSections] = (0, import_react3.useState)(/* @__PURE__ */ new Set());
+  const [viewedTasks, setViewedTasks] = (0, import_react3.useState)({});
   const [toast, setToast] = (0, import_react3.useState)(null);
   const [achievement, setAchievement] = (0, import_react3.useState)(null);
   const [importOpen, setImportOpen] = (0, import_react3.useState)(false);
@@ -26600,101 +26601,128 @@ function ReminderApp({ initialData: initialData2 }) {
             ]
           }
         ),
-        !isCollapsed && sectionReminders.map((r, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
-          padding: "12px 16px",
-          borderBottom: i < sectionReminders.length - 1 ? `1px solid ${COLORS.border}` : "none",
-          backgroundColor: r.completed ? COLORS.cardAlt : COLORS.card,
-          opacity: r.completed ? 0.7 : 1
-        }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 10 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-            "button",
+        !isCollapsed && sectionReminders.map((r, i) => {
+          const isNew = r.createdAt && Date.now() - new Date(r.createdAt).getTime() < 36e5;
+          const viewedAt = viewedTasks[r.id];
+          const shouldGlow = isNew && (!viewedAt || Date.now() - viewedAt < 1e4);
+          return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "div",
             {
-              onClick: () => r.completed ? uncomplete(r) : complete(r),
-              style: {
-                width: 24,
-                height: 24,
-                borderRadius: "50%",
-                border: `2px solid ${r.completed ? COLORS.success : COLORS.border}`,
-                backgroundColor: r.completed ? COLORS.success : "transparent",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0
+              ref: (el) => {
+                if (el && isNew && !viewedTasks[r.id]) {
+                  const observer = new IntersectionObserver((entries) => {
+                    entries.forEach((entry) => {
+                      if (entry.isIntersecting) {
+                        setViewedTasks((prev) => ({ ...prev, [r.id]: Date.now() }));
+                        observer.disconnect();
+                      }
+                    });
+                  }, { threshold: 0.5 });
+                  observer.observe(el);
+                }
               },
-              children: r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { size: 12, color: "#fff" })
-            }
-          ),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 18, opacity: r.completed ? 0.5 : 1 }, children: QUICK_FILTERS.find((f) => f.id === r.category)?.emoji || "\u{1F4CC}" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
-              fontSize: 14,
-              fontWeight: 500,
-              color: r.completed ? COLORS.textMuted : COLORS.textMain,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              textDecoration: r.completed ? "line-through" : "none"
-            }, children: r.title }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
-              fontSize: 12,
-              color: sectionKey === "overdue" ? COLORS.danger : COLORS.textMuted,
-              marginTop: 2,
-              display: "flex",
-              alignItems: "center",
-              gap: 6
-            }, children: [
-              r.dueTime && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: formatTime(r.dueTime) }),
-              r.priority !== "medium" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: {
-                padding: "1px 6px",
-                borderRadius: 50,
-                fontSize: 10,
-                backgroundColor: `${PRIORITY_COLORS[r.priority]}20`,
-                color: PRIORITY_COLORS[r.priority],
-                textTransform: "capitalize"
-              }, children: r.priority }),
-              r.recurrence !== "none" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-flex", alignItems: "center", gap: 2 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Repeat, { size: 10, color: COLORS.primary }) })
-            ] })
-          ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 4 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-              "button",
-              {
-                onClick: () => setEditing(r),
-                style: {
-                  width: 28,
-                  height: 28,
-                  borderRadius: "50%",
-                  border: "none",
-                  backgroundColor: COLORS.inputBg,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center"
-                },
-                children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { size: 12, color: COLORS.textMuted })
-              }
-            ),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-              "button",
-              {
-                onClick: () => del(r.id),
-                style: {
-                  width: 28,
-                  height: 28,
-                  borderRadius: "50%",
-                  border: "none",
-                  backgroundColor: `${COLORS.danger}10`,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center"
-                },
-                children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { size: 12, color: COLORS.danger })
-              }
-            )
-          ] })
-        ] }) }, r.id))
+              style: {
+                padding: "12px 16px",
+                borderBottom: i < sectionReminders.length - 1 ? `1px solid ${COLORS.border}` : "none",
+                backgroundColor: r.completed ? COLORS.cardAlt : COLORS.card,
+                opacity: r.completed ? 0.7 : 1,
+                boxShadow: shouldGlow ? `inset 0 0 0 2px ${COLORS.primary}40, 0 0 12px ${COLORS.primary}30` : "none",
+                transition: "box-shadow 0.5s ease-out"
+              },
+              children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 10 }, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                  "button",
+                  {
+                    onClick: () => r.completed ? uncomplete(r) : complete(r),
+                    style: {
+                      width: 24,
+                      height: 24,
+                      borderRadius: "50%",
+                      border: `2px solid ${r.completed ? COLORS.success : COLORS.border}`,
+                      backgroundColor: r.completed ? COLORS.success : "transparent",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0
+                    },
+                    children: r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { size: 12, color: "#fff" })
+                  }
+                ),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 18, opacity: r.completed ? 0.5 : 1 }, children: QUICK_FILTERS.find((f) => f.id === r.category)?.emoji || "\u{1F4CC}" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0 }, children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
+                    fontSize: 14,
+                    fontWeight: 500,
+                    color: r.completed ? COLORS.textMuted : COLORS.textMain,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    textDecoration: r.completed ? "line-through" : "none"
+                  }, children: r.title }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
+                    fontSize: 12,
+                    color: sectionKey === "overdue" ? COLORS.danger : COLORS.textMuted,
+                    marginTop: 2,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6
+                  }, children: [
+                    r.dueTime && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: formatTime(r.dueTime) }),
+                    r.priority !== "medium" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: {
+                      padding: "1px 6px",
+                      borderRadius: 50,
+                      fontSize: 10,
+                      backgroundColor: `${PRIORITY_COLORS[r.priority]}20`,
+                      color: PRIORITY_COLORS[r.priority],
+                      textTransform: "capitalize"
+                    }, children: r.priority }),
+                    r.recurrence !== "none" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-flex", alignItems: "center", gap: 2 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Repeat, { size: 10, color: COLORS.primary }) })
+                  ] })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 4 }, children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                    "button",
+                    {
+                      onClick: () => setEditing(r),
+                      style: {
+                        width: 28,
+                        height: 28,
+                        borderRadius: "50%",
+                        border: "none",
+                        backgroundColor: COLORS.inputBg,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center"
+                      },
+                      children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { size: 12, color: COLORS.textMuted })
+                    }
+                  ),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                    "button",
+                    {
+                      onClick: () => del(r.id),
+                      style: {
+                        width: 28,
+                        height: 28,
+                        borderRadius: "50%",
+                        border: "none",
+                        backgroundColor: `${COLORS.danger}10`,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center"
+                      },
+                      children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { size: 12, color: COLORS.danger })
+                    }
+                  )
+                ] })
+              ] })
+            },
+            r.id
+          );
+        })
       ] }, sectionKey);
     }) }),
     snoozePopup && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 24, width: "100%", maxWidth: 320, padding: 28, textAlign: "center", boxShadow: "0 16px 48px rgba(0,0,0,0.15)" }, children: [
