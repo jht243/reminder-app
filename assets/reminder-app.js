@@ -25077,6 +25077,38 @@ var parseNaturalLanguage = (input) => {
   let recurrence = "none";
   let recurrenceInterval;
   let recurrenceUnit;
+  let recurrenceDays;
+  const dayNameToNum = {
+    sunday: 0,
+    sun: 0,
+    monday: 1,
+    mon: 1,
+    tuesday: 2,
+    tue: 2,
+    tues: 2,
+    wednesday: 3,
+    wed: 3,
+    thursday: 4,
+    thu: 4,
+    thur: 4,
+    thurs: 4,
+    friday: 5,
+    fri: 5,
+    saturday: 6,
+    sat: 6
+  };
+  const extractDays = (text) => {
+    const days = [];
+    const dayPattern = /\b(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)\b/gi;
+    let match;
+    while ((match = dayPattern.exec(text)) !== null) {
+      const dayNum = dayNameToNum[match[1].toLowerCase()];
+      if (dayNum !== void 0 && !days.includes(dayNum)) {
+        days.push(dayNum);
+      }
+    }
+    return days.sort((a, b) => a - b);
+  };
   const customRecurrenceMatch = lower.match(/every\s+(\d+)\s+(day|days|week|weeks|month|months|year|years)/i);
   if (customRecurrenceMatch) {
     const num = parseInt(customRecurrenceMatch[1]);
@@ -25096,15 +25128,24 @@ var parseNaturalLanguage = (input) => {
       recurrence = num === 1 ? "yearly" : "custom";
     }
     confidence += 15;
-  } else if (/\bevery\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)(\s*(,|and)\s*(sunday|monday|tuesday|wednesday|thursday|friday|saturday))+/i.test(lower)) {
+  } else if (/\bevery\s+(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(\s*(,|and)\s*(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))+/i.test(lower)) {
     recurrence = "weekly";
     recurrenceInterval = 1;
     recurrenceUnit = "weeks";
+    const daysMatch = lower.match(/every\s+((?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(?:\s*(?:,|and)\s*(?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))*)/i);
+    if (daysMatch) {
+      recurrenceDays = extractDays(daysMatch[1]);
+    }
     confidence += 15;
-  } else if (/\bevery\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i.test(lower)) {
+  } else if (/\bevery\s+(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)\b/i.test(lower)) {
     recurrence = "weekly";
     recurrenceInterval = 1;
     recurrenceUnit = "weeks";
+    const singleDayMatch = lower.match(/every\s+(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)\b/i);
+    if (singleDayMatch) {
+      const dayNum = dayNameToNum[singleDayMatch[1].toLowerCase()];
+      if (dayNum !== void 0) recurrenceDays = [dayNum];
+    }
     confidence += 15;
   } else if (/\bevery\s*day\b|daily/i.test(lower)) {
     recurrence = "daily";
@@ -25227,6 +25268,7 @@ var parseNaturalLanguage = (input) => {
     recurrence,
     recurrenceInterval,
     recurrenceUnit,
+    recurrenceDays,
     confidence: Math.min(confidence, 100)
   };
 };
@@ -25618,10 +25660,18 @@ function ReminderApp({ initialData: initialData2 }) {
   const completedTaskCount = (stats.completedTasks || []).length;
   const totalTaskCount = PROGRESSION_TASKS.length;
   console.log("[Render] completedTaskCount:", completedTaskCount, "hint:", hint?.name);
+  const dayNumToShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const formatRecurrence = (r) => {
     if (r.recurrence === "none") return "";
     if (r.recurrence === "daily") return "Daily";
-    if (r.recurrence === "weekly") return "Weekly";
+    if (r.recurrence === "weekly") {
+      if (r.recurrenceDays && r.recurrenceDays.length > 0) {
+        if (r.recurrenceDays.length === 7) return "Daily";
+        if (r.recurrenceDays.length === 1) return `Every ${dayNumToShort[r.recurrenceDays[0]]}`;
+        return r.recurrenceDays.map((d) => dayNumToShort[d]).join(", ");
+      }
+      return "Weekly";
+    }
     if (r.recurrence === "monthly") return "Monthly";
     if (r.recurrence === "yearly") return "Yearly";
     if (r.recurrence === "custom" && r.recurrenceInterval && r.recurrenceUnit) {
@@ -25648,6 +25698,7 @@ function ReminderApp({ initialData: initialData2 }) {
           recurrence: parsedSegment.recurrence,
           recurrenceInterval: parsedSegment.recurrenceInterval,
           recurrenceUnit: parsedSegment.recurrenceUnit,
+          recurrenceDays: parsedSegment.recurrenceDays,
           completed: false,
           createdAt: (/* @__PURE__ */ new Date()).toISOString(),
           pointsAwarded: 0
@@ -25672,6 +25723,7 @@ function ReminderApp({ initialData: initialData2 }) {
         recurrence: parsed.recurrence,
         recurrenceInterval: parsed.recurrenceInterval,
         recurrenceUnit: parsed.recurrenceUnit,
+        recurrenceDays: parsed.recurrenceDays,
         completed: false,
         createdAt: (/* @__PURE__ */ new Date()).toISOString(),
         pointsAwarded: 0

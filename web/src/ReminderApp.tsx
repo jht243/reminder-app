@@ -22,6 +22,7 @@ interface Reminder {
   recurrence: RecurrenceType;
   recurrenceInterval?: number; // e.g., 3 for "every 3 days"
   recurrenceUnit?: "days" | "weeks" | "months" | "years";
+  recurrenceDays?: number[]; // Specific days of week: 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
   completed: boolean;
   completedAt?: string;
   createdAt: string;
@@ -57,6 +58,7 @@ interface ParsedReminder {
   recurrence: RecurrenceType;
   recurrenceInterval?: number;
   recurrenceUnit?: "days" | "weeks" | "months" | "years";
+  recurrenceDays?: number[]; // Specific days of week: 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
   confidence: number;
 }
 
@@ -408,6 +410,32 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
   let recurrence: RecurrenceType = "none";
   let recurrenceInterval: number | undefined;
   let recurrenceUnit: "days" | "weeks" | "months" | "years" | undefined;
+  let recurrenceDays: number[] | undefined;
+  
+  // Day name to number mapping
+  const dayNameToNum: Record<string, number> = {
+    sunday: 0, sun: 0,
+    monday: 1, mon: 1,
+    tuesday: 2, tue: 2, tues: 2,
+    wednesday: 3, wed: 3,
+    thursday: 4, thu: 4, thur: 4, thurs: 4,
+    friday: 5, fri: 5,
+    saturday: 6, sat: 6
+  };
+  
+  // Helper to extract day numbers from text
+  const extractDays = (text: string): number[] => {
+    const days: number[] = [];
+    const dayPattern = /\b(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)\b/gi;
+    let match;
+    while ((match = dayPattern.exec(text)) !== null) {
+      const dayNum = dayNameToNum[match[1].toLowerCase()];
+      if (dayNum !== undefined && !days.includes(dayNum)) {
+        days.push(dayNum);
+      }
+    }
+    return days.sort((a, b) => a - b);
+  };
   
   // 1. Explicit custom intervals: "every X days/weeks/months/years"
   const customRecurrenceMatch = lower.match(/every\s+(\d+)\s+(day|days|week|weeks|month|months|year|years)/i);
@@ -432,12 +460,29 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
     confidence += 15;
   }
   // 2. Multi-day weekly patterns like "every tuesday and thursday" or "every mon, wed, fri"
-  else if (/\bevery\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)(\s*(,|and)\s*(sunday|monday|tuesday|wednesday|thursday|friday|saturday))+/i.test(lower)) {
-    recurrence = "weekly"; recurrenceInterval = 1; recurrenceUnit = "weeks"; confidence += 15;
+  else if (/\bevery\s+(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(\s*(,|and)\s*(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))+/i.test(lower)) {
+    recurrence = "weekly"; 
+    recurrenceInterval = 1; 
+    recurrenceUnit = "weeks";
+    // Extract specific days
+    const daysMatch = lower.match(/every\s+((?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(?:\s*(?:,|and)\s*(?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))*)/i);
+    if (daysMatch) {
+      recurrenceDays = extractDays(daysMatch[1]);
+    }
+    confidence += 15;
   }
   // 2b. "every monday/tuesday/etc" = weekly on that day (single day)
-  else if (/\bevery\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i.test(lower)) {
-    recurrence = "weekly"; recurrenceInterval = 1; recurrenceUnit = "weeks"; confidence += 15;
+  else if (/\bevery\s+(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)\b/i.test(lower)) {
+    recurrence = "weekly"; 
+    recurrenceInterval = 1; 
+    recurrenceUnit = "weeks";
+    // Extract the single day
+    const singleDayMatch = lower.match(/every\s+(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)\b/i);
+    if (singleDayMatch) {
+      const dayNum = dayNameToNum[singleDayMatch[1].toLowerCase()];
+      if (dayNum !== undefined) recurrenceDays = [dayNum];
+    }
+    confidence += 15;
   }
   // 3. Standard recurrence keywords
   else if (/\bevery\s*day\b|daily/i.test(lower)) { 
@@ -593,6 +638,7 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
     recurrence,
     recurrenceInterval,
     recurrenceUnit,
+    recurrenceDays,
     confidence: Math.min(confidence, 100)
   };
 };
@@ -1061,11 +1107,22 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   
   console.log("[Render] completedTaskCount:", completedTaskCount, "hint:", hint?.name);
   
+  // Day number to short name mapping
+  const dayNumToShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  
   // Helper to format recurrence for display
   const formatRecurrence = (r: Reminder | ParsedReminder): string => {
     if (r.recurrence === "none") return "";
     if (r.recurrence === "daily") return "Daily";
-    if (r.recurrence === "weekly") return "Weekly";
+    if (r.recurrence === "weekly") {
+      // If specific days are set, show them
+      if (r.recurrenceDays && r.recurrenceDays.length > 0) {
+        if (r.recurrenceDays.length === 7) return "Daily";
+        if (r.recurrenceDays.length === 1) return `Every ${dayNumToShort[r.recurrenceDays[0]]}`;
+        return r.recurrenceDays.map(d => dayNumToShort[d]).join(", ");
+      }
+      return "Weekly";
+    }
     if (r.recurrence === "monthly") return "Monthly";
     if (r.recurrence === "yearly") return "Yearly";
     if (r.recurrence === "custom" && r.recurrenceInterval && r.recurrenceUnit) {
@@ -1095,6 +1152,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
           recurrence: parsedSegment.recurrence,
           recurrenceInterval: parsedSegment.recurrenceInterval,
           recurrenceUnit: parsedSegment.recurrenceUnit,
+          recurrenceDays: parsedSegment.recurrenceDays,
           completed: false,
           createdAt: new Date().toISOString(),
           pointsAwarded: 0
@@ -1117,6 +1175,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
         recurrence: parsed.recurrence,
         recurrenceInterval: parsed.recurrenceInterval,
         recurrenceUnit: parsed.recurrenceUnit,
+        recurrenceDays: parsed.recurrenceDays,
         completed: false,
         createdAt: new Date().toISOString(),
         pointsAwarded: 0
