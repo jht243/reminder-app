@@ -450,7 +450,9 @@ const DEFAULT_ACHIEVEMENTS = [
 ];
 
 // Progression tasks - ordered sequence of onboarding tasks
+// First 5 = adding different types of reminders, then mark complete tasks
 const PROGRESSION_TASKS: Omit<ProgressionTask, 'completed'>[] = [
+  // === ADDING REMINDERS (Tasks 1-5) ===
   {
     id: "first_reminder",
     name: "Getting Started",
@@ -460,17 +462,9 @@ const PROGRESSION_TASKS: Omit<ProgressionTask, 'completed'>[] = [
     check: (reminders) => reminders.length >= 1
   },
   {
-    id: "first_complete",
-    name: "Task Master",
-    description: "Complete your first reminder",
-    icon: "✅",
-    points: 20,
-    check: (_, stats) => stats.completedAllTime >= 1
-  },
-  {
     id: "add_birthday",
     name: "Never Forget",
-    description: "Add a birthday reminder (type 'birthday')",
+    description: "Add a birthday reminder (include 'birthday' in title)",
     icon: "🎂",
     points: 15,
     check: (reminders) => reminders.some(r => /birthday/i.test(r.title))
@@ -478,66 +472,76 @@ const PROGRESSION_TASKS: Omit<ProgressionTask, 'completed'>[] = [
   {
     id: "add_work",
     name: "Stay Professional",
-    description: "Add a work reminder (meeting, deadline, etc.)",
+    description: "Add a work reminder (meeting, deadline, project)",
     icon: "💼",
     points: 15,
     check: (reminders) => reminders.some(r => r.category === "work")
   },
   {
-    id: "add_health",
-    name: "Health First",
-    description: "Add a health reminder (doctor, vitamins, etc.)",
-    icon: "💊",
-    points: 15,
-    check: (reminders) => reminders.some(r => r.category === "health")
-  },
-  {
-    id: "add_recurring",
-    name: "Habit Builder",
-    description: "Create a recurring reminder",
-    icon: "🔄",
-    points: 20,
-    check: (reminders) => reminders.some(r => r.recurrence !== "none")
-  },
-  {
-    id: "complete_3",
-    name: "On a Roll",
-    description: "Complete 3 reminders total",
-    icon: "🎳",
-    points: 25,
-    check: (_, stats) => stats.completedAllTime >= 3
-  },
-  {
     id: "add_family",
     name: "Family Matters",
-    description: "Add a family reminder (call mom, anniversary, etc.)",
+    description: "Add a family reminder (call mom, visit grandma)",
     icon: "👨‍👩‍👧",
     points: 15,
     check: (reminders) => reminders.some(r => r.category === "family")
   },
   {
-    id: "start_streak",
-    name: "Streak Starter",
-    description: "Build a 2-day streak",
-    icon: "🔥",
+    id: "add_recurring",
+    name: "Habit Builder",
+    description: "Add a recurring reminder (daily, weekly, etc.)",
+    icon: "🔄",
+    points: 20,
+    check: (reminders) => reminders.some(r => r.recurrence !== "none")
+  },
+  // === MARK COMPLETE TASKS (Tasks 6-8) ===
+  {
+    id: "first_complete",
+    name: "Task Master",
+    description: "Mark your first reminder as complete",
+    icon: "✅",
+    points: 20,
+    check: (_, stats) => stats.completedAllTime >= 1
+  },
+  {
+    id: "complete_3",
+    name: "On a Roll",
+    description: "Mark 3 reminders as complete",
+    icon: "🎳",
+    points: 25,
+    check: (_, stats) => stats.completedAllTime >= 3
+  },
+  {
+    id: "complete_5",
+    name: "High Five",
+    description: "Mark 5 reminders as complete",
+    icon: "🖐️",
     points: 30,
-    check: (_, stats) => stats.currentStreak >= 2 || stats.longestStreak >= 2
+    check: (_, stats) => stats.completedAllTime >= 5
+  },
+  // === ADVANCED TASKS (Tasks 9-12) ===
+  {
+    id: "add_health",
+    name: "Health First",
+    description: "Add a health reminder (doctor, vitamins, exercise)",
+    icon: "💊",
+    points: 15,
+    check: (reminders) => reminders.some(r => r.category === "health")
   },
   {
     id: "add_bill",
     name: "Bill Tracker",
-    description: "Add a bill/payment reminder (rent, utilities, etc.)",
+    description: "Add a bill/payment reminder (rent, utilities)",
     icon: "💰",
     points: 15,
     check: (reminders) => reminders.some(r => r.category === "finance" || /bill|rent|pay|mortgage|insurance/i.test(r.title))
   },
   {
-    id: "complete_10",
-    name: "Power User",
-    description: "Complete 10 reminders total",
-    icon: "⭐",
-    points: 50,
-    check: (_, stats) => stats.completedAllTime >= 10
+    id: "start_streak",
+    name: "Streak Starter",
+    description: "Build a 2-day streak by marking reminders complete daily",
+    icon: "🔥",
+    points: 30,
+    check: (_, stats) => stats.currentStreak >= 2 || stats.longestStreak >= 2
   },
   {
     id: "week_streak",
