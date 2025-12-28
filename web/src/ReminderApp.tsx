@@ -1647,7 +1647,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
         )}
       </div>
       
-      {/* Modern Quick Filter Chips - horizontal scrollable */}
+      {/* Modern Quick Filter Chips - with scroll arrows for PC */}
       <div style={{ 
         backgroundColor: COLORS.card, 
         borderRadius: cardRadius, 
@@ -1655,17 +1655,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
         marginBottom: 12, 
         boxShadow: cardShadow
       }}>
-        {/* Expandable search + filter chips row */}
-        <div style={{ 
-          display: "flex", 
-          gap: 8, 
-          alignItems: "center",
-          overflowX: "auto",
-          WebkitOverflowScrolling: "touch",
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-          paddingBottom: 2
-        }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           {/* Search icon/expanded input */}
           {searchExpanded ? (
             <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
@@ -1702,17 +1692,47 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
             <button
               onClick={() => setSearchExpanded(true)}
               style={{
-                width: 36, height: 36, borderRadius: "50%",
+                width: 32, height: 32, borderRadius: "50%",
                 border: "none", backgroundColor: COLORS.cardAlt,
                 cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
                 flexShrink: 0
               }}
             >
-              <Search size={16} color={COLORS.textMuted} />
+              <Search size={14} color={COLORS.textMuted} />
             </button>
           )}
           
-          {/* Quick filter chips */}
+          {/* Left scroll arrow */}
+          <button
+            onClick={() => {
+              const container = document.getElementById("filter-chips-scroll");
+              if (container) container.scrollBy({ left: -150, behavior: "smooth" });
+            }}
+            style={{
+              width: 28, height: 28, borderRadius: "50%",
+              border: "none", backgroundColor: COLORS.cardAlt,
+              cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0
+            }}
+          >
+            <ChevronRight size={14} color={COLORS.textMuted} style={{ transform: "rotate(180deg)" }} />
+          </button>
+          
+          {/* Scrollable filter chips */}
+          <div 
+            id="filter-chips-scroll"
+            style={{ 
+              display: "flex", 
+              gap: 6, 
+              alignItems: "center",
+              overflowX: "auto",
+              flex: 1,
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+              padding: "2px 0"
+            }}
+          >
+            {/* Quick filter chips */}
           {QUICK_FILTERS.map(filter => {
             const isActive = quickFilter === filter.id;
             const count = filter.id === "all" 
@@ -1764,6 +1784,23 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
               </button>
             );
           })}
+          </div>
+          
+          {/* Right scroll arrow */}
+          <button
+            onClick={() => {
+              const container = document.getElementById("filter-chips-scroll");
+              if (container) container.scrollBy({ left: 150, behavior: "smooth" });
+            }}
+            style={{
+              width: 28, height: 28, borderRadius: "50%",
+              border: "none", backgroundColor: COLORS.cardAlt,
+              cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0
+            }}
+          >
+            <ChevronRight size={14} color={COLORS.textMuted} />
+          </button>
         </div>
       </div>
       

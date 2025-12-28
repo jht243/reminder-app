@@ -26221,16 +26221,7 @@ function ReminderApp({ initialData: initialData2 }) {
       padding: "10px 12px",
       marginBottom: 12,
       boxShadow: cardShadow
-    }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
-      display: "flex",
-      gap: 8,
-      alignItems: "center",
-      overflowX: "auto",
-      WebkitOverflowScrolling: "touch",
-      scrollbarWidth: "none",
-      msOverflowStyle: "none",
-      paddingBottom: 2
-    }, children: [
+    }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6 }, children: [
       searchExpanded ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
           "input",
@@ -26281,8 +26272,8 @@ function ReminderApp({ initialData: initialData2 }) {
         {
           onClick: () => setSearchExpanded(true),
           style: {
-            width: 36,
-            height: 36,
+            width: 32,
+            height: 32,
             borderRadius: "50%",
             border: "none",
             backgroundColor: COLORS.cardAlt,
@@ -26292,49 +26283,109 @@ function ReminderApp({ initialData: initialData2 }) {
             justifyContent: "center",
             flexShrink: 0
           },
-          children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { size: 16, color: COLORS.textMuted })
+          children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { size: 14, color: COLORS.textMuted })
         }
       ),
-      QUICK_FILTERS.map((filter) => {
-        const isActive = quickFilter === filter.id;
-        const count = filter.id === "all" ? reminders.filter((r) => !r.completed).length : filter.id === "urgent" ? reminders.filter((r) => !r.completed && r.priority === "urgent").length : filter.id === "today" ? todayCount : filter.id === "overdue" ? overdueCount : reminders.filter((r) => !r.completed && r.category === filter.id).length;
-        return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-          "button",
-          {
-            onClick: () => setQuickFilter(filter.id),
-            style: {
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "8px 14px",
-              borderRadius: 50,
-              border: isActive ? `2px solid ${filter.color}` : "2px solid transparent",
-              backgroundColor: isActive ? filter.bg : COLORS.cardAlt,
-              color: isActive ? filter.color : COLORS.textSecondary,
-              fontSize: 13,
-              fontWeight: isActive ? 600 : 500,
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              flexShrink: 0,
-              transition: "all 0.2s"
-            },
-            children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14 }, children: filter.emoji }),
-              filter.label,
-              count > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: {
-                fontSize: 11,
-                backgroundColor: isActive ? filter.color : COLORS.textMuted,
-                color: "#fff",
-                padding: "2px 6px",
-                borderRadius: 50,
-                minWidth: 18,
-                textAlign: "center"
-              }, children: count })
-            ]
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "button",
+        {
+          onClick: () => {
+            const container2 = document.getElementById("filter-chips-scroll");
+            if (container2) container2.scrollBy({ left: -150, behavior: "smooth" });
           },
-          filter.id
-        );
-      })
+          style: {
+            width: 28,
+            height: 28,
+            borderRadius: "50%",
+            border: "none",
+            backgroundColor: COLORS.cardAlt,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0
+          },
+          children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { size: 14, color: COLORS.textMuted, style: { transform: "rotate(180deg)" } })
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "div",
+        {
+          id: "filter-chips-scroll",
+          style: {
+            display: "flex",
+            gap: 6,
+            alignItems: "center",
+            overflowX: "auto",
+            flex: 1,
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+            padding: "2px 0"
+          },
+          children: QUICK_FILTERS.map((filter) => {
+            const isActive = quickFilter === filter.id;
+            const count = filter.id === "all" ? reminders.filter((r) => !r.completed).length : filter.id === "urgent" ? reminders.filter((r) => !r.completed && r.priority === "urgent").length : filter.id === "today" ? todayCount : filter.id === "overdue" ? overdueCount : reminders.filter((r) => !r.completed && r.category === filter.id).length;
+            return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+              "button",
+              {
+                onClick: () => setQuickFilter(filter.id),
+                style: {
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 14px",
+                  borderRadius: 50,
+                  border: isActive ? `2px solid ${filter.color}` : "2px solid transparent",
+                  backgroundColor: isActive ? filter.bg : COLORS.cardAlt,
+                  color: isActive ? filter.color : COLORS.textSecondary,
+                  fontSize: 13,
+                  fontWeight: isActive ? 600 : 500,
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
+                  transition: "all 0.2s"
+                },
+                children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14 }, children: filter.emoji }),
+                  filter.label,
+                  count > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: {
+                    fontSize: 11,
+                    backgroundColor: isActive ? filter.color : COLORS.textMuted,
+                    color: "#fff",
+                    padding: "2px 6px",
+                    borderRadius: 50,
+                    minWidth: 18,
+                    textAlign: "center"
+                  }, children: count })
+                ]
+              },
+              filter.id
+            );
+          })
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "button",
+        {
+          onClick: () => {
+            const container2 = document.getElementById("filter-chips-scroll");
+            if (container2) container2.scrollBy({ left: 150, behavior: "smooth" });
+          },
+          style: {
+            width: 28,
+            height: 28,
+            borderRadius: "50%",
+            border: "none",
+            backgroundColor: COLORS.cardAlt,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0
+          },
+          children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { size: 14, color: COLORS.textMuted })
+        }
+      )
     ] }) }),
     filtered.filter((r) => !r.completed).length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: cardRadius, boxShadow: cardShadow, textAlign: "center", padding: 48, color: COLORS.textMuted }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
