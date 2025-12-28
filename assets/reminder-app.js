@@ -24716,39 +24716,31 @@ var __iconNode18 = [
 ];
 var Stethoscope = createLucideIcon("stethoscope", __iconNode18);
 
-// node_modules/lucide-react/dist/esm/icons/timer.js
-var __iconNode19 = [
-  ["line", { x1: "10", x2: "14", y1: "2", y2: "2", key: "14vaq8" }],
-  ["line", { x1: "12", x2: "15", y1: "14", y2: "11", key: "17fdiu" }],
-  ["circle", { cx: "12", cy: "14", r: "8", key: "1e1u0o" }]
-];
-var Timer = createLucideIcon("timer", __iconNode19);
-
 // node_modules/lucide-react/dist/esm/icons/trash-2.js
-var __iconNode20 = [
+var __iconNode19 = [
   ["path", { d: "M10 11v6", key: "nco0om" }],
   ["path", { d: "M14 11v6", key: "outv1u" }],
   ["path", { d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6", key: "miytrc" }],
   ["path", { d: "M3 6h18", key: "d0wm0j" }],
   ["path", { d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2", key: "e791ji" }]
 ];
-var Trash2 = createLucideIcon("trash-2", __iconNode20);
+var Trash2 = createLucideIcon("trash-2", __iconNode19);
 
 // node_modules/lucide-react/dist/esm/icons/users.js
-var __iconNode21 = [
+var __iconNode20 = [
   ["path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", key: "1yyitq" }],
   ["path", { d: "M16 3.128a4 4 0 0 1 0 7.744", key: "16gr8j" }],
   ["path", { d: "M22 21v-2a4 4 0 0 0-3-3.87", key: "kshegd" }],
   ["circle", { cx: "9", cy: "7", r: "4", key: "nufk8" }]
 ];
-var Users = createLucideIcon("users", __iconNode21);
+var Users = createLucideIcon("users", __iconNode20);
 
 // node_modules/lucide-react/dist/esm/icons/x.js
-var __iconNode22 = [
+var __iconNode21 = [
   ["path", { d: "M18 6 6 18", key: "1bl5f8" }],
   ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
 ];
-var X = createLucideIcon("x", __iconNode22);
+var X = createLucideIcon("x", __iconNode21);
 
 // src/ReminderApp.tsx
 var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
@@ -25279,11 +25271,26 @@ function ReminderApp({ initialData: initialData2 }) {
     const updated = { ...r, completed: true, completedAt: (/* @__PURE__ */ new Date()).toISOString(), pointsAwarded: pts };
     if (r.recurrence !== "none") {
       const next = new Date(r.dueDate);
+      const interval = r.recurrenceInterval || 1;
       if (r.recurrence === "daily") next.setDate(next.getDate() + 1);
       else if (r.recurrence === "weekly") next.setDate(next.getDate() + 7);
       else if (r.recurrence === "monthly") next.setMonth(next.getMonth() + 1);
-      const newR = { ...r, id: generateId(), dueDate: next.toISOString().split("T")[0], completed: false, completedAt: void 0, createdAt: (/* @__PURE__ */ new Date()).toISOString(), pointsAwarded: 0 };
-      setReminders((prev) => [...prev.map((x) => x.id === r.id ? updated : x), newR]);
+      else if (r.recurrence === "yearly") next.setFullYear(next.getFullYear() + 1);
+      else if (r.recurrence === "custom" && r.recurrenceUnit) {
+        if (r.recurrenceUnit === "days") next.setDate(next.getDate() + interval);
+        else if (r.recurrenceUnit === "weeks") next.setDate(next.getDate() + interval * 7);
+        else if (r.recurrenceUnit === "months") next.setMonth(next.getMonth() + interval);
+        else if (r.recurrenceUnit === "years") next.setFullYear(next.getFullYear() + interval);
+      }
+      const nextDateStr = next.toISOString().split("T")[0];
+      const shouldCreateNext = !r.endDate || nextDateStr <= r.endDate;
+      if (shouldCreateNext) {
+        const newR = { ...r, id: generateId(), dueDate: nextDateStr, completed: false, completedAt: void 0, createdAt: (/* @__PURE__ */ new Date()).toISOString(), pointsAwarded: 0 };
+        setReminders((prev) => [...prev.map((x) => x.id === r.id ? updated : x), newR]);
+      } else {
+        setReminders((prev) => prev.map((x) => x.id === r.id ? updated : x));
+        setToast("Recurring series complete!");
+      }
     } else {
       setReminders((prev) => prev.map((x) => x.id === r.id ? updated : x));
     }
@@ -25322,11 +25329,14 @@ function ReminderApp({ initialData: initialData2 }) {
     setReminders((prev) => prev.map((x) => x.id === r.id ? { ...r, completed: false, completedAt: void 0 } : x));
     setStats((s) => ({ ...s, totalPoints: Math.max(0, s.totalPoints - r.pointsAwarded), completedAllTime: Math.max(0, s.completedAllTime - 1) }));
   };
+  const [snoozingId, setSnoozingId] = (0, import_react3.useState)(null);
   const snooze = (r, mins) => {
+    setSnoozingId(r.id);
     const d = /* @__PURE__ */ new Date();
     d.setMinutes(d.getMinutes() + mins);
     setReminders((prev) => prev.map((x) => x.id === r.id ? { ...r, dueDate: d.toISOString().split("T")[0], dueTime: `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}` } : x));
-    setToast(`Snoozed ${mins}m`);
+    setToast(`\u{1F4A4} Snoozed for ${mins} minutes`);
+    setTimeout(() => setSnoozingId(null), 500);
   };
   const del = (id) => {
     setReminders((prev) => prev.filter((r) => r.id !== id));
@@ -25475,12 +25485,32 @@ function ReminderApp({ initialData: initialData2 }) {
         ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 6 }, children: [
-        !r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => snooze(r, 15), title: "Snooze 15min", style: { width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Timer, { size: 16, color: COLORS.textMuted }) }),
+        !r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "button",
+          {
+            onClick: () => snooze(r, 15),
+            title: "Snooze 15 minutes",
+            style: {
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              border: "none",
+              backgroundColor: snoozingId === r.id ? COLORS.primaryLight : COLORS.inputBg,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "all 0.2s ease",
+              transform: snoozingId === r.id ? "scale(0.9)" : "scale(1)"
+            },
+            children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14, fontWeight: 600, color: snoozingId === r.id ? "#fff" : COLORS.textMuted }, children: "\u{1F4A4}" })
+          }
+        ),
         !r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setEditing(r), title: "Edit", style: { width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { size: 16, color: COLORS.textMuted }) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => del(r.id), title: "Delete", style: { width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { size: 16, color: COLORS.danger }) })
       ] })
     ] }) }, r.id)) }),
-    editing && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 16, width: "100%", maxWidth: 400, padding: 20 }, children: [
+    editing && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16, overflowY: "auto" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 16, width: "100%", maxWidth: 420, padding: 20, maxHeight: "90vh", overflowY: "auto" }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { style: { margin: 0, fontSize: 18, fontWeight: 700, color: COLORS.textMain }, children: "Edit Reminder" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setEditing(null), style: { width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 18 }) })
@@ -25488,16 +25518,6 @@ function ReminderApp({ initialData: initialData2 }) {
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginBottom: 14 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }, children: "Title" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "text", value: editing.title, onChange: (e) => setEditing({ ...editing, title: e.target.value }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 } })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }, children: "Date" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "date", value: editing.dueDate, onChange: (e) => setEditing({ ...editing, dueDate: e.target.value }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 } })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }, children: "Time" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "time", value: editing.dueTime || "", onChange: (e) => setEditing({ ...editing, dueTime: e.target.value || void 0 }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 } })
-        ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
@@ -25514,14 +25534,94 @@ function ReminderApp({ initialData: initialData2 }) {
           ] })
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginBottom: 18 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }, children: "Repeat" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { value: editing.recurrence, onChange: (e) => setEditing({ ...editing, recurrence: e.target.value }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "none", children: "One-time" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "daily", children: "Daily" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "weekly", children: "Weekly" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "monthly", children: "Monthly" })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginBottom: 14, padding: 14, backgroundColor: COLORS.accentLight, borderRadius: 10 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.primary, display: "block", marginBottom: 10 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Repeat, { size: 14, style: { marginRight: 6, verticalAlign: "middle" } }),
+          "Repeat Settings"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginBottom: 12 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, color: COLORS.textSecondary, display: "block", marginBottom: 4 }, children: "Frequency" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+            "select",
+            {
+              value: editing.recurrence === "custom" ? "custom" : editing.recurrence,
+              onChange: (e) => {
+                const val = e.target.value;
+                if (val === "custom") {
+                  setEditing({ ...editing, recurrence: "custom", recurrenceInterval: editing.recurrenceInterval || 2, recurrenceUnit: editing.recurrenceUnit || "days" });
+                } else {
+                  setEditing({ ...editing, recurrence: val, recurrenceInterval: void 0, recurrenceUnit: void 0 });
+                }
+              },
+              style: { ...inputStyle, width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card },
+              children: [
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "none", children: "One-time (no repeat)" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "daily", children: "Daily" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "weekly", children: "Weekly" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "monthly", children: "Monthly" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "yearly", children: "Yearly" }),
+                /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "custom", children: "Custom interval..." })
+              ]
+            }
+          )
+        ] }),
+        editing.recurrence === "custom" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, color: COLORS.textSecondary, display: "block", marginBottom: 4 }, children: "Every" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              "input",
+              {
+                type: "number",
+                min: "1",
+                max: "365",
+                value: editing.recurrenceInterval || 2,
+                onChange: (e) => setEditing({ ...editing, recurrenceInterval: parseInt(e.target.value) || 1 }),
+                style: { ...inputStyle, width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card }
+              }
+            )
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, color: COLORS.textSecondary, display: "block", marginBottom: 4 }, children: "Unit" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+              "select",
+              {
+                value: editing.recurrenceUnit || "days",
+                onChange: (e) => setEditing({ ...editing, recurrenceUnit: e.target.value }),
+                style: { ...inputStyle, width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card },
+                children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "days", children: "Days" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "weeks", children: "Weeks" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "months", children: "Months" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "years", children: "Years" })
+                ]
+              }
+            )
+          ] })
+        ] }),
+        editing.recurrence !== "none" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, color: COLORS.textSecondary, display: "block", marginBottom: 4 }, children: "Start Date" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "date", value: editing.dueDate, onChange: (e) => setEditing({ ...editing, dueDate: e.target.value }), style: { ...inputStyle, width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card } })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, color: COLORS.textSecondary, display: "block", marginBottom: 4 }, children: "End Date (optional)" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "date", value: editing.endDate || "", onChange: (e) => setEditing({ ...editing, endDate: e.target.value || void 0 }), style: { ...inputStyle, width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card } })
+          ] })
         ] })
+      ] }),
+      editing.recurrence === "none" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }, children: "Date" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "date", value: editing.dueDate, onChange: (e) => setEditing({ ...editing, dueDate: e.target.value }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 } })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }, children: "Time" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "time", value: editing.dueTime || "", onChange: (e) => setEditing({ ...editing, dueTime: e.target.value || void 0 }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 } })
+        ] })
+      ] }),
+      editing.recurrence !== "none" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginBottom: 14 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }, children: "Reminder Time" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "time", value: editing.dueTime || "", onChange: (e) => setEditing({ ...editing, dueTime: e.target.value || void 0 }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 } })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 12 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setEditing(null), style: { flex: 1, padding: 14, borderRadius: 10, border: `1px solid ${COLORS.border}`, backgroundColor: COLORS.card, fontSize: 15, fontWeight: 600, cursor: "pointer" }, children: "Cancel" }),
@@ -25867,14 +25967,6 @@ lucide-react/dist/esm/icons/star.js:
    *)
 
 lucide-react/dist/esm/icons/stethoscope.js:
-  (**
-   * @license lucide-react v0.554.0 - ISC
-   *
-   * This source code is licensed under the ISC license.
-   * See the LICENSE file in the root directory of this source tree.
-   *)
-
-lucide-react/dist/esm/icons/timer.js:
   (**
    * @license lucide-react v0.554.0 - ISC
    *

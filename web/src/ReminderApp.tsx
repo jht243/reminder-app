@@ -14,8 +14,9 @@ interface Reminder {
   id: string;
   title: string;
   description?: string;
-  dueDate: string;
+  dueDate: string; // Start date for recurring reminders
   dueTime?: string;
+  endDate?: string; // End date for recurring reminders (optional)
   priority: Priority;
   category: Category;
   recurrence: RecurrenceType;
@@ -658,11 +659,30 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     
     if (r.recurrence !== "none") {
       const next = new Date(r.dueDate);
+      const interval = r.recurrenceInterval || 1;
+      
       if (r.recurrence === "daily") next.setDate(next.getDate() + 1);
       else if (r.recurrence === "weekly") next.setDate(next.getDate() + 7);
       else if (r.recurrence === "monthly") next.setMonth(next.getMonth() + 1);
-      const newR: Reminder = { ...r, id: generateId(), dueDate: next.toISOString().split("T")[0], completed: false, completedAt: undefined, createdAt: new Date().toISOString(), pointsAwarded: 0 };
-      setReminders(prev => [...prev.map(x => x.id === r.id ? updated : x), newR]);
+      else if (r.recurrence === "yearly") next.setFullYear(next.getFullYear() + 1);
+      else if (r.recurrence === "custom" && r.recurrenceUnit) {
+        if (r.recurrenceUnit === "days") next.setDate(next.getDate() + interval);
+        else if (r.recurrenceUnit === "weeks") next.setDate(next.getDate() + interval * 7);
+        else if (r.recurrenceUnit === "months") next.setMonth(next.getMonth() + interval);
+        else if (r.recurrenceUnit === "years") next.setFullYear(next.getFullYear() + interval);
+      }
+      
+      // Check if next date is past end date
+      const nextDateStr = next.toISOString().split("T")[0];
+      const shouldCreateNext = !r.endDate || nextDateStr <= r.endDate;
+      
+      if (shouldCreateNext) {
+        const newR: Reminder = { ...r, id: generateId(), dueDate: nextDateStr, completed: false, completedAt: undefined, createdAt: new Date().toISOString(), pointsAwarded: 0 };
+        setReminders(prev => [...prev.map(x => x.id === r.id ? updated : x), newR]);
+      } else {
+        setReminders(prev => prev.map(x => x.id === r.id ? updated : x));
+        setToast("Recurring series complete!");
+      }
     } else {
       setReminders(prev => prev.map(x => x.id === r.id ? updated : x));
     }
@@ -685,10 +705,14 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     setStats(s => ({ ...s, totalPoints: Math.max(0, s.totalPoints - r.pointsAwarded), completedAllTime: Math.max(0, s.completedAllTime - 1) }));
   };
   
+  const [snoozingId, setSnoozingId] = useState<string | null>(null);
+  
   const snooze = (r: Reminder, mins: number) => {
+    setSnoozingId(r.id);
     const d = new Date(); d.setMinutes(d.getMinutes() + mins);
     setReminders(prev => prev.map(x => x.id === r.id ? { ...r, dueDate: d.toISOString().split("T")[0], dueTime: `${d.getHours().toString().padStart(2,"0")}:${d.getMinutes().toString().padStart(2,"0")}` } : x));
-    setToast(`Snoozed ${mins}m`);
+    setToast(`💤 Snoozed for ${mins} minutes`);
+    setTimeout(() => setSnoozingId(null), 500);
   };
   
   const del = (id: string) => { setReminders(prev => prev.filter(r => r.id !== id)); setToast("Deleted"); };
@@ -813,7 +837,21 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
                 </div>
               </div>
               <div style={{ display: "flex", gap: 6 }}>
-                {!r.completed && <button onClick={() => snooze(r, 15)} title="Snooze 15min" style={{ width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><Timer size={16} color={COLORS.textMuted} /></button>}
+                {!r.completed && (
+                  <button 
+                    onClick={() => snooze(r, 15)} 
+                    title="Snooze 15 minutes" 
+                    style={{ 
+                      width: 32, height: 32, borderRadius: 8, border: "none", 
+                      backgroundColor: snoozingId === r.id ? COLORS.primaryLight : COLORS.inputBg, 
+                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                      transition: "all 0.2s ease",
+                      transform: snoozingId === r.id ? "scale(0.9)" : "scale(1)"
+                    }}
+                  >
+                    <span style={{ fontSize: 14, fontWeight: 600, color: snoozingId === r.id ? "#fff" : COLORS.textMuted }}>💤</span>
+                  </button>
+                )}
                 {!r.completed && <button onClick={() => setEditing(r)} title="Edit" style={{ width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><Edit2 size={16} color={COLORS.textMuted} /></button>}
                 <button onClick={() => del(r.id)} title="Delete" style={{ width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><Trash2 size={16} color={COLORS.danger} /></button>
               </div>
@@ -824,8 +862,8 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       
       {/* Edit Modal */}
       {editing && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16 }}>
-          <div style={{ backgroundColor: COLORS.card, borderRadius: 16, width: "100%", maxWidth: 400, padding: 20 }}>
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16, overflowY: "auto" }}>
+          <div style={{ backgroundColor: COLORS.card, borderRadius: 16, width: "100%", maxWidth: 420, padding: 20, maxHeight: "90vh", overflowY: "auto" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: COLORS.textMain }}>Edit Reminder</h2>
               <button onClick={() => setEditing(null)} style={{ width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><X size={18} /></button>
@@ -834,17 +872,6 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
             <div style={{ marginBottom: 14 }}>
               <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }}>Title</label>
               <input type="text" value={editing.title} onChange={e => setEditing({ ...editing, title: e.target.value })} style={{ ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 }} />
-            </div>
-            
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
-              <div>
-                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }}>Date</label>
-                <input type="date" value={editing.dueDate} onChange={e => setEditing({ ...editing, dueDate: e.target.value })} style={{ ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 }} />
-              </div>
-              <div>
-                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }}>Time</label>
-                <input type="time" value={editing.dueTime || ""} onChange={e => setEditing({ ...editing, dueTime: e.target.value || undefined })} style={{ ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 }} />
-              </div>
             </div>
             
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
@@ -858,10 +885,102 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
               </div>
             </div>
             
-            <div style={{ marginBottom: 18 }}>
-              <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }}>Repeat</label>
-              <select value={editing.recurrence} onChange={e => setEditing({ ...editing, recurrence: e.target.value as RecurrenceType })} style={{ ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 }}><option value="none">One-time</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select>
+            {/* Recurrence Section */}
+            <div style={{ marginBottom: 14, padding: 14, backgroundColor: COLORS.accentLight, borderRadius: 10 }}>
+              <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.primary, display: "block", marginBottom: 10 }}>
+                <Repeat size={14} style={{ marginRight: 6, verticalAlign: "middle" }} />
+                Repeat Settings
+              </label>
+              
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ fontSize: 12, color: COLORS.textSecondary, display: "block", marginBottom: 4 }}>Frequency</label>
+                <select 
+                  value={editing.recurrence === "custom" ? "custom" : editing.recurrence} 
+                  onChange={e => {
+                    const val = e.target.value as RecurrenceType;
+                    if (val === "custom") {
+                      setEditing({ ...editing, recurrence: "custom", recurrenceInterval: editing.recurrenceInterval || 2, recurrenceUnit: editing.recurrenceUnit || "days" });
+                    } else {
+                      setEditing({ ...editing, recurrence: val, recurrenceInterval: undefined, recurrenceUnit: undefined });
+                    }
+                  }} 
+                  style={{ ...inputStyle, width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card }}
+                >
+                  <option value="none">One-time (no repeat)</option>
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                  <option value="custom">Custom interval...</option>
+                </select>
+              </div>
+              
+              {/* Custom interval options */}
+              {editing.recurrence === "custom" && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
+                  <div>
+                    <label style={{ fontSize: 12, color: COLORS.textSecondary, display: "block", marginBottom: 4 }}>Every</label>
+                    <input 
+                      type="number" 
+                      min="1" 
+                      max="365"
+                      value={editing.recurrenceInterval || 2} 
+                      onChange={e => setEditing({ ...editing, recurrenceInterval: parseInt(e.target.value) || 1 })} 
+                      style={{ ...inputStyle, width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card }} 
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 12, color: COLORS.textSecondary, display: "block", marginBottom: 4 }}>Unit</label>
+                    <select 
+                      value={editing.recurrenceUnit || "days"} 
+                      onChange={e => setEditing({ ...editing, recurrenceUnit: e.target.value as any })} 
+                      style={{ ...inputStyle, width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card }}
+                    >
+                      <option value="days">Days</option>
+                      <option value="weeks">Weeks</option>
+                      <option value="months">Months</option>
+                      <option value="years">Years</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+              
+              {/* Start and End Date for recurring */}
+              {editing.recurrence !== "none" && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div>
+                    <label style={{ fontSize: 12, color: COLORS.textSecondary, display: "block", marginBottom: 4 }}>Start Date</label>
+                    <input type="date" value={editing.dueDate} onChange={e => setEditing({ ...editing, dueDate: e.target.value })} style={{ ...inputStyle, width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card }} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 12, color: COLORS.textSecondary, display: "block", marginBottom: 4 }}>End Date (optional)</label>
+                    <input type="date" value={editing.endDate || ""} onChange={e => setEditing({ ...editing, endDate: e.target.value || undefined })} style={{ ...inputStyle, width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card }} />
+                  </div>
+                </div>
+              )}
             </div>
+            
+            {/* Date/Time for one-time reminders */}
+            {editing.recurrence === "none" && (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+                <div>
+                  <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }}>Date</label>
+                  <input type="date" value={editing.dueDate} onChange={e => setEditing({ ...editing, dueDate: e.target.value })} style={{ ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }}>Time</label>
+                  <input type="time" value={editing.dueTime || ""} onChange={e => setEditing({ ...editing, dueTime: e.target.value || undefined })} style={{ ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 }} />
+                </div>
+              </div>
+            )}
+            
+            {/* Time for recurring reminders */}
+            {editing.recurrence !== "none" && (
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }}>Reminder Time</label>
+                <input type="time" value={editing.dueTime || ""} onChange={e => setEditing({ ...editing, dueTime: e.target.value || undefined })} style={{ ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 }} />
+              </div>
+            )}
             
             <div style={{ display: "flex", gap: 12 }}>
               <button onClick={() => setEditing(null)} style={{ flex: 1, padding: 14, borderRadius: 10, border: `1px solid ${COLORS.border}`, backgroundColor: COLORS.card, fontSize: 15, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
