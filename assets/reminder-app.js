@@ -26548,6 +26548,98 @@ function ReminderApp({ initialData: initialData2 }) {
         ] }) }, r.id))
       ] }, sectionKey);
     }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
+      marginTop: 24,
+      padding: "16px 20px",
+      backgroundColor: COLORS.card,
+      borderRadius: cardRadius,
+      boxShadow: cardShadow,
+      display: "flex",
+      flexWrap: "wrap",
+      gap: 10,
+      justifyContent: "center"
+    }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "button",
+        {
+          onClick: () => window.print(),
+          style: {
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "10px 16px",
+            borderRadius: 50,
+            backgroundColor: COLORS.cardAlt,
+            color: COLORS.textSecondary,
+            fontSize: 13,
+            fontWeight: 500,
+            cursor: "pointer",
+            border: `1px solid ${COLORS.border}`
+          },
+          children: "\u{1F5A8}\uFE0F Print"
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "button",
+        {
+          onClick: resetProgress,
+          style: {
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "10px 16px",
+            borderRadius: 50,
+            backgroundColor: COLORS.cardAlt,
+            color: COLORS.textSecondary,
+            fontSize: 13,
+            fontWeight: 500,
+            cursor: "pointer",
+            border: `1px solid ${COLORS.border}`
+          },
+          children: "\u{1F504} Reset"
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "button",
+        {
+          onClick: () => window.open("https://buymeacoffee.com/jhteplitsky", "_blank"),
+          style: {
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "10px 16px",
+            borderRadius: 50,
+            backgroundColor: "#FFDD00",
+            color: "#000",
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: "pointer",
+            border: "none"
+          },
+          children: "\u2615 Donate"
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "button",
+        {
+          onClick: () => window.open("mailto:jonathan@teplitsky.com?subject=Reminder%20App%20Feedback", "_blank"),
+          style: {
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "10px 16px",
+            borderRadius: 50,
+            backgroundColor: COLORS.cardAlt,
+            color: COLORS.textSecondary,
+            fontSize: 13,
+            fontWeight: 500,
+            cursor: "pointer",
+            border: `1px solid ${COLORS.border}`
+          },
+          children: "\u{1F4AC} Feedback"
+        }
+      )
+    ] }),
     snoozePopup && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 24, width: "100%", maxWidth: 320, padding: 28, textAlign: "center", boxShadow: "0 16px 48px rgba(0,0,0,0.15)" }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
         width: 64,
