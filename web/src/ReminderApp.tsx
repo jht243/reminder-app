@@ -491,7 +491,7 @@ const PROGRESSION_TASKS: Omit<ProgressionTask, 'completed'>[] = [
   },
   {
     id: "add_birthday",
-    name: "Never Forget",
+    name: "Birthday Tracker",
     description: "Add a birthday reminder (include 'birthday' in title)",
     icon: "🎂",
     points: 15,

@@ -25102,7 +25102,7 @@ var PROGRESSION_TASKS = [
   },
   {
     id: "add_birthday",
-    name: "Never Forget",
+    name: "Birthday Tracker",
     description: "Add a birthday reminder (include 'birthday' in title)",
     icon: "\u{1F382}",
     points: 15,
