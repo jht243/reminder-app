@@ -1587,15 +1587,136 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       {/* Import Modal */}
       {importOpen && (
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1100, padding: 16 }}>
-          <div style={{ backgroundColor: COLORS.card, borderRadius: 24, width: "100%", maxWidth: 480, padding: 24, boxShadow: "0 16px 48px rgba(0,0,0,0.15)", maxHeight: "90vh", overflowY: "auto" }}>
+          <div style={{ backgroundColor: COLORS.card, borderRadius: 24, width: "100%", maxWidth: 520, padding: 24, boxShadow: "0 16px 48px rgba(0,0,0,0.15)", maxHeight: "90vh", overflowY: "auto" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: COLORS.textMain }}>Import Reminders</h2>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: COLORS.textMain }}>Import from AI</h2>
               <button onClick={() => setImportOpen(false)} style={{ width: 36, height: 36, borderRadius: "50%", border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><X size={18} color={COLORS.textMuted} /></button>
             </div>
             
-            <p style={{ margin: "0 0 20px", fontSize: 14, color: COLORS.textSecondary, lineHeight: 1.5 }}>
-              Drag and drop an <b>.ics</b> (iCalendar) or <b>.csv</b> (Excel) file to import your reminders from other apps like Google Calendar, Outlook, or Apple Reminders.
+            <p style={{ margin: "0 0 16px", fontSize: 14, color: COLORS.textSecondary, lineHeight: 1.5 }}>
+              Ask ChatGPT to <b>"generate a study plan as an ICS code block"</b>, OR just paste a list of tasks directly here (e.g. "Buy milk tomorrow").
             </p>
+
+            {/* Magic Paste Area */}
+            <div style={{ position: "relative", marginBottom: 20 }}>
+              <textarea
+                placeholder={`BEGIN:VCALENDAR
+BEGIN:VEVENT
+...
+OR just paste a list:
+- Buy milk tomorrow
+- Call mom at 5pm
+- Submit report next Friday`}
+                style={{
+                  width: "100%",
+                  height: 160,
+                  padding: 16,
+                  borderRadius: 16,
+                  border: `2px solid ${COLORS.border}`,
+                  backgroundColor: COLORS.inputBg,
+                  fontSize: 13,
+                  fontFamily: "monospace",
+                  resize: "none",
+                  outline: "none",
+                  ...inputStyle
+                }}
+                onChange={(e) => {
+                  const content = e.target.value;
+                  if (content.length > 10) {
+                    // Auto-detect and parse
+                    let count = 0;
+                    if (content.includes("BEGIN:VCALENDAR")) {
+                      count = parseICS(content).length;
+                    } else if (content.includes(",") && content.split("\n")[0].includes(",")) {
+                      count = parseCSV(content).length;
+                    } else {
+                      // Count non-empty lines for natural language
+                      count = content.split(/\r\n|\n|\r/).filter(l => l.trim().length > 2).length;
+                    }
+                    
+                    if (count > 0) {
+                      setToast(`Ready to import ${count} tasks...`);
+                    }
+                  }
+                }}
+                id="magic-paste"
+              />
+              <div style={{ position: "absolute", bottom: 12, right: 12, display: "flex", gap: 8 }}>
+                 <button
+                  onClick={() => {
+                    const content = (document.getElementById("magic-paste") as HTMLTextAreaElement).value;
+                    let imported: Partial<Reminder>[] = [];
+                    
+                    if (content.includes("BEGIN:VCALENDAR")) {
+                      imported = parseICS(content);
+                    } else if (content.includes(",") && content.split("\n")[0].includes(",")) {
+                      imported = parseCSV(content);
+                    } else {
+                      // Bulk Natural Language parsing
+                      const lines = content.split(/\r\n|\n|\r/).filter(l => l.trim().length > 2);
+                      imported = lines.map(line => {
+                        // Remove bullet points if present
+                        const cleanLine = line.replace(/^[-*•]\s*/, "").trim();
+                        const parsed = parseNaturalLanguage(cleanLine);
+                        
+                        // Map ParsedReminder to Reminder structure
+                        return {
+                          title: parsed.title,
+                          dueDate: parsed.dueDate,
+                          dueTime: parsed.dueTime,
+                          priority: parsed.priority,
+                          category: parsed.category,
+                          recurrence: parsed.recurrence,
+                          recurrenceInterval: parsed.recurrenceInterval,
+                          recurrenceUnit: parsed.recurrenceUnit,
+                          completed: false,
+                          pointsAwarded: 0
+                        };
+                      });
+                    }
+                    
+                    if (imported.length === 0) {
+                      setToast("Could not recognize format.");
+                      return;
+                    }
+                    
+                    const newReminders: Reminder[] = imported.map(p => ({
+                      id: generateId(),
+                      title: p.title || "Untitled",
+                      dueDate: p.dueDate || new Date().toISOString().split("T")[0],
+                      dueTime: p.dueTime,
+                      priority: p.priority || "medium",
+                      category: p.category || "other",
+                      recurrence: p.recurrence || "none",
+                      recurrenceInterval: p.recurrenceInterval,
+                      recurrenceUnit: p.recurrenceUnit,
+                      completed: false,
+                      createdAt: new Date().toISOString(),
+                      pointsAwarded: 0
+                    }));
+                    
+                    setReminders(prev => [...prev, ...newReminders]);
+                    setImportOpen(false);
+                    setToast(`Imported ${newReminders.length} reminders!`);
+                  }}
+                  style={{
+                    padding: "8px 16px", borderRadius: 50,
+                    backgroundColor: COLORS.primary, color: "#fff",
+                    border: "none", cursor: "pointer",
+                    fontSize: 13, fontWeight: 600,
+                    boxShadow: "0 4px 12px rgba(45,90,61,0.2)"
+                  }}
+                >
+                  Import Text
+                </button>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "20px 0", opacity: 0.6 }}>
+              <div style={{ height: 1, backgroundColor: COLORS.border, flex: 1 }} />
+              <span style={{ fontSize: 12, color: COLORS.textMuted }}>OR DROP FILE</span>
+              <div style={{ height: 1, backgroundColor: COLORS.border, flex: 1 }} />
+            </div>
             
             <div 
               onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(true); }}
@@ -1605,29 +1726,21 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
               style={{
                 border: `2px dashed ${dragActive ? COLORS.primary : COLORS.border}`,
                 borderRadius: 16,
-                backgroundColor: dragActive ? `${COLORS.primary}10` : COLORS.inputBg,
-                padding: 40,
+                backgroundColor: dragActive ? `${COLORS.primary}10` : COLORS.cardAlt,
+                padding: 20,
                 textAlign: "center",
                 transition: "all 0.2s ease",
                 cursor: "pointer",
-                marginBottom: 20,
                 display: "flex",
-                flexDirection: "column",
                 alignItems: "center",
+                justifyContent: "center",
                 gap: 12
               }}
             >
-              <div style={{ width: 48, height: 48, borderRadius: "50%", backgroundColor: COLORS.iconBg, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Upload size={24} color={COLORS.primary} />
-              </div>
-              <div>
-                <span style={{ display: "block", fontSize: 15, fontWeight: 600, color: COLORS.textMain, marginBottom: 4 }}>
-                  {dragActive ? "Drop file to import" : "Click or drag file here"}
-                </span>
-                <span style={{ fontSize: 13, color: COLORS.textMuted }}>
-                  Supports .ics and .csv
-                </span>
-              </div>
+              <Upload size={20} color={COLORS.textMuted} />
+              <span style={{ fontSize: 13, color: COLORS.textSecondary, fontWeight: 500 }}>
+                {dragActive ? "Drop file now" : "Upload .ics or .csv file"}
+              </span>
               <input 
                 type="file" 
                 accept=".ics,.icl,.csv" 
@@ -1636,32 +1749,6 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
                 id="file-upload-input"
               />
               <label htmlFor="file-upload-input" style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, cursor: "pointer" }} />
-            </div>
-            
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <div style={{ padding: 16, backgroundColor: COLORS.cardAlt, borderRadius: 16 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: 14, fontWeight: 600, color: COLORS.textMain }}>
-                  <Calendar size={16} /> iCalendar (.ics)
-                </div>
-                <p style={{ margin: 0, fontSize: 12, color: COLORS.textMuted }}>
-                  Best for Google Calendar, Apple Calendar, and ChatGPT exports.
-                </p>
-              </div>
-              <div style={{ padding: 16, backgroundColor: COLORS.cardAlt, borderRadius: 16 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: 14, fontWeight: 600, color: COLORS.textMain }}>
-                  <FileText size={16} /> CSV (.csv)
-                </div>
-                <p style={{ margin: 0, fontSize: 12, color: COLORS.textMuted }}>
-                  Works with Outlook, Trello, Asana, and Excel sheets.
-                </p>
-              </div>
-            </div>
-            
-            <div style={{ marginTop: 24, paddingTop: 16, borderTop: `1px solid ${COLORS.border}` }}>
-              <h4 style={{ margin: "0 0 12px", fontSize: 13, fontWeight: 600, color: COLORS.textMain }}>Pro Tip: Use AI to Plan</h4>
-              <div style={{ fontSize: 13, color: COLORS.textSecondary, lineHeight: 1.5, backgroundColor: COLORS.accentLight, padding: 12, borderRadius: 12 }}>
-                Ask ChatGPT: "Create a study plan for my exam next week and export it as an ICS file." Then paste the text into a file and drop it here!
-              </div>
             </div>
           </div>
         </div>

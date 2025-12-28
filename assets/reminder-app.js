@@ -24580,24 +24580,8 @@ var __iconNode7 = [
 ];
 var Crown = createLucideIcon("crown", __iconNode7);
 
-// node_modules/lucide-react/dist/esm/icons/file-text.js
-var __iconNode8 = [
-  [
-    "path",
-    {
-      d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z",
-      key: "1oefj6"
-    }
-  ],
-  ["path", { d: "M14 2v5a1 1 0 0 0 1 1h5", key: "wfsgrz" }],
-  ["path", { d: "M10 9H8", key: "b1mrlr" }],
-  ["path", { d: "M16 13H8", key: "t4e002" }],
-  ["path", { d: "M16 17H8", key: "z1uh3a" }]
-];
-var FileText = createLucideIcon("file-text", __iconNode8);
-
 // node_modules/lucide-react/dist/esm/icons/flame.js
-var __iconNode9 = [
+var __iconNode8 = [
   [
     "path",
     {
@@ -24606,10 +24590,10 @@ var __iconNode9 = [
     }
   ]
 ];
-var Flame = createLucideIcon("flame", __iconNode9);
+var Flame = createLucideIcon("flame", __iconNode8);
 
 // node_modules/lucide-react/dist/esm/icons/graduation-cap.js
-var __iconNode10 = [
+var __iconNode9 = [
   [
     "path",
     {
@@ -24620,10 +24604,10 @@ var __iconNode10 = [
   ["path", { d: "M22 10v6", key: "1lu8f3" }],
   ["path", { d: "M6 12.5V16a6 3 0 0 0 12 0v-3.5", key: "1r8lef" }]
 ];
-var GraduationCap = createLucideIcon("graduation-cap", __iconNode10);
+var GraduationCap = createLucideIcon("graduation-cap", __iconNode9);
 
 // node_modules/lucide-react/dist/esm/icons/heart.js
-var __iconNode11 = [
+var __iconNode10 = [
   [
     "path",
     {
@@ -24632,10 +24616,10 @@ var __iconNode11 = [
     }
   ]
 ];
-var Heart = createLucideIcon("heart", __iconNode11);
+var Heart = createLucideIcon("heart", __iconNode10);
 
 // node_modules/lucide-react/dist/esm/icons/house.js
-var __iconNode12 = [
+var __iconNode11 = [
   ["path", { d: "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8", key: "5wwlr5" }],
   [
     "path",
@@ -24645,10 +24629,10 @@ var __iconNode12 = [
     }
   ]
 ];
-var House = createLucideIcon("house", __iconNode12);
+var House = createLucideIcon("house", __iconNode11);
 
 // node_modules/lucide-react/dist/esm/icons/pen.js
-var __iconNode13 = [
+var __iconNode12 = [
   [
     "path",
     {
@@ -24657,10 +24641,10 @@ var __iconNode13 = [
     }
   ]
 ];
-var Pen = createLucideIcon("pen", __iconNode13);
+var Pen = createLucideIcon("pen", __iconNode12);
 
 // node_modules/lucide-react/dist/esm/icons/plane.js
-var __iconNode14 = [
+var __iconNode13 = [
   [
     "path",
     {
@@ -24669,33 +24653,33 @@ var __iconNode14 = [
     }
   ]
 ];
-var Plane = createLucideIcon("plane", __iconNode14);
+var Plane = createLucideIcon("plane", __iconNode13);
 
 // node_modules/lucide-react/dist/esm/icons/plus.js
-var __iconNode15 = [
+var __iconNode14 = [
   ["path", { d: "M5 12h14", key: "1ays0h" }],
   ["path", { d: "M12 5v14", key: "s699le" }]
 ];
-var Plus = createLucideIcon("plus", __iconNode15);
+var Plus = createLucideIcon("plus", __iconNode14);
 
 // node_modules/lucide-react/dist/esm/icons/repeat.js
-var __iconNode16 = [
+var __iconNode15 = [
   ["path", { d: "m17 2 4 4-4 4", key: "nntrym" }],
   ["path", { d: "M3 11v-1a4 4 0 0 1 4-4h14", key: "84bu3i" }],
   ["path", { d: "m7 22-4-4 4-4", key: "1wqhfi" }],
   ["path", { d: "M21 13v1a4 4 0 0 1-4 4H3", key: "1rx37r" }]
 ];
-var Repeat = createLucideIcon("repeat", __iconNode16);
+var Repeat = createLucideIcon("repeat", __iconNode15);
 
 // node_modules/lucide-react/dist/esm/icons/search.js
-var __iconNode17 = [
+var __iconNode16 = [
   ["path", { d: "m21 21-4.34-4.34", key: "14j7rj" }],
   ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }]
 ];
-var Search = createLucideIcon("search", __iconNode17);
+var Search = createLucideIcon("search", __iconNode16);
 
 // node_modules/lucide-react/dist/esm/icons/shopping-cart.js
-var __iconNode18 = [
+var __iconNode17 = [
   ["circle", { cx: "8", cy: "21", r: "1", key: "jimo8o" }],
   ["circle", { cx: "19", cy: "21", r: "1", key: "13723u" }],
   [
@@ -24706,10 +24690,10 @@ var __iconNode18 = [
     }
   ]
 ];
-var ShoppingCart = createLucideIcon("shopping-cart", __iconNode18);
+var ShoppingCart = createLucideIcon("shopping-cart", __iconNode17);
 
 // node_modules/lucide-react/dist/esm/icons/star.js
-var __iconNode19 = [
+var __iconNode18 = [
   [
     "path",
     {
@@ -24718,51 +24702,51 @@ var __iconNode19 = [
     }
   ]
 ];
-var Star = createLucideIcon("star", __iconNode19);
+var Star = createLucideIcon("star", __iconNode18);
 
 // node_modules/lucide-react/dist/esm/icons/stethoscope.js
-var __iconNode20 = [
+var __iconNode19 = [
   ["path", { d: "M11 2v2", key: "1539x4" }],
   ["path", { d: "M5 2v2", key: "1yf1q8" }],
   ["path", { d: "M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1", key: "rb5t3r" }],
   ["path", { d: "M8 15a6 6 0 0 0 12 0v-3", key: "x18d4x" }],
   ["circle", { cx: "20", cy: "10", r: "2", key: "ts1r5v" }]
 ];
-var Stethoscope = createLucideIcon("stethoscope", __iconNode20);
+var Stethoscope = createLucideIcon("stethoscope", __iconNode19);
 
 // node_modules/lucide-react/dist/esm/icons/trash-2.js
-var __iconNode21 = [
+var __iconNode20 = [
   ["path", { d: "M10 11v6", key: "nco0om" }],
   ["path", { d: "M14 11v6", key: "outv1u" }],
   ["path", { d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6", key: "miytrc" }],
   ["path", { d: "M3 6h18", key: "d0wm0j" }],
   ["path", { d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2", key: "e791ji" }]
 ];
-var Trash2 = createLucideIcon("trash-2", __iconNode21);
+var Trash2 = createLucideIcon("trash-2", __iconNode20);
 
 // node_modules/lucide-react/dist/esm/icons/upload.js
-var __iconNode22 = [
+var __iconNode21 = [
   ["path", { d: "M12 3v12", key: "1x0j5s" }],
   ["path", { d: "m17 8-5-5-5 5", key: "7q97r8" }],
   ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", key: "ih7n3h" }]
 ];
-var Upload = createLucideIcon("upload", __iconNode22);
+var Upload = createLucideIcon("upload", __iconNode21);
 
 // node_modules/lucide-react/dist/esm/icons/users.js
-var __iconNode23 = [
+var __iconNode22 = [
   ["path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", key: "1yyitq" }],
   ["path", { d: "M16 3.128a4 4 0 0 1 0 7.744", key: "16gr8j" }],
   ["path", { d: "M22 21v-2a4 4 0 0 0-3-3.87", key: "kshegd" }],
   ["circle", { cx: "9", cy: "7", r: "4", key: "nufk8" }]
 ];
-var Users = createLucideIcon("users", __iconNode23);
+var Users = createLucideIcon("users", __iconNode22);
 
 // node_modules/lucide-react/dist/esm/icons/x.js
-var __iconNode24 = [
+var __iconNode23 = [
   ["path", { d: "M18 6 6 18", key: "1bl5f8" }],
   ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
 ];
-var X = createLucideIcon("x", __iconNode24);
+var X = createLucideIcon("x", __iconNode23);
 
 // src/ReminderApp.tsx
 var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
@@ -26271,17 +26255,129 @@ function ReminderApp({ initialData: initialData2 }) {
         }
       )
     ] }) }),
-    importOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1100, padding: 16 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 24, width: "100%", maxWidth: 480, padding: 24, boxShadow: "0 16px 48px rgba(0,0,0,0.15)", maxHeight: "90vh", overflowY: "auto" }, children: [
+    importOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1100, padding: 16 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 24, width: "100%", maxWidth: 520, padding: 24, boxShadow: "0 16px 48px rgba(0,0,0,0.15)", maxHeight: "90vh", overflowY: "auto" }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { style: { margin: 0, fontSize: 18, fontWeight: 600, color: COLORS.textMain }, children: "Import Reminders" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { style: { margin: 0, fontSize: 18, fontWeight: 600, color: COLORS.textMain }, children: "Import from AI" }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setImportOpen(false), style: { width: 36, height: 36, borderRadius: "50%", border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 18, color: COLORS.textMuted }) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { style: { margin: "0 0 20px", fontSize: 14, color: COLORS.textSecondary, lineHeight: 1.5 }, children: [
-        "Drag and drop an ",
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: ".ics" }),
-        " (iCalendar) or ",
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: ".csv" }),
-        " (Excel) file to import your reminders from other apps like Google Calendar, Outlook, or Apple Reminders."
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { style: { margin: "0 0 16px", fontSize: 14, color: COLORS.textSecondary, lineHeight: 1.5 }, children: [
+        "Ask ChatGPT to ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: '"generate a study plan as an ICS code block"' }),
+        ', OR just paste a list of tasks directly here (e.g. "Buy milk tomorrow").'
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative", marginBottom: 20 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "textarea",
+          {
+            placeholder: `BEGIN:VCALENDAR
+BEGIN:VEVENT
+...
+OR just paste a list:
+- Buy milk tomorrow
+- Call mom at 5pm
+- Submit report next Friday`,
+            style: {
+              width: "100%",
+              height: 160,
+              padding: 16,
+              borderRadius: 16,
+              border: `2px solid ${COLORS.border}`,
+              backgroundColor: COLORS.inputBg,
+              fontSize: 13,
+              fontFamily: "monospace",
+              resize: "none",
+              outline: "none",
+              ...inputStyle
+            },
+            onChange: (e) => {
+              const content = e.target.value;
+              if (content.length > 10) {
+                let count = 0;
+                if (content.includes("BEGIN:VCALENDAR")) {
+                  count = parseICS(content).length;
+                } else if (content.includes(",") && content.split("\n")[0].includes(",")) {
+                  count = parseCSV(content).length;
+                } else {
+                  count = content.split(/\r\n|\n|\r/).filter((l) => l.trim().length > 2).length;
+                }
+                if (count > 0) {
+                  setToast(`Ready to import ${count} tasks...`);
+                }
+              }
+            },
+            id: "magic-paste"
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", bottom: 12, right: 12, display: "flex", gap: 8 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "button",
+          {
+            onClick: () => {
+              const content = document.getElementById("magic-paste").value;
+              let imported = [];
+              if (content.includes("BEGIN:VCALENDAR")) {
+                imported = parseICS(content);
+              } else if (content.includes(",") && content.split("\n")[0].includes(",")) {
+                imported = parseCSV(content);
+              } else {
+                const lines = content.split(/\r\n|\n|\r/).filter((l) => l.trim().length > 2);
+                imported = lines.map((line) => {
+                  const cleanLine = line.replace(/^[-*•]\s*/, "").trim();
+                  const parsed2 = parseNaturalLanguage(cleanLine);
+                  return {
+                    title: parsed2.title,
+                    dueDate: parsed2.dueDate,
+                    dueTime: parsed2.dueTime,
+                    priority: parsed2.priority,
+                    category: parsed2.category,
+                    recurrence: parsed2.recurrence,
+                    recurrenceInterval: parsed2.recurrenceInterval,
+                    recurrenceUnit: parsed2.recurrenceUnit,
+                    completed: false,
+                    pointsAwarded: 0
+                  };
+                });
+              }
+              if (imported.length === 0) {
+                setToast("Could not recognize format.");
+                return;
+              }
+              const newReminders = imported.map((p) => ({
+                id: generateId(),
+                title: p.title || "Untitled",
+                dueDate: p.dueDate || (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
+                dueTime: p.dueTime,
+                priority: p.priority || "medium",
+                category: p.category || "other",
+                recurrence: p.recurrence || "none",
+                recurrenceInterval: p.recurrenceInterval,
+                recurrenceUnit: p.recurrenceUnit,
+                completed: false,
+                createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+                pointsAwarded: 0
+              }));
+              setReminders((prev) => [...prev, ...newReminders]);
+              setImportOpen(false);
+              setToast(`Imported ${newReminders.length} reminders!`);
+            },
+            style: {
+              padding: "8px 16px",
+              borderRadius: 50,
+              backgroundColor: COLORS.primary,
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              fontSize: 13,
+              fontWeight: 600,
+              boxShadow: "0 4px 12px rgba(45,90,61,0.2)"
+            },
+            children: "Import Text"
+          }
+        ) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 12, margin: "20px 0", opacity: 0.6 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { height: 1, backgroundColor: COLORS.border, flex: 1 } }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 12, color: COLORS.textMuted }, children: "OR DROP FILE" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { height: 1, backgroundColor: COLORS.border, flex: 1 } })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
         "div",
@@ -26305,23 +26401,19 @@ function ReminderApp({ initialData: initialData2 }) {
           style: {
             border: `2px dashed ${dragActive ? COLORS.primary : COLORS.border}`,
             borderRadius: 16,
-            backgroundColor: dragActive ? `${COLORS.primary}10` : COLORS.inputBg,
-            padding: 40,
+            backgroundColor: dragActive ? `${COLORS.primary}10` : COLORS.cardAlt,
+            padding: 20,
             textAlign: "center",
             transition: "all 0.2s ease",
             cursor: "pointer",
-            marginBottom: 20,
             display: "flex",
-            flexDirection: "column",
             alignItems: "center",
+            justifyContent: "center",
             gap: 12
           },
           children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: 48, height: 48, borderRadius: "50%", backgroundColor: COLORS.iconBg, display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Upload, { size: 24, color: COLORS.primary }) }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "block", fontSize: 15, fontWeight: 600, color: COLORS.textMain, marginBottom: 4 }, children: dragActive ? "Drop file to import" : "Click or drag file here" }),
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 13, color: COLORS.textMuted }, children: "Supports .ics and .csv" })
-            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Upload, { size: 20, color: COLORS.textMuted }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 13, color: COLORS.textSecondary, fontWeight: 500 }, children: dragActive ? "Drop file now" : "Upload .ics or .csv file" }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
               "input",
               {
@@ -26335,27 +26427,7 @@ function ReminderApp({ initialData: initialData2 }) {
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: "file-upload-input", style: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, cursor: "pointer" } })
           ]
         }
-      ),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { padding: 16, backgroundColor: COLORS.cardAlt, borderRadius: 16 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: 14, fontWeight: 600, color: COLORS.textMain }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Calendar, { size: 16 }),
-            " iCalendar (.ics)"
-          ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { margin: 0, fontSize: 12, color: COLORS.textMuted }, children: "Best for Google Calendar, Apple Calendar, and ChatGPT exports." })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { padding: 16, backgroundColor: COLORS.cardAlt, borderRadius: 16 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: 14, fontWeight: 600, color: COLORS.textMain }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileText, { size: 16 }),
-            " CSV (.csv)"
-          ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { margin: 0, fontSize: 12, color: COLORS.textMuted }, children: "Works with Outlook, Trello, Asana, and Excel sheets." })
-        ] })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginTop: 24, paddingTop: 16, borderTop: `1px solid ${COLORS.border}` }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", { style: { margin: "0 0 12px", fontSize: 13, fontWeight: 600, color: COLORS.textMain }, children: "Pro Tip: Use AI to Plan" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 13, color: COLORS.textSecondary, lineHeight: 1.5, backgroundColor: COLORS.accentLight, padding: 12, borderRadius: 12 }, children: 'Ask ChatGPT: "Create a study plan for my exam next week and export it as an ICS file." Then paste the text into a file and drop it here!' })
-      ] })
+      )
     ] }) }),
     editing && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16, overflowY: "auto" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 24, width: "100%", maxWidth: 420, padding: 24, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 16px 48px rgba(0,0,0,0.15)" }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }, children: [
@@ -26726,14 +26798,6 @@ lucide-react/dist/esm/icons/clock.js:
    *)
 
 lucide-react/dist/esm/icons/crown.js:
-  (**
-   * @license lucide-react v0.554.0 - ISC
-   *
-   * This source code is licensed under the ISC license.
-   * See the LICENSE file in the root directory of this source tree.
-   *)
-
-lucide-react/dist/esm/icons/file-text.js:
   (**
    * @license lucide-react v0.554.0 - ISC
    *
