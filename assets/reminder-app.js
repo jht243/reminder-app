@@ -26670,19 +26670,16 @@ function ReminderApp({ initialData: initialData2 }) {
           }
         ),
         !isCollapsed && sectionReminders.map((r, i) => {
-          const isNew = r.createdAt && Date.now() - new Date(r.createdAt).getTime() < 3e5;
-          const shouldGlow = isNew && Date.now() - new Date(r.createdAt).getTime() < 1e4;
+          const shouldHighlight = r.createdAt && Date.now() - new Date(r.createdAt).getTime() < 1e4;
           return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
             "div",
             {
               style: {
                 padding: "12px 16px",
                 borderBottom: i < sectionReminders.length - 1 ? `1px solid ${COLORS.border}` : "none",
-                backgroundColor: shouldGlow ? `${COLORS.primary}08` : r.completed ? COLORS.cardAlt : COLORS.card,
+                backgroundColor: shouldHighlight ? COLORS.primaryBg : r.completed ? COLORS.cardAlt : COLORS.card,
                 opacity: r.completed ? 0.7 : 1,
-                boxShadow: shouldGlow ? `inset 0 0 0 2px ${COLORS.primary}50, 0 0 16px ${COLORS.primary}25` : "none",
-                transition: "all 0.5s ease-out",
-                animation: shouldGlow ? "pulse 2s ease-in-out infinite" : "none"
+                transition: "background-color 1s ease-out"
               },
               children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 10 }, children: [
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)(

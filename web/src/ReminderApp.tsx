@@ -2112,9 +2112,8 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
                 
                 {/* Section Items */}
                 {!isCollapsed && sectionReminders.map((r, i) => {
-                  // Check if task is new (created within last 5 minutes) and should glow
-                  const isNew = r.createdAt && (Date.now() - new Date(r.createdAt).getTime()) < 300000; // 5 min
-                  const shouldGlow = isNew && (Date.now() - new Date(r.createdAt).getTime()) < 10000; // 10 sec glow
+                  // Check if task is new and should highlight (10 seconds after creation)
+                  const shouldHighlight = r.createdAt && (Date.now() - new Date(r.createdAt).getTime()) < 10000;
                   
                   return (
                   <div 
@@ -2122,11 +2121,9 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
                     style={{ 
                     padding: "12px 16px", 
                     borderBottom: i < sectionReminders.length - 1 ? `1px solid ${COLORS.border}` : "none",
-                    backgroundColor: shouldGlow ? `${COLORS.primary}08` : (r.completed ? COLORS.cardAlt : COLORS.card),
+                    backgroundColor: shouldHighlight ? COLORS.primaryBg : (r.completed ? COLORS.cardAlt : COLORS.card),
                     opacity: r.completed ? 0.7 : 1,
-                    boxShadow: shouldGlow ? `inset 0 0 0 2px ${COLORS.primary}50, 0 0 16px ${COLORS.primary}25` : "none",
-                    transition: "all 0.5s ease-out",
-                    animation: shouldGlow ? "pulse 2s ease-in-out infinite" : "none"
+                    transition: "background-color 1s ease-out"
                   }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       {/* Compact checkbox */}
