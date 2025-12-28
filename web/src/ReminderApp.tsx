@@ -431,7 +431,11 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
     }
     confidence += 15;
   }
-  // 2. "every monday/tuesday/etc" = weekly on that day
+  // 2. Multi-day weekly patterns like "every tuesday and thursday" or "every mon, wed, fri"
+  else if (/\bevery\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)(\s*(,|and)\s*(sunday|monday|tuesday|wednesday|thursday|friday|saturday))+/i.test(lower)) {
+    recurrence = "weekly"; recurrenceInterval = 1; recurrenceUnit = "weeks"; confidence += 15;
+  }
+  // 2b. "every monday/tuesday/etc" = weekly on that day (single day)
   else if (/\bevery\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i.test(lower)) {
     recurrence = "weekly"; recurrenceInterval = 1; recurrenceUnit = "weeks"; confidence += 15;
   }
@@ -537,7 +541,7 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
     .replace(/\bevery\s+\d+\s+months?\b/gi, "")
     .replace(/\bevery\s+\d+\s+years?\b/gi, "")
     .replace(/\bevery\s+other\s+(day|week|month|year)\b/gi, "")
-    .replace(/\bevery\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/gi, "")
+    .replace(/\bevery\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)(\s*(,|and)\s*(sunday|monday|tuesday|wednesday|thursday|friday|saturday))*/gi, "")
     .replace(/\bevery\s*day\b/gi, "")
     .replace(/\bevery\s*week\b/gi, "")
     .replace(/\bevery\s*month\b/gi, "")
