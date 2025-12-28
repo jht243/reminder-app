@@ -804,6 +804,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   
   // Filters
   const [search, setSearch] = useState("");
+  const [searchExpanded, setSearchExpanded] = useState(false);
   const [filterCategory, setFilterCategory] = useState<Category | "all">("all");
   const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "completed" | "overdue">("all");
   const [sortField, setSortField] = useState<"dueDate" | "priority" | "category">("dueDate");
@@ -1650,41 +1651,68 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       <div style={{ 
         backgroundColor: COLORS.card, 
         borderRadius: cardRadius, 
-        padding: "12px 16px", 
+        padding: "10px 12px", 
         marginBottom: 12, 
-        boxShadow: cardShadow,
-        overflow: "hidden"
+        boxShadow: cardShadow
       }}>
-        {/* Search bar - compact */}
-        <div style={{ position: "relative", marginBottom: 12 }}>
-          <Search size={16} color={COLORS.textMuted} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
-          <input 
-            type="text" 
-            placeholder="Search reminders..." 
-            value={search} 
-            onChange={e => setSearch(e.target.value)} 
-            style={{ 
-              ...inputStyle, 
-              width: "100%", 
-              padding: "12px 16px 12px 42px", 
-              borderRadius: 50, 
-              border: "none", 
-              backgroundColor: COLORS.inputBg, 
-              fontSize: 14, 
-              outline: "none" 
-            }} 
-          />
-        </div>
-        
-        {/* Quick filter chips - horizontal scroll */}
+        {/* Expandable search + filter chips row */}
         <div style={{ 
           display: "flex", 
           gap: 8, 
-          overflowX: "auto", 
-          paddingBottom: 4,
+          alignItems: "center",
+          overflowX: "auto",
+          WebkitOverflowScrolling: "touch",
           scrollbarWidth: "none",
-          msOverflowStyle: "none"
+          msOverflowStyle: "none",
+          paddingBottom: 2
         }}>
+          {/* Search icon/expanded input */}
+          {searchExpanded ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+              <input 
+                type="text" 
+                placeholder="Search..." 
+                value={search} 
+                onChange={e => setSearch(e.target.value)}
+                onBlur={() => { if (!search) setSearchExpanded(false); }}
+                autoFocus
+                style={{ 
+                  ...inputStyle, 
+                  width: 120,
+                  padding: "8px 12px", 
+                  borderRadius: 50, 
+                  border: `2px solid ${COLORS.primary}`,
+                  backgroundColor: COLORS.inputBg, 
+                  fontSize: 13, 
+                  outline: "none" 
+                }} 
+              />
+              <button
+                onClick={() => { setSearch(""); setSearchExpanded(false); }}
+                style={{
+                  width: 28, height: 28, borderRadius: "50%",
+                  border: "none", backgroundColor: COLORS.cardAlt,
+                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center"
+                }}
+              >
+                <X size={14} color={COLORS.textMuted} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setSearchExpanded(true)}
+              style={{
+                width: 36, height: 36, borderRadius: "50%",
+                border: "none", backgroundColor: COLORS.cardAlt,
+                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0
+              }}
+            >
+              <Search size={16} color={COLORS.textMuted} />
+            </button>
+          )}
+          
+          {/* Quick filter chips */}
           {QUICK_FILTERS.map(filter => {
             const isActive = quickFilter === filter.id;
             const count = filter.id === "all" 

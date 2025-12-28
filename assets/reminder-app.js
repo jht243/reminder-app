@@ -25412,6 +25412,7 @@ function ReminderApp({ initialData: initialData2 }) {
   const inputRef = (0, import_react3.useRef)(null);
   const [editing, setEditing] = (0, import_react3.useState)(null);
   const [search, setSearch] = (0, import_react3.useState)("");
+  const [searchExpanded, setSearchExpanded] = (0, import_react3.useState)(false);
   const [filterCategory, setFilterCategory] = (0, import_react3.useState)("all");
   const [filterStatus, setFilterStatus] = (0, import_react3.useState)("all");
   const [sortField, setSortField] = (0, import_react3.useState)("dueDate");
@@ -26214,44 +26215,87 @@ function ReminderApp({ initialData: initialData2 }) {
         ] })
       ] })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
       backgroundColor: COLORS.card,
       borderRadius: cardRadius,
-      padding: "12px 16px",
+      padding: "10px 12px",
       marginBottom: 12,
-      boxShadow: cardShadow,
-      overflow: "hidden"
+      boxShadow: cardShadow
+    }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
+      display: "flex",
+      gap: 8,
+      alignItems: "center",
+      overflowX: "auto",
+      WebkitOverflowScrolling: "touch",
+      scrollbarWidth: "none",
+      msOverflowStyle: "none",
+      paddingBottom: 2
     }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative", marginBottom: 12 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { size: 16, color: COLORS.textMuted, style: { position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" } }),
+      searchExpanded ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
           "input",
           {
             type: "text",
-            placeholder: "Search reminders...",
+            placeholder: "Search...",
             value: search,
             onChange: (e) => setSearch(e.target.value),
+            onBlur: () => {
+              if (!search) setSearchExpanded(false);
+            },
+            autoFocus: true,
             style: {
               ...inputStyle,
-              width: "100%",
-              padding: "12px 16px 12px 42px",
+              width: 120,
+              padding: "8px 12px",
               borderRadius: 50,
-              border: "none",
+              border: `2px solid ${COLORS.primary}`,
               backgroundColor: COLORS.inputBg,
-              fontSize: 14,
+              fontSize: 13,
               outline: "none"
             }
           }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "button",
+          {
+            onClick: () => {
+              setSearch("");
+              setSearchExpanded(false);
+            },
+            style: {
+              width: 28,
+              height: 28,
+              borderRadius: "50%",
+              border: "none",
+              backgroundColor: COLORS.cardAlt,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            },
+            children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 14, color: COLORS.textMuted })
+          }
         )
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
-        display: "flex",
-        gap: 8,
-        overflowX: "auto",
-        paddingBottom: 4,
-        scrollbarWidth: "none",
-        msOverflowStyle: "none"
-      }, children: QUICK_FILTERS.map((filter) => {
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "button",
+        {
+          onClick: () => setSearchExpanded(true),
+          style: {
+            width: 36,
+            height: 36,
+            borderRadius: "50%",
+            border: "none",
+            backgroundColor: COLORS.cardAlt,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0
+          },
+          children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { size: 16, color: COLORS.textMuted })
+        }
+      ),
+      QUICK_FILTERS.map((filter) => {
         const isActive = quickFilter === filter.id;
         const count = filter.id === "all" ? reminders.filter((r) => !r.completed).length : filter.id === "urgent" ? reminders.filter((r) => !r.completed && r.priority === "urgent").length : filter.id === "today" ? todayCount : filter.id === "overdue" ? overdueCount : reminders.filter((r) => !r.completed && r.category === filter.id).length;
         return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
@@ -26290,8 +26334,8 @@ function ReminderApp({ initialData: initialData2 }) {
           },
           filter.id
         );
-      }) })
-    ] }),
+      })
+    ] }) }),
     filtered.filter((r) => !r.completed).length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: cardRadius, boxShadow: cardShadow, textAlign: "center", padding: 48, color: COLORS.textMuted }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
         width: 64,
