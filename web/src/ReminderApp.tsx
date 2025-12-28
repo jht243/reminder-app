@@ -1400,7 +1400,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const cardRadius = 20;
 
   return (
-    <div style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', backgroundColor: COLORS.bg, minHeight: "100%", padding: 16, fontWeight: 400 }}>
+    <div style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', backgroundColor: COLORS.bg, minHeight: "100%", padding: 16, fontWeight: 400, maxWidth: "100%", overflowX: "hidden" }}>
       {/* Toast notification */}
       {toast && (
         <div style={{ 
@@ -1652,7 +1652,8 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
         borderRadius: cardRadius, 
         padding: "12px 16px", 
         marginBottom: 12, 
-        boxShadow: cardShadow
+        boxShadow: cardShadow,
+        overflow: "hidden"
       }}>
         {/* Search bar - compact */}
         <div style={{ position: "relative", marginBottom: 12 }}>

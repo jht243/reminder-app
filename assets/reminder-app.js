@@ -25915,7 +25915,7 @@ function ReminderApp({ initialData: initialData2 }) {
   const inputStyle = { boxSizing: "border-box" };
   const cardShadow = "0 2px 8px rgba(0,0,0,0.04)";
   const cardRadius = 20;
-  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', backgroundColor: COLORS.bg, minHeight: "100%", padding: 16, fontWeight: 400 }, children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', backgroundColor: COLORS.bg, minHeight: "100%", padding: 16, fontWeight: 400, maxWidth: "100%", overflowX: "hidden" }, children: [
     toast && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
       position: "fixed",
       top: 16,
@@ -26219,7 +26219,8 @@ function ReminderApp({ initialData: initialData2 }) {
       borderRadius: cardRadius,
       padding: "12px 16px",
       marginBottom: 12,
-      boxShadow: cardShadow
+      boxShadow: cardShadow,
+      overflow: "hidden"
     }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative", marginBottom: 12 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { size: 16, color: COLORS.textMuted, style: { position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" } }),
