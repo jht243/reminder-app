@@ -24873,7 +24873,17 @@ var formatTime = (time) => {
   const hour = parseInt(h);
   return `${hour % 12 || 12}:${m} ${hour >= 12 ? "PM" : "AM"}`;
 };
-var isOverdue = (r) => !r.completed && /* @__PURE__ */ new Date(`${r.dueDate}T${r.dueTime || "23:59"}`) < /* @__PURE__ */ new Date();
+var isOverdue = (r) => {
+  if (r.completed) return false;
+  const [year, month, day] = r.dueDate.split("-").map(Number);
+  const [hours, minutes] = (r.dueTime || "23:59").split(":").map(Number);
+  const dueDateTime = new Date(year, month - 1, day, hours, minutes);
+  return dueDateTime < /* @__PURE__ */ new Date();
+};
+var parseLocalDate = (dateStr) => {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day);
+};
 var getTimeSection = (r) => {
   if (r.completed) return "later";
   const now = /* @__PURE__ */ new Date();
@@ -24882,8 +24892,7 @@ var getTimeSection = (r) => {
   tomorrow.setDate(tomorrow.getDate() + 1);
   const weekEnd = new Date(today);
   weekEnd.setDate(weekEnd.getDate() + 7);
-  const dueDate = new Date(r.dueDate);
-  const dueDateOnly = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
+  const dueDateOnly = parseLocalDate(r.dueDate);
   if (isOverdue(r)) return "overdue";
   if (dueDateOnly.getTime() === today.getTime()) return "today";
   if (dueDateOnly.getTime() === tomorrow.getTime()) return "tomorrow";

@@ -162,7 +162,21 @@ const formatTime = (time?: string) => {
   return `${hour % 12 || 12}:${m} ${hour >= 12 ? "PM" : "AM"}`;
 };
 
-const isOverdue = (r: Reminder) => !r.completed && new Date(`${r.dueDate}T${r.dueTime || "23:59"}`) < new Date();
+const isOverdue = (r: Reminder) => {
+  if (r.completed) return false;
+  // Parse date as local time, not UTC
+  const [year, month, day] = r.dueDate.split('-').map(Number);
+  const [hours, minutes] = (r.dueTime || "23:59").split(':').map(Number);
+  const dueDateTime = new Date(year, month - 1, day, hours, minutes);
+  return dueDateTime < new Date();
+};
+
+// Helper to parse date string as local date (not UTC)
+const parseLocalDate = (dateStr: string): Date => {
+  // "YYYY-MM-DD" format - parse as local, not UTC
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day); // month is 0-indexed
+};
 
 // Helper to get time-based section for a reminder
 const getTimeSection = (r: Reminder): "overdue" | "today" | "tomorrow" | "thisWeek" | "later" => {
@@ -171,8 +185,9 @@ const getTimeSection = (r: Reminder): "overdue" | "today" | "tomorrow" | "thisWe
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
   const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7);
-  const dueDate = new Date(r.dueDate);
-  const dueDateOnly = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
+  
+  // Parse dueDate as local date, not UTC
+  const dueDateOnly = parseLocalDate(r.dueDate);
   
   if (isOverdue(r)) return "overdue";
   if (dueDateOnly.getTime() === today.getTime()) return "today";
