@@ -710,6 +710,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const processedTasksRef = useRef<Set<string>>(new Set(stats.completedTasks || []));
   
   // Check for newly completed progression tasks and award points
+  // IMPORTANT: Tasks must be completed in SEQUENTIAL order
   useEffect(() => {
     const currentCompleted = stats.completedTasks || [];
     
@@ -720,55 +721,48 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     console.log("[Progression] Reminders count:", reminders.length);
     console.log("[Progression] Stats:", { completedAllTime: stats.completedAllTime, currentStreak: stats.currentStreak });
     
-    let pointsToAdd = 0;
-    const newlyCompleted: string[] = [];
-    
-    for (const task of PROGRESSION_TASKS) {
-      // Skip if already in our processed set
-      if (processedTasksRef.current.has(task.id)) {
-        continue;
-      }
-      
-      // Check if task condition is now met
-      const isComplete = task.check(reminders, stats);
-      console.log(`[Progression] Task "${task.id}": check=${isComplete}`);
-      
-      if (isComplete) {
-        pointsToAdd += task.points;
-        newlyCompleted.push(task.id);
-        processedTasksRef.current.add(task.id); // Mark as processed immediately
-        console.log(`[Progression] Task "${task.id}" COMPLETED! +${task.points} pts`);
+    // Find the NEXT task in sequence (first one not completed)
+    let nextTaskIndex = 0;
+    for (let i = 0; i < PROGRESSION_TASKS.length; i++) {
+      if (!processedTasksRef.current.has(PROGRESSION_TASKS[i].id)) {
+        nextTaskIndex = i;
+        break;
       }
     }
     
-    // Award points for newly completed tasks
-    if (newlyCompleted.length > 0) {
-      const taskName = PROGRESSION_TASKS.find(t => t.id === newlyCompleted[0])?.name || "Task";
-      console.log(`[Progression] Awarding ${pointsToAdd} pts for ${newlyCompleted.length} tasks`);
+    const nextTask = PROGRESSION_TASKS[nextTaskIndex];
+    if (!nextTask || processedTasksRef.current.has(nextTask.id)) {
+      console.log("[Progression] All tasks completed or no next task");
+      return;
+    }
+    
+    console.log(`[Progression] Next task to complete: "${nextTask.id}"`);
+    
+    // Check if the next task's condition is met
+    const isComplete = nextTask.check(reminders, stats);
+    console.log(`[Progression] Task "${nextTask.id}": check=${isComplete}`);
+    
+    if (isComplete) {
+      processedTasksRef.current.add(nextTask.id); // Mark as processed immediately
+      console.log(`[Progression] Task "${nextTask.id}" COMPLETED! +${nextTask.points} pts`);
       
       setStats(prev => ({
         ...prev,
-        totalPoints: prev.totalPoints + pointsToAdd,
-        completedTasks: [...new Set([...(prev.completedTasks || []), ...newlyCompleted])]
+        totalPoints: prev.totalPoints + nextTask.points,
+        completedTasks: [...new Set([...(prev.completedTasks || []), nextTask.id])]
       }));
-      setToast(`🎉 "${taskName}" complete! +${pointsToAdd} pts`);
+      setToast(`🎉 "${nextTask.name}" complete! +${nextTask.points} pts`);
     }
   }, [reminders.length, stats.completedAllTime, stats.currentStreak, stats.longestStreak]);
   
-  // Get the current progression task to show as hint (the NEXT task to complete)
+  // Get the current progression task to show as hint (the NEXT task in sequence)
   const getCurrentProgressionTask = (): { text: string; icon: string; points: number; name: string } | null => {
     const completedTasks = stats.completedTasks || [];
     
-    console.log("[Hint] Finding next task. Completed:", completedTasks);
-    
-    // Find the first task that is NOT completed yet
+    // Find the first task that is NOT in completedTasks (sequential order)
     for (const task of PROGRESSION_TASKS) {
-      const isInCompleted = completedTasks.includes(task.id);
-      const checkResult = task.check(reminders, stats);
-      
-      // Show task if it's not completed AND the check is still false (not yet achieved)
-      if (!isInCompleted && !checkResult) {
-        console.log(`[Hint] Showing task "${task.id}" (not completed, check=${checkResult})`);
+      if (!completedTasks.includes(task.id)) {
+        console.log(`[Hint] Next task: "${task.id}"`);
         return {
           text: task.description,
           icon: task.icon,
@@ -776,24 +770,15 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
           name: task.name
         };
       }
-      
-      // If check is true but not in completed, this task should be completed soon
-      if (!isInCompleted && checkResult) {
-        console.log(`[Hint] Task "${task.id}" is done but not yet in completedTasks`);
-      }
     }
     
     // All tasks complete - show level progress
-    if (levelInfo.progress > 0) {
-      return {
-        text: `${Math.round(levelInfo.progress)}% to Level ${levelInfo.level + 1}`,
-        icon: "👑",
-        points: 0,
-        name: "Keep Going!"
-      };
-    }
-    
-    return null;
+    return {
+      text: `${Math.round(levelInfo.progress)}% to Level ${levelInfo.level + 1}`,
+      icon: "👑",
+      points: 0,
+      name: "All Tasks Complete!"
+    };
   };
   
   const hint = getCurrentProgressionTask();
@@ -943,6 +928,21 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   
   const del = (id: string) => { setReminders(prev => prev.filter(r => r.id !== id)); setToast("Deleted"); };
   
+  // Reset all progress (for debugging/fresh start)
+  const resetProgress = () => {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(STATS_KEY);
+    processedTasksRef.current.clear();
+    setReminders([]);
+    setStats({
+      totalPoints: 0, currentStreak: 0, longestStreak: 0,
+      completedAllTime: 0, level: 1, achievements: [...DEFAULT_ACHIEVEMENTS],
+      completedTasks: []
+    });
+    setToast("Progress reset! Start fresh.");
+    console.log("[Reset] All progress cleared");
+  };
+  
   const CategoryIcon = ({ cat }: { cat: Category }) => {
     const config = CATEGORY_CONFIG[cat];
     const Icon = config.icon;
@@ -1009,15 +1009,28 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
               {completedTaskCount}/{totalTaskCount}
             </div>
           </div>
-          {/* Progress bar */}
-          <div style={{ marginTop: 10, height: 6, backgroundColor: COLORS.border, borderRadius: 3, overflow: "hidden" }}>
-            <div style={{ 
-              height: "100%", 
-              width: `${(completedTaskCount / totalTaskCount) * 100}%`, 
-              backgroundColor: COLORS.primaryLight, 
-              borderRadius: 3,
-              transition: "width 0.3s ease"
-            }} />
+          {/* Progress bar and reset */}
+          <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ flex: 1, height: 6, backgroundColor: COLORS.border, borderRadius: 3, overflow: "hidden" }}>
+              <div style={{ 
+                height: "100%", 
+                width: `${(completedTaskCount / totalTaskCount) * 100}%`, 
+                backgroundColor: COLORS.primaryLight, 
+                borderRadius: 3,
+                transition: "width 0.3s ease"
+              }} />
+            </div>
+            <button 
+              onClick={resetProgress} 
+              style={{ 
+                fontSize: 11, color: COLORS.textMuted, background: "none", border: "none", 
+                cursor: "pointer", padding: "2px 6px", borderRadius: 4,
+                opacity: 0.6
+              }}
+              title="Reset all progress"
+            >
+              Reset
+            </button>
           </div>
         </div>
       )}
