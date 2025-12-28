@@ -25316,37 +25316,56 @@ function ReminderApp({ initialData: initialData2 }) {
   const overdueCount = reminders.filter(isOverdue).length;
   const todayCount = reminders.filter((r) => !r.completed && r.dueDate === (/* @__PURE__ */ new Date()).toISOString().split("T")[0]).length;
   const levelInfo = calcLevel(stats.totalPoints);
+  const processedTasksRef = (0, import_react3.useRef)(new Set(stats.completedTasks || []));
   (0, import_react3.useEffect)(() => {
-    const completedTasks = stats.completedTasks || [];
+    const currentCompleted = stats.completedTasks || [];
+    currentCompleted.forEach((id) => processedTasksRef.current.add(id));
+    console.log("[Progression] Checking tasks. Current completed:", currentCompleted);
+    console.log("[Progression] Reminders count:", reminders.length);
+    console.log("[Progression] Stats:", { completedAllTime: stats.completedAllTime, currentStreak: stats.currentStreak });
     let pointsToAdd = 0;
     const newlyCompleted = [];
     for (const task of PROGRESSION_TASKS) {
-      if (completedTasks.includes(task.id)) continue;
-      if (task.check(reminders, stats)) {
+      if (processedTasksRef.current.has(task.id)) {
+        continue;
+      }
+      const isComplete = task.check(reminders, stats);
+      console.log(`[Progression] Task "${task.id}": check=${isComplete}`);
+      if (isComplete) {
         pointsToAdd += task.points;
         newlyCompleted.push(task.id);
+        processedTasksRef.current.add(task.id);
+        console.log(`[Progression] Task "${task.id}" COMPLETED! +${task.points} pts`);
       }
     }
     if (newlyCompleted.length > 0) {
       const taskName = PROGRESSION_TASKS.find((t) => t.id === newlyCompleted[0])?.name || "Task";
+      console.log(`[Progression] Awarding ${pointsToAdd} pts for ${newlyCompleted.length} tasks`);
       setStats((prev) => ({
         ...prev,
         totalPoints: prev.totalPoints + pointsToAdd,
-        completedTasks: [...prev.completedTasks || [], ...newlyCompleted]
+        completedTasks: [.../* @__PURE__ */ new Set([...prev.completedTasks || [], ...newlyCompleted])]
       }));
       setToast(`\u{1F389} "${taskName}" complete! +${pointsToAdd} pts`);
     }
-  }, [reminders, stats.completedAllTime, stats.currentStreak, stats.longestStreak]);
+  }, [reminders.length, stats.completedAllTime, stats.currentStreak, stats.longestStreak]);
   const getCurrentProgressionTask = () => {
     const completedTasks = stats.completedTasks || [];
+    console.log("[Hint] Finding next task. Completed:", completedTasks);
     for (const task of PROGRESSION_TASKS) {
-      if (!completedTasks.includes(task.id) && !task.check(reminders, stats)) {
+      const isInCompleted = completedTasks.includes(task.id);
+      const checkResult = task.check(reminders, stats);
+      if (!isInCompleted && !checkResult) {
+        console.log(`[Hint] Showing task "${task.id}" (not completed, check=${checkResult})`);
         return {
           text: task.description,
           icon: task.icon,
           points: task.points,
           name: task.name
         };
+      }
+      if (!isInCompleted && checkResult) {
+        console.log(`[Hint] Task "${task.id}" is done but not yet in completedTasks`);
       }
     }
     if (levelInfo.progress > 0) {
@@ -25362,6 +25381,7 @@ function ReminderApp({ initialData: initialData2 }) {
   const hint = getCurrentProgressionTask();
   const completedTaskCount = (stats.completedTasks || []).length;
   const totalTaskCount = PROGRESSION_TASKS.length;
+  console.log("[Render] completedTaskCount:", completedTaskCount, "hint:", hint?.name);
   const formatRecurrence = (r) => {
     if (r.recurrence === "none") return "";
     if (r.recurrence === "daily") return "Daily";

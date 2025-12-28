@@ -706,48 +706,80 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const todayCount = reminders.filter(r => !r.completed && r.dueDate === new Date().toISOString().split("T")[0]).length;
   const levelInfo = calcLevel(stats.totalPoints);
   
+  // Track which tasks we've already processed to prevent double-awarding
+  const processedTasksRef = useRef<Set<string>>(new Set(stats.completedTasks || []));
+  
   // Check for newly completed progression tasks and award points
   useEffect(() => {
-    const completedTasks = stats.completedTasks || [];
+    const currentCompleted = stats.completedTasks || [];
+    
+    // Sync ref with current state
+    currentCompleted.forEach(id => processedTasksRef.current.add(id));
+    
+    console.log("[Progression] Checking tasks. Current completed:", currentCompleted);
+    console.log("[Progression] Reminders count:", reminders.length);
+    console.log("[Progression] Stats:", { completedAllTime: stats.completedAllTime, currentStreak: stats.currentStreak });
+    
     let pointsToAdd = 0;
     const newlyCompleted: string[] = [];
     
     for (const task of PROGRESSION_TASKS) {
-      // Skip if already completed
-      if (completedTasks.includes(task.id)) continue;
+      // Skip if already in our processed set
+      if (processedTasksRef.current.has(task.id)) {
+        continue;
+      }
       
-      // Check if task is now complete
-      if (task.check(reminders, stats)) {
+      // Check if task condition is now met
+      const isComplete = task.check(reminders, stats);
+      console.log(`[Progression] Task "${task.id}": check=${isComplete}`);
+      
+      if (isComplete) {
         pointsToAdd += task.points;
         newlyCompleted.push(task.id);
+        processedTasksRef.current.add(task.id); // Mark as processed immediately
+        console.log(`[Progression] Task "${task.id}" COMPLETED! +${task.points} pts`);
       }
     }
     
     // Award points for newly completed tasks
     if (newlyCompleted.length > 0) {
       const taskName = PROGRESSION_TASKS.find(t => t.id === newlyCompleted[0])?.name || "Task";
+      console.log(`[Progression] Awarding ${pointsToAdd} pts for ${newlyCompleted.length} tasks`);
+      
       setStats(prev => ({
         ...prev,
         totalPoints: prev.totalPoints + pointsToAdd,
-        completedTasks: [...(prev.completedTasks || []), ...newlyCompleted]
+        completedTasks: [...new Set([...(prev.completedTasks || []), ...newlyCompleted])]
       }));
       setToast(`🎉 "${taskName}" complete! +${pointsToAdd} pts`);
     }
-  }, [reminders, stats.completedAllTime, stats.currentStreak, stats.longestStreak]);
+  }, [reminders.length, stats.completedAllTime, stats.currentStreak, stats.longestStreak]);
   
-  // Get the current progression task to show as hint
+  // Get the current progression task to show as hint (the NEXT task to complete)
   const getCurrentProgressionTask = (): { text: string; icon: string; points: number; name: string } | null => {
     const completedTasks = stats.completedTasks || [];
     
-    // Find the first incomplete task in order
+    console.log("[Hint] Finding next task. Completed:", completedTasks);
+    
+    // Find the first task that is NOT completed yet
     for (const task of PROGRESSION_TASKS) {
-      if (!completedTasks.includes(task.id) && !task.check(reminders, stats)) {
+      const isInCompleted = completedTasks.includes(task.id);
+      const checkResult = task.check(reminders, stats);
+      
+      // Show task if it's not completed AND the check is still false (not yet achieved)
+      if (!isInCompleted && !checkResult) {
+        console.log(`[Hint] Showing task "${task.id}" (not completed, check=${checkResult})`);
         return {
           text: task.description,
           icon: task.icon,
           points: task.points,
           name: task.name
         };
+      }
+      
+      // If check is true but not in completed, this task should be completed soon
+      if (!isInCompleted && checkResult) {
+        console.log(`[Hint] Task "${task.id}" is done but not yet in completedTasks`);
       }
     }
     
@@ -767,6 +799,8 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const hint = getCurrentProgressionTask();
   const completedTaskCount = (stats.completedTasks || []).length;
   const totalTaskCount = PROGRESSION_TASKS.length;
+  
+  console.log("[Render] completedTaskCount:", completedTaskCount, "hint:", hint?.name);
   
   // Helper to format recurrence for display
   const formatRecurrence = (r: Reminder | ParsedReminder): string => {
