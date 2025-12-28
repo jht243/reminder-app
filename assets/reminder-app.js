@@ -24876,7 +24876,7 @@ var formatTime = (time) => {
   return `${hour % 12 || 12}:${m} ${hour >= 12 ? "PM" : "AM"}`;
 };
 var isOverdue = (r) => {
-  if (r.completed) return false;
+  if (r.completed && !isRecentlyCompleted(r)) return false;
   const [year, month, day] = r.dueDate.split("-").map(Number);
   const [hours, minutes] = (r.dueTime || "23:59").split(":").map(Number);
   const dueDateTime = new Date(year, month - 1, day, hours, minutes);
@@ -24887,7 +24887,7 @@ var parseLocalDate = (dateStr) => {
   return new Date(year, month - 1, day);
 };
 var getTimeSection = (r) => {
-  if (r.completed) return "later";
+  if (r.completed && !isRecentlyCompleted(r)) return "later";
   const now = /* @__PURE__ */ new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const tomorrow = new Date(today);
@@ -25616,9 +25616,9 @@ function ReminderApp({ initialData: initialData2 }) {
       setParsed(null);
     }
   }, [input]);
-  const [, forceUpdate] = (0, import_react3.useState)(0);
+  const [tick, setTick] = (0, import_react3.useState)(0);
   (0, import_react3.useEffect)(() => {
-    const interval = setInterval(() => forceUpdate((n) => n + 1), 5e3);
+    const interval = setInterval(() => setTick((n) => n + 1), 5e3);
     return () => clearInterval(interval);
   }, []);
   (0, import_react3.useEffect)(() => {
@@ -25637,15 +25637,15 @@ function ReminderApp({ initialData: initialData2 }) {
     }
     if (quickFilter !== "all") {
       if (quickFilter === "urgent") {
-        f = f.filter((r) => !r.completed && r.priority === "urgent");
+        f = f.filter((r) => (!r.completed || isRecentlyCompleted(r)) && r.priority === "urgent");
       } else if (quickFilter === "today") {
-        f = f.filter((r) => !r.completed && r.dueDate === (/* @__PURE__ */ new Date()).toISOString().split("T")[0]);
+        f = f.filter((r) => (!r.completed || isRecentlyCompleted(r)) && r.dueDate === (/* @__PURE__ */ new Date()).toISOString().split("T")[0]);
       } else if (quickFilter === "overdue") {
         f = f.filter((r) => isOverdue(r));
       } else if (quickFilter === "completed") {
         f = f.filter((r) => r.completed && !isRecentlyCompleted(r));
       } else {
-        f = f.filter((r) => !r.completed && r.category === quickFilter);
+        f = f.filter((r) => (!r.completed || isRecentlyCompleted(r)) && r.category === quickFilter);
       }
     }
     f.sort((a, b) => {
@@ -25658,7 +25658,7 @@ function ReminderApp({ initialData: initialData2 }) {
       return order[a.priority] - order[b.priority];
     });
     return f;
-  }, [reminders, search, quickFilter]);
+  }, [reminders, search, quickFilter, tick]);
   const groupedByTime = (0, import_react3.useMemo)(() => {
     const groups = {
       overdue: [],
@@ -25672,7 +25672,7 @@ function ReminderApp({ initialData: initialData2 }) {
       groups[section].push(r);
     });
     return groups;
-  }, [filtered]);
+  }, [filtered, tick]);
   const sectionOrder = ["overdue", "today", "tomorrow", "thisWeek", "later"];
   const overdueCount = reminders.filter(isOverdue).length;
   const todayCount = reminders.filter((r) => !r.completed && r.dueDate === (/* @__PURE__ */ new Date()).toISOString().split("T")[0]).length;

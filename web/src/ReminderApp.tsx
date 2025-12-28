@@ -166,7 +166,10 @@ const formatTime = (time?: string) => {
 };
 
 const isOverdue = (r: Reminder) => {
-  if (r.completed) return false;
+  // If completed and NOT recently completed, it's not overdue (it's done)
+  // If recently completed, we still consider it "overdue" for 1 minute so it stays in the Overdue section
+  if (r.completed && !isRecentlyCompleted(r)) return false;
+  
   // Parse date as local time, not UTC
   const [year, month, day] = r.dueDate.split('-').map(Number);
   const [hours, minutes] = (r.dueTime || "23:59").split(':').map(Number);
@@ -183,7 +186,10 @@ const parseLocalDate = (dateStr: string): Date => {
 
 // Helper to get time-based section for a reminder
 const getTimeSection = (r: Reminder): "overdue" | "today" | "tomorrow" | "thisWeek" | "later" => {
-  if (r.completed) return "later";
+  // If completed and NOT recently completed, it goes to 'later' (or usually filtered out)
+  // If recently completed, we want it to stay in its original section
+  if (r.completed && !isRecentlyCompleted(r)) return "later";
+  
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
@@ -1041,9 +1047,9 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   }, [input]);
   
   // Force re-render every 5 seconds to update recently completed items visibility
-  const [, forceUpdate] = useState(0);
+  const [tick, setTick] = useState(0);
   useEffect(() => {
-    const interval = setInterval(() => forceUpdate(n => n + 1), 5000);
+    const interval = setInterval(() => setTick(n => n + 1), 5000);
     return () => clearInterval(interval);
   }, []);
   
@@ -1067,9 +1073,9 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     // Apply quick filter
     if (quickFilter !== "all") {
       if (quickFilter === "urgent") {
-        f = f.filter(r => !r.completed && r.priority === "urgent");
+        f = f.filter(r => (!r.completed || isRecentlyCompleted(r)) && r.priority === "urgent");
       } else if (quickFilter === "today") {
-        f = f.filter(r => !r.completed && r.dueDate === new Date().toISOString().split("T")[0]);
+        f = f.filter(r => (!r.completed || isRecentlyCompleted(r)) && r.dueDate === new Date().toISOString().split("T")[0]);
       } else if (quickFilter === "overdue") {
         f = f.filter(r => isOverdue(r));
       } else if (quickFilter === "completed") {
@@ -1077,7 +1083,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
         f = f.filter(r => r.completed && !isRecentlyCompleted(r));
       } else {
         // Category filter
-        f = f.filter(r => !r.completed && r.category === quickFilter);
+        f = f.filter(r => (!r.completed || isRecentlyCompleted(r)) && r.category === quickFilter);
       }
     }
     
@@ -1095,7 +1101,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       return order[a.priority] - order[b.priority];
     });
     return f;
-  }, [reminders, search, quickFilter]);
+  }, [reminders, search, quickFilter, tick]);
   
   // Group reminders by time section for smart display
   // Include recently completed items in their original sections (crossed out)
@@ -1113,7 +1119,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       groups[section].push(r);
     });
     return groups;
-  }, [filtered]);
+  }, [filtered, tick]);
   
   // Section order for display
   const sectionOrder = ["overdue", "today", "tomorrow", "thisWeek", "later"] as const;
