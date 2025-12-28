@@ -24552,23 +24552,36 @@ var __iconNode3 = [
 ];
 var Calendar = createLucideIcon("calendar", __iconNode3);
 
+// node_modules/lucide-react/dist/esm/icons/camera.js
+var __iconNode4 = [
+  [
+    "path",
+    {
+      d: "M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z",
+      key: "18u6gg"
+    }
+  ],
+  ["circle", { cx: "12", cy: "13", r: "3", key: "1vg3eu" }]
+];
+var Camera = createLucideIcon("camera", __iconNode4);
+
 // node_modules/lucide-react/dist/esm/icons/check.js
-var __iconNode4 = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
-var Check = createLucideIcon("check", __iconNode4);
+var __iconNode5 = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
+var Check = createLucideIcon("check", __iconNode5);
 
 // node_modules/lucide-react/dist/esm/icons/chevron-right.js
-var __iconNode5 = [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]];
-var ChevronRight = createLucideIcon("chevron-right", __iconNode5);
+var __iconNode6 = [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]];
+var ChevronRight = createLucideIcon("chevron-right", __iconNode6);
 
 // node_modules/lucide-react/dist/esm/icons/clock.js
-var __iconNode6 = [
+var __iconNode7 = [
   ["path", { d: "M12 6v6l4 2", key: "mmk7yg" }],
   ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }]
 ];
-var Clock = createLucideIcon("clock", __iconNode6);
+var Clock = createLucideIcon("clock", __iconNode7);
 
 // node_modules/lucide-react/dist/esm/icons/crown.js
-var __iconNode7 = [
+var __iconNode8 = [
   [
     "path",
     {
@@ -24578,10 +24591,10 @@ var __iconNode7 = [
   ],
   ["path", { d: "M5 21h14", key: "11awu3" }]
 ];
-var Crown = createLucideIcon("crown", __iconNode7);
+var Crown = createLucideIcon("crown", __iconNode8);
 
 // node_modules/lucide-react/dist/esm/icons/flame.js
-var __iconNode8 = [
+var __iconNode9 = [
   [
     "path",
     {
@@ -24590,10 +24603,10 @@ var __iconNode8 = [
     }
   ]
 ];
-var Flame = createLucideIcon("flame", __iconNode8);
+var Flame = createLucideIcon("flame", __iconNode9);
 
 // node_modules/lucide-react/dist/esm/icons/graduation-cap.js
-var __iconNode9 = [
+var __iconNode10 = [
   [
     "path",
     {
@@ -24604,10 +24617,10 @@ var __iconNode9 = [
   ["path", { d: "M22 10v6", key: "1lu8f3" }],
   ["path", { d: "M6 12.5V16a6 3 0 0 0 12 0v-3.5", key: "1r8lef" }]
 ];
-var GraduationCap = createLucideIcon("graduation-cap", __iconNode9);
+var GraduationCap = createLucideIcon("graduation-cap", __iconNode10);
 
 // node_modules/lucide-react/dist/esm/icons/heart.js
-var __iconNode10 = [
+var __iconNode11 = [
   [
     "path",
     {
@@ -24616,10 +24629,10 @@ var __iconNode10 = [
     }
   ]
 ];
-var Heart = createLucideIcon("heart", __iconNode10);
+var Heart = createLucideIcon("heart", __iconNode11);
 
 // node_modules/lucide-react/dist/esm/icons/house.js
-var __iconNode11 = [
+var __iconNode12 = [
   ["path", { d: "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8", key: "5wwlr5" }],
   [
     "path",
@@ -24629,10 +24642,10 @@ var __iconNode11 = [
     }
   ]
 ];
-var House = createLucideIcon("house", __iconNode11);
+var House = createLucideIcon("house", __iconNode12);
 
 // node_modules/lucide-react/dist/esm/icons/pen.js
-var __iconNode12 = [
+var __iconNode13 = [
   [
     "path",
     {
@@ -24641,10 +24654,10 @@ var __iconNode12 = [
     }
   ]
 ];
-var Pen = createLucideIcon("pen", __iconNode12);
+var Pen = createLucideIcon("pen", __iconNode13);
 
 // node_modules/lucide-react/dist/esm/icons/plane.js
-var __iconNode13 = [
+var __iconNode14 = [
   [
     "path",
     {
@@ -24653,33 +24666,33 @@ var __iconNode13 = [
     }
   ]
 ];
-var Plane = createLucideIcon("plane", __iconNode13);
+var Plane = createLucideIcon("plane", __iconNode14);
 
 // node_modules/lucide-react/dist/esm/icons/plus.js
-var __iconNode14 = [
+var __iconNode15 = [
   ["path", { d: "M5 12h14", key: "1ays0h" }],
   ["path", { d: "M12 5v14", key: "s699le" }]
 ];
-var Plus = createLucideIcon("plus", __iconNode14);
+var Plus = createLucideIcon("plus", __iconNode15);
 
 // node_modules/lucide-react/dist/esm/icons/repeat.js
-var __iconNode15 = [
+var __iconNode16 = [
   ["path", { d: "m17 2 4 4-4 4", key: "nntrym" }],
   ["path", { d: "M3 11v-1a4 4 0 0 1 4-4h14", key: "84bu3i" }],
   ["path", { d: "m7 22-4-4 4-4", key: "1wqhfi" }],
   ["path", { d: "M21 13v1a4 4 0 0 1-4 4H3", key: "1rx37r" }]
 ];
-var Repeat = createLucideIcon("repeat", __iconNode15);
+var Repeat = createLucideIcon("repeat", __iconNode16);
 
 // node_modules/lucide-react/dist/esm/icons/search.js
-var __iconNode16 = [
+var __iconNode17 = [
   ["path", { d: "m21 21-4.34-4.34", key: "14j7rj" }],
   ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }]
 ];
-var Search = createLucideIcon("search", __iconNode16);
+var Search = createLucideIcon("search", __iconNode17);
 
 // node_modules/lucide-react/dist/esm/icons/shopping-cart.js
-var __iconNode17 = [
+var __iconNode18 = [
   ["circle", { cx: "8", cy: "21", r: "1", key: "jimo8o" }],
   ["circle", { cx: "19", cy: "21", r: "1", key: "13723u" }],
   [
@@ -24690,10 +24703,10 @@ var __iconNode17 = [
     }
   ]
 ];
-var ShoppingCart = createLucideIcon("shopping-cart", __iconNode17);
+var ShoppingCart = createLucideIcon("shopping-cart", __iconNode18);
 
 // node_modules/lucide-react/dist/esm/icons/star.js
-var __iconNode18 = [
+var __iconNode19 = [
   [
     "path",
     {
@@ -24702,51 +24715,70 @@ var __iconNode18 = [
     }
   ]
 ];
-var Star = createLucideIcon("star", __iconNode18);
+var Star = createLucideIcon("star", __iconNode19);
 
 // node_modules/lucide-react/dist/esm/icons/stethoscope.js
-var __iconNode19 = [
+var __iconNode20 = [
   ["path", { d: "M11 2v2", key: "1539x4" }],
   ["path", { d: "M5 2v2", key: "1yf1q8" }],
   ["path", { d: "M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1", key: "rb5t3r" }],
   ["path", { d: "M8 15a6 6 0 0 0 12 0v-3", key: "x18d4x" }],
   ["circle", { cx: "20", cy: "10", r: "2", key: "ts1r5v" }]
 ];
-var Stethoscope = createLucideIcon("stethoscope", __iconNode19);
+var Stethoscope = createLucideIcon("stethoscope", __iconNode20);
 
 // node_modules/lucide-react/dist/esm/icons/trash-2.js
-var __iconNode20 = [
+var __iconNode21 = [
   ["path", { d: "M10 11v6", key: "nco0om" }],
   ["path", { d: "M14 11v6", key: "outv1u" }],
   ["path", { d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6", key: "miytrc" }],
   ["path", { d: "M3 6h18", key: "d0wm0j" }],
   ["path", { d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2", key: "e791ji" }]
 ];
-var Trash2 = createLucideIcon("trash-2", __iconNode20);
+var Trash2 = createLucideIcon("trash-2", __iconNode21);
 
 // node_modules/lucide-react/dist/esm/icons/upload.js
-var __iconNode21 = [
+var __iconNode22 = [
   ["path", { d: "M12 3v12", key: "1x0j5s" }],
   ["path", { d: "m17 8-5-5-5 5", key: "7q97r8" }],
   ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", key: "ih7n3h" }]
 ];
-var Upload = createLucideIcon("upload", __iconNode21);
+var Upload = createLucideIcon("upload", __iconNode22);
 
 // node_modules/lucide-react/dist/esm/icons/users.js
-var __iconNode22 = [
+var __iconNode23 = [
   ["path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", key: "1yyitq" }],
   ["path", { d: "M16 3.128a4 4 0 0 1 0 7.744", key: "16gr8j" }],
   ["path", { d: "M22 21v-2a4 4 0 0 0-3-3.87", key: "kshegd" }],
   ["circle", { cx: "9", cy: "7", r: "4", key: "nufk8" }]
 ];
-var Users = createLucideIcon("users", __iconNode22);
+var Users = createLucideIcon("users", __iconNode23);
+
+// node_modules/lucide-react/dist/esm/icons/wand-sparkles.js
+var __iconNode24 = [
+  [
+    "path",
+    {
+      d: "m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72",
+      key: "ul74o6"
+    }
+  ],
+  ["path", { d: "m14 7 3 3", key: "1r5n42" }],
+  ["path", { d: "M5 6v4", key: "ilb8ba" }],
+  ["path", { d: "M19 14v4", key: "blhpug" }],
+  ["path", { d: "M10 2v2", key: "7u0qdc" }],
+  ["path", { d: "M7 8H3", key: "zfb6yr" }],
+  ["path", { d: "M21 16h-4", key: "1cnmox" }],
+  ["path", { d: "M11 3H9", key: "1obp7u" }]
+];
+var WandSparkles = createLucideIcon("wand-sparkles", __iconNode24);
 
 // node_modules/lucide-react/dist/esm/icons/x.js
-var __iconNode23 = [
+var __iconNode25 = [
   ["path", { d: "M18 6 6 18", key: "1bl5f8" }],
   ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
 ];
-var X = createLucideIcon("x", __iconNode23);
+var X = createLucideIcon("x", __iconNode25);
 
 // src/ReminderApp.tsx
 var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
@@ -25526,30 +25558,59 @@ function ReminderApp({ initialData: initialData2 }) {
     return "";
   };
   const createFromParsed = () => {
-    if (!parsed || !parsed.title.trim()) {
+    if (!input.trim()) {
       setToast("Type something to create a reminder");
       return;
     }
-    const newReminder = {
-      id: generateId(),
-      title: parsed.title,
-      dueDate: parsed.dueDate,
-      dueTime: parsed.dueTime,
-      priority: parsed.priority,
-      category: parsed.category,
-      recurrence: parsed.recurrence,
-      recurrenceInterval: parsed.recurrenceInterval,
-      recurrenceUnit: parsed.recurrenceUnit,
-      completed: false,
-      createdAt: (/* @__PURE__ */ new Date()).toISOString(),
-      pointsAwarded: 0
-    };
-    setReminders((prev) => [...prev, newReminder]);
-    setInput("");
-    setParsed(null);
-    const recurrenceText = formatRecurrence(parsed);
-    const msg = recurrenceText ? `Created ${recurrenceText.toLowerCase()} reminder!` : `Created! Auto-categorized as ${CATEGORY_CONFIG[parsed.category].label}`;
-    setToast(msg);
+    const segments = input.split(",").map((s) => s.trim()).filter((s) => s.length > 0);
+    if (segments.length > 1) {
+      const newReminders = segments.map((segment) => {
+        const parsedSegment = parseNaturalLanguage(segment);
+        return {
+          id: generateId(),
+          title: parsedSegment.title,
+          dueDate: parsedSegment.dueDate,
+          dueTime: parsedSegment.dueTime,
+          priority: parsedSegment.priority,
+          category: parsedSegment.category,
+          recurrence: parsedSegment.recurrence,
+          recurrenceInterval: parsedSegment.recurrenceInterval,
+          recurrenceUnit: parsedSegment.recurrenceUnit,
+          completed: false,
+          createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+          pointsAwarded: 0
+        };
+      });
+      setReminders((prev) => [...prev, ...newReminders]);
+      setInput("");
+      setParsed(null);
+      setToast(`Created ${newReminders.length} reminders!`);
+    } else {
+      if (!parsed || !parsed.title.trim()) {
+        setToast("Type something to create a reminder");
+        return;
+      }
+      const newReminder = {
+        id: generateId(),
+        title: parsed.title,
+        dueDate: parsed.dueDate,
+        dueTime: parsed.dueTime,
+        priority: parsed.priority,
+        category: parsed.category,
+        recurrence: parsed.recurrence,
+        recurrenceInterval: parsed.recurrenceInterval,
+        recurrenceUnit: parsed.recurrenceUnit,
+        completed: false,
+        createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+        pointsAwarded: 0
+      };
+      setReminders((prev) => [...prev, newReminder]);
+      setInput("");
+      setParsed(null);
+      const recurrenceText = formatRecurrence(parsed);
+      const msg = recurrenceText ? `Created ${recurrenceText.toLowerCase()} reminder!` : `Created! Auto-categorized as ${CATEGORY_CONFIG[parsed.category].label}`;
+      setToast(msg);
+    }
   };
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && parsed) {
@@ -25667,6 +25728,118 @@ function ReminderApp({ initialData: initialData2 }) {
     });
     setToast("Progress reset! Start fresh.");
     console.log("[Reset] All progress cleared");
+  };
+  const generate40Reminders = () => {
+    const sampleTasks = [
+      { title: "Call mom", category: "family", priority: "medium" },
+      { title: "Team standup meeting", category: "work", priority: "high" },
+      { title: "Pay electricity bill", category: "finance", priority: "urgent" },
+      { title: "Gym workout", category: "health", priority: "medium" },
+      { title: "Buy groceries", category: "errands", priority: "medium" },
+      { title: "Dentist appointment", category: "health", priority: "high" },
+      { title: "Submit project report", category: "work", priority: "urgent" },
+      { title: "Pick up dry cleaning", category: "errands", priority: "low" },
+      { title: "Birthday gift for Sarah", category: "social", priority: "medium" },
+      { title: "Book flight tickets", category: "travel", priority: "high" },
+      { title: "Online course lesson", category: "learning", priority: "medium" },
+      { title: "Water the plants", category: "home", priority: "low" },
+      { title: "Car oil change", category: "errands", priority: "medium" },
+      { title: "Reply to client email", category: "work", priority: "high" },
+      { title: "Dinner with friends", category: "social", priority: "medium" },
+      { title: "Renew gym membership", category: "health", priority: "low" },
+      { title: "Fix kitchen faucet", category: "home", priority: "medium" },
+      { title: "Cancel unused subscription", category: "finance", priority: "low" },
+      { title: "Family video call", category: "family", priority: "medium" },
+      { title: "Prepare presentation slides", category: "work", priority: "high" },
+      { title: "Take vitamins", category: "health", priority: "low" },
+      { title: "Schedule car inspection", category: "errands", priority: "medium" },
+      { title: "Read book chapter", category: "learning", priority: "low" },
+      { title: "Pack for weekend trip", category: "travel", priority: "high" },
+      { title: "Clean bathroom", category: "home", priority: "medium" },
+      { title: "Review investment portfolio", category: "finance", priority: "medium" },
+      { title: "Call insurance company", category: "finance", priority: "high" },
+      { title: "Kids school pickup", category: "family", priority: "urgent" },
+      { title: "Coffee with mentor", category: "social", priority: "medium" },
+      { title: "Update resume", category: "work", priority: "low" },
+      { title: "Yoga class", category: "health", priority: "medium" },
+      { title: "Return Amazon package", category: "errands", priority: "medium" },
+      { title: "Practice Spanish", category: "learning", priority: "low" },
+      { title: "Check hotel reviews", category: "travel", priority: "low" },
+      { title: "Organize closet", category: "home", priority: "low" },
+      { title: "Pay credit card", category: "finance", priority: "urgent" },
+      { title: "Anniversary dinner reservation", category: "family", priority: "high" },
+      { title: "Code review for PR", category: "work", priority: "high" },
+      { title: "Meal prep Sunday", category: "health", priority: "medium" },
+      { title: "Game night with neighbors", category: "social", priority: "low" }
+    ];
+    const today = /* @__PURE__ */ new Date();
+    const newReminders = sampleTasks.map((task, i) => {
+      const dueDate = new Date(today);
+      dueDate.setDate(dueDate.getDate() + Math.floor(i / 4));
+      const hour = 8 + i % 12;
+      return {
+        id: generateId(),
+        title: task.title,
+        dueDate: dueDate.toISOString().split("T")[0],
+        dueTime: `${hour.toString().padStart(2, "0")}:${i % 2 === 0 ? "00" : "30"}`,
+        priority: task.priority,
+        category: task.category,
+        recurrence: "none",
+        completed: false,
+        createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+        pointsAwarded: 0
+      };
+    });
+    setReminders((prev) => [...prev, ...newReminders]);
+    setToast(`Generated ${newReminders.length} sample reminders!`);
+  };
+  const handleScreenshotUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setToast("Please upload an image file");
+      return;
+    }
+    setToast("Analyzing screenshot...");
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const base64 = event.target?.result;
+      const img = new Image();
+      img.onload = () => {
+        const userInput = prompt(
+          "\u{1F4F8} Screenshot uploaded!\n\nSince browser-based OCR is limited, please paste the text from your screenshot here.\n\nTip: You can also just type your reminders separated by commas or newlines."
+        );
+        if (userInput && userInput.trim()) {
+          const lines = userInput.split(/[,\n]/).map((s) => s.trim()).filter((s) => s.length > 2);
+          const newReminders = lines.map((line) => {
+            const parsed2 = parseNaturalLanguage(line.replace(/^[-*•]\s*/, ""));
+            return {
+              id: generateId(),
+              title: parsed2.title,
+              dueDate: parsed2.dueDate,
+              dueTime: parsed2.dueTime,
+              priority: parsed2.priority,
+              category: parsed2.category,
+              recurrence: parsed2.recurrence,
+              recurrenceInterval: parsed2.recurrenceInterval,
+              recurrenceUnit: parsed2.recurrenceUnit,
+              completed: false,
+              createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+              pointsAwarded: 0
+            };
+          });
+          if (newReminders.length > 0) {
+            setReminders((prev) => [...prev, ...newReminders]);
+            setToast(`Imported ${newReminders.length} reminders from screenshot!`);
+          } else {
+            setToast("No reminders found in input");
+          }
+        }
+      };
+      img.src = base64;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
   };
   const CategoryIcon = ({ cat, size = 32 }) => {
     const config = CATEGORY_CONFIG[cat];
@@ -25905,7 +26078,7 @@ function ReminderApp({ initialData: initialData2 }) {
         }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { size: 20, color: COLORS.primary }) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 15, fontWeight: 600, color: COLORS.textMain }, children: "Create New Task" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 12, color: COLORS.textMuted }, children: "Type naturally to add a reminder" })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 12, color: COLORS.textMuted }, children: "Type naturally \u2022 Separate multiple tasks with commas" })
         ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative" }, children: [
@@ -25914,7 +26087,7 @@ function ReminderApp({ initialData: initialData2 }) {
           {
             ref: inputRef,
             type: "text",
-            placeholder: "Try: 'Call mom tomorrow 3pm' or 'Pay rent Friday urgent'",
+            placeholder: "e.g. 'Feed cat, Pay bill tomorrow, Cancel Netflix Thursday'",
             value: input,
             onChange: (e) => setInput(e.target.value),
             onKeyDown: handleKeyDown,
@@ -26429,6 +26602,69 @@ OR just paste a list:
         }
       )
     ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
+      marginTop: 24,
+      padding: 20,
+      backgroundColor: COLORS.card,
+      borderRadius: cardRadius,
+      boxShadow: cardShadow
+    }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textMain, marginBottom: 12 }, children: "Quick Actions" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", flexWrap: "wrap", gap: 10 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { style: {
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "10px 16px",
+          borderRadius: 50,
+          backgroundColor: COLORS.cardAlt,
+          color: COLORS.textMain,
+          fontSize: 13,
+          fontWeight: 500,
+          cursor: "pointer",
+          border: `1px solid ${COLORS.border}`,
+          transition: "all 0.2s"
+        }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Camera, { size: 16, color: COLORS.primary }),
+          "Import from Screenshot",
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "input",
+            {
+              type: "file",
+              accept: "image/*",
+              capture: "environment",
+              onChange: handleScreenshotUpload,
+              style: { display: "none" }
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "button",
+          {
+            onClick: generate40Reminders,
+            style: {
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "10px 16px",
+              borderRadius: 50,
+              backgroundColor: COLORS.cardAlt,
+              color: COLORS.textMain,
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: "pointer",
+              border: `1px solid ${COLORS.border}`,
+              transition: "all 0.2s"
+            },
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(WandSparkles, { size: 16, color: COLORS.primary }),
+              "Generate 40 Reminders"
+            ]
+          }
+        )
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 11, color: COLORS.textMuted, marginTop: 10 }, children: "\u{1F4F8} Upload a screenshot of your existing reminders to import them instantly" })
+    ] }),
     editing && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16, overflowY: "auto" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 24, width: "100%", maxWidth: 420, padding: 24, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 16px 48px rgba(0,0,0,0.15)" }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { style: { margin: 0, fontSize: 18, fontWeight: 600, color: COLORS.textMain }, children: "Edit Reminder" }),
@@ -26773,6 +27009,14 @@ lucide-react/dist/esm/icons/calendar.js:
    * See the LICENSE file in the root directory of this source tree.
    *)
 
+lucide-react/dist/esm/icons/camera.js:
+  (**
+   * @license lucide-react v0.554.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
 lucide-react/dist/esm/icons/check.js:
   (**
    * @license lucide-react v0.554.0 - ISC
@@ -26918,6 +27162,14 @@ lucide-react/dist/esm/icons/upload.js:
    *)
 
 lucide-react/dist/esm/icons/users.js:
+  (**
+   * @license lucide-react v0.554.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/wand-sparkles.js:
   (**
    * @license lucide-react v0.554.0 - ISC
    *

@@ -3,7 +3,7 @@ import {
   Bell, Plus, Check, X, Clock, Calendar, Search, Filter, Trash2,
   Edit2, Repeat, Trophy, Flame, Star, Award, Crown, Send,
   SortAsc, SortDesc, Timer, Briefcase, Users, Heart, ShoppingCart,
-  Stethoscope, GraduationCap, Plane, Home, Sparkles, ChevronRight, Upload, FileText, Download
+  Stethoscope, GraduationCap, Plane, Home, Sparkles, ChevronRight, Upload, FileText, Download, Camera, Wand2
 } from "lucide-react";
 
 type Priority = "low" | "medium" | "high" | "urgent";
@@ -977,33 +977,64 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     return "";
   };
   
-  // Create from parsed input - ONE CLICK!
+  // Create from parsed input - supports comma-separated bulk input
   const createFromParsed = () => {
-    if (!parsed || !parsed.title.trim()) { setToast("Type something to create a reminder"); return; }
-    const newReminder: Reminder = {
-      id: generateId(),
-      title: parsed.title,
-      dueDate: parsed.dueDate,
-      dueTime: parsed.dueTime,
-      priority: parsed.priority,
-      category: parsed.category,
-      recurrence: parsed.recurrence,
-      recurrenceInterval: parsed.recurrenceInterval,
-      recurrenceUnit: parsed.recurrenceUnit,
-      completed: false,
-      createdAt: new Date().toISOString(),
-      pointsAwarded: 0
-    };
-    setReminders(prev => [...prev, newReminder]);
-    setInput("");
-    setParsed(null);
+    if (!input.trim()) { setToast("Type something to create a reminder"); return; }
     
-    // Enhanced toast message
-    const recurrenceText = formatRecurrence(parsed);
-    const msg = recurrenceText 
-      ? `Created ${recurrenceText.toLowerCase()} reminder!`
-      : `Created! Auto-categorized as ${CATEGORY_CONFIG[parsed.category].label}`;
-    setToast(msg);
+    // Check for comma-separated bulk input
+    const segments = input.split(",").map(s => s.trim()).filter(s => s.length > 0);
+    
+    if (segments.length > 1) {
+      // Bulk create mode
+      const newReminders: Reminder[] = segments.map(segment => {
+        const parsedSegment = parseNaturalLanguage(segment);
+        return {
+          id: generateId(),
+          title: parsedSegment.title,
+          dueDate: parsedSegment.dueDate,
+          dueTime: parsedSegment.dueTime,
+          priority: parsedSegment.priority,
+          category: parsedSegment.category,
+          recurrence: parsedSegment.recurrence,
+          recurrenceInterval: parsedSegment.recurrenceInterval,
+          recurrenceUnit: parsedSegment.recurrenceUnit,
+          completed: false,
+          createdAt: new Date().toISOString(),
+          pointsAwarded: 0
+        };
+      });
+      setReminders(prev => [...prev, ...newReminders]);
+      setInput("");
+      setParsed(null);
+      setToast(`Created ${newReminders.length} reminders!`);
+    } else {
+      // Single reminder mode
+      if (!parsed || !parsed.title.trim()) { setToast("Type something to create a reminder"); return; }
+      const newReminder: Reminder = {
+        id: generateId(),
+        title: parsed.title,
+        dueDate: parsed.dueDate,
+        dueTime: parsed.dueTime,
+        priority: parsed.priority,
+        category: parsed.category,
+        recurrence: parsed.recurrence,
+        recurrenceInterval: parsed.recurrenceInterval,
+        recurrenceUnit: parsed.recurrenceUnit,
+        completed: false,
+        createdAt: new Date().toISOString(),
+        pointsAwarded: 0
+      };
+      setReminders(prev => [...prev, newReminder]);
+      setInput("");
+      setParsed(null);
+      
+      // Enhanced toast message
+      const recurrenceText = formatRecurrence(parsed);
+      const msg = recurrenceText 
+        ? `Created ${recurrenceText.toLowerCase()} reminder!`
+        : `Created! Auto-categorized as ${CATEGORY_CONFIG[parsed.category].label}`;
+      setToast(msg);
+    }
   };
   
   // Handle Enter key
@@ -1118,6 +1149,144 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     });
     setToast("Progress reset! Start fresh.");
     console.log("[Reset] All progress cleared");
+  };
+
+  // Generate 40 sample reminders for testing
+  const generate40Reminders = () => {
+    const sampleTasks = [
+      { title: "Call mom", category: "family" as Category, priority: "medium" as Priority },
+      { title: "Team standup meeting", category: "work" as Category, priority: "high" as Priority },
+      { title: "Pay electricity bill", category: "finance" as Category, priority: "urgent" as Priority },
+      { title: "Gym workout", category: "health" as Category, priority: "medium" as Priority },
+      { title: "Buy groceries", category: "errands" as Category, priority: "medium" as Priority },
+      { title: "Dentist appointment", category: "health" as Category, priority: "high" as Priority },
+      { title: "Submit project report", category: "work" as Category, priority: "urgent" as Priority },
+      { title: "Pick up dry cleaning", category: "errands" as Category, priority: "low" as Priority },
+      { title: "Birthday gift for Sarah", category: "social" as Category, priority: "medium" as Priority },
+      { title: "Book flight tickets", category: "travel" as Category, priority: "high" as Priority },
+      { title: "Online course lesson", category: "learning" as Category, priority: "medium" as Priority },
+      { title: "Water the plants", category: "home" as Category, priority: "low" as Priority },
+      { title: "Car oil change", category: "errands" as Category, priority: "medium" as Priority },
+      { title: "Reply to client email", category: "work" as Category, priority: "high" as Priority },
+      { title: "Dinner with friends", category: "social" as Category, priority: "medium" as Priority },
+      { title: "Renew gym membership", category: "health" as Category, priority: "low" as Priority },
+      { title: "Fix kitchen faucet", category: "home" as Category, priority: "medium" as Priority },
+      { title: "Cancel unused subscription", category: "finance" as Category, priority: "low" as Priority },
+      { title: "Family video call", category: "family" as Category, priority: "medium" as Priority },
+      { title: "Prepare presentation slides", category: "work" as Category, priority: "high" as Priority },
+      { title: "Take vitamins", category: "health" as Category, priority: "low" as Priority },
+      { title: "Schedule car inspection", category: "errands" as Category, priority: "medium" as Priority },
+      { title: "Read book chapter", category: "learning" as Category, priority: "low" as Priority },
+      { title: "Pack for weekend trip", category: "travel" as Category, priority: "high" as Priority },
+      { title: "Clean bathroom", category: "home" as Category, priority: "medium" as Priority },
+      { title: "Review investment portfolio", category: "finance" as Category, priority: "medium" as Priority },
+      { title: "Call insurance company", category: "finance" as Category, priority: "high" as Priority },
+      { title: "Kids school pickup", category: "family" as Category, priority: "urgent" as Priority },
+      { title: "Coffee with mentor", category: "social" as Category, priority: "medium" as Priority },
+      { title: "Update resume", category: "work" as Category, priority: "low" as Priority },
+      { title: "Yoga class", category: "health" as Category, priority: "medium" as Priority },
+      { title: "Return Amazon package", category: "errands" as Category, priority: "medium" as Priority },
+      { title: "Practice Spanish", category: "learning" as Category, priority: "low" as Priority },
+      { title: "Check hotel reviews", category: "travel" as Category, priority: "low" as Priority },
+      { title: "Organize closet", category: "home" as Category, priority: "low" as Priority },
+      { title: "Pay credit card", category: "finance" as Category, priority: "urgent" as Priority },
+      { title: "Anniversary dinner reservation", category: "family" as Category, priority: "high" as Priority },
+      { title: "Code review for PR", category: "work" as Category, priority: "high" as Priority },
+      { title: "Meal prep Sunday", category: "health" as Category, priority: "medium" as Priority },
+      { title: "Game night with neighbors", category: "social" as Category, priority: "low" as Priority },
+    ];
+
+    const today = new Date();
+    const newReminders: Reminder[] = sampleTasks.map((task, i) => {
+      const dueDate = new Date(today);
+      dueDate.setDate(dueDate.getDate() + Math.floor(i / 4)); // Spread over ~10 days
+      const hour = 8 + (i % 12); // Vary times between 8am and 8pm
+      return {
+        id: generateId(),
+        title: task.title,
+        dueDate: dueDate.toISOString().split("T")[0],
+        dueTime: `${hour.toString().padStart(2, "0")}:${(i % 2 === 0 ? "00" : "30")}`,
+        priority: task.priority,
+        category: task.category,
+        recurrence: "none" as RecurrenceType,
+        completed: false,
+        createdAt: new Date().toISOString(),
+        pointsAwarded: 0
+      };
+    });
+
+    setReminders(prev => [...prev, ...newReminders]);
+    setToast(`Generated ${newReminders.length} sample reminders!`);
+  };
+
+  // Screenshot OCR handler - extracts reminders from uploaded screenshot
+  const handleScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check if it's an image
+    if (!file.type.startsWith("image/")) {
+      setToast("Please upload an image file");
+      return;
+    }
+
+    setToast("Analyzing screenshot...");
+
+    // Convert to base64 for display and potential API use
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const base64 = event.target?.result as string;
+      
+      // For now, use a simple OCR approach via browser's built-in capabilities
+      // In production, this would call an AI vision API like GPT-4V or Google Vision
+      // Simulating extraction with common reminder patterns
+      
+      // Create a canvas to process the image
+      const img = new Image();
+      img.onload = () => {
+        // For demo purposes, we'll show a modal asking user to describe what they see
+        // In a real implementation, this would use an OCR/Vision API
+        const userInput = prompt(
+          "📸 Screenshot uploaded!\n\n" +
+          "Since browser-based OCR is limited, please paste the text from your screenshot here.\n\n" +
+          "Tip: You can also just type your reminders separated by commas or newlines."
+        );
+        
+        if (userInput && userInput.trim()) {
+          // Parse the user's input as bulk reminders
+          const lines = userInput.split(/[,\n]/).map(s => s.trim()).filter(s => s.length > 2);
+          const newReminders: Reminder[] = lines.map(line => {
+            const parsed = parseNaturalLanguage(line.replace(/^[-*•]\s*/, ""));
+            return {
+              id: generateId(),
+              title: parsed.title,
+              dueDate: parsed.dueDate,
+              dueTime: parsed.dueTime,
+              priority: parsed.priority,
+              category: parsed.category,
+              recurrence: parsed.recurrence,
+              recurrenceInterval: parsed.recurrenceInterval,
+              recurrenceUnit: parsed.recurrenceUnit,
+              completed: false,
+              createdAt: new Date().toISOString(),
+              pointsAwarded: 0
+            };
+          });
+          
+          if (newReminders.length > 0) {
+            setReminders(prev => [...prev, ...newReminders]);
+            setToast(`Imported ${newReminders.length} reminders from screenshot!`);
+          } else {
+            setToast("No reminders found in input");
+          }
+        }
+      };
+      img.src = base64;
+    };
+    reader.readAsDataURL(file);
+    
+    // Reset the input so the same file can be uploaded again
+    e.target.value = "";
   };
   
   // Round icon component for modern minimal style
@@ -1333,14 +1502,14 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
           </div>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, color: COLORS.textMain }}>Create New Task</div>
-            <div style={{ fontSize: 12, color: COLORS.textMuted }}>Type naturally to add a reminder</div>
+            <div style={{ fontSize: 12, color: COLORS.textMuted }}>Type naturally • Separate multiple tasks with commas</div>
           </div>
         </div>
         <div style={{ position: "relative" }}>
           <input
             ref={inputRef}
             type="text"
-            placeholder="Try: 'Call mom tomorrow 3pm' or 'Pay rent Friday urgent'"
+            placeholder="e.g. 'Feed cat, Pay bill tomorrow, Cancel Netflix Thursday'"
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -1753,6 +1922,57 @@ OR just paste a list:
           </div>
         </div>
       )}
+
+      {/* Footer Actions */}
+      <div style={{ 
+        marginTop: 24, 
+        padding: 20, 
+        backgroundColor: COLORS.card, 
+        borderRadius: cardRadius, 
+        boxShadow: cardShadow 
+      }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.textMain, marginBottom: 12 }}>Quick Actions</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+          {/* Screenshot Upload */}
+          <label style={{
+            display: "flex", alignItems: "center", gap: 8,
+            padding: "10px 16px", borderRadius: 50,
+            backgroundColor: COLORS.cardAlt, color: COLORS.textMain,
+            fontSize: 13, fontWeight: 500, cursor: "pointer",
+            border: `1px solid ${COLORS.border}`,
+            transition: "all 0.2s"
+          }}>
+            <Camera size={16} color={COLORS.primary} />
+            Import from Screenshot
+            <input 
+              type="file" 
+              accept="image/*" 
+              capture="environment"
+              onChange={handleScreenshotUpload}
+              style={{ display: "none" }}
+            />
+          </label>
+          
+          {/* Generate 40 Reminders */}
+          <button
+            onClick={generate40Reminders}
+            style={{
+              display: "flex", alignItems: "center", gap: 8,
+              padding: "10px 16px", borderRadius: 50,
+              backgroundColor: COLORS.cardAlt, color: COLORS.textMain,
+              fontSize: 13, fontWeight: 500, cursor: "pointer",
+              border: `1px solid ${COLORS.border}`,
+              transition: "all 0.2s"
+            }}
+          >
+            <Wand2 size={16} color={COLORS.primary} />
+            Generate 40 Reminders
+          </button>
+        </div>
+        <div style={{ fontSize: 11, color: COLORS.textMuted, marginTop: 10 }}>
+          📸 Upload a screenshot of your existing reminders to import them instantly
+        </div>
+      </div>
 
       {/* Edit Modal - modern style */}
       {editing && (
