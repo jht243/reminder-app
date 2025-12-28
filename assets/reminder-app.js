@@ -24859,12 +24859,14 @@ var isRecentlyCompleted = (r) => {
 };
 var generateId = () => `rem_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 var formatDate = (dateStr) => {
-  const date = new Date(dateStr);
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
   const today = /* @__PURE__ */ new Date();
-  const tomorrow = new Date(today);
+  const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const tomorrow = new Date(todayOnly);
   tomorrow.setDate(tomorrow.getDate() + 1);
-  if (date.toDateString() === today.toDateString()) return "Today";
-  if (date.toDateString() === tomorrow.toDateString()) return "Tomorrow";
+  if (date.getTime() === todayOnly.getTime()) return "Today";
+  if (date.getTime() === tomorrow.getTime()) return "Tomorrow";
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 };
 var formatTime = (time) => {
