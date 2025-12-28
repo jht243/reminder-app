@@ -325,8 +325,27 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
   const today = new Date();
   let confidence = 0;
   
-  // Parse time
+  // Parse time - comprehensive time detection
   let dueTime: string | undefined;
+  
+  // Named time words first (before numeric patterns)
+  if (/\bmidnight\b/i.test(lower)) {
+    dueTime = "00:00"; confidence += 15;
+  } else if (/\bnoon\b|\bmidday\b/i.test(lower)) {
+    dueTime = "12:00"; confidence += 15;
+  } else if (/\b(early\s*)?morning\b/i.test(lower) && !/this morning/i.test(lower)) {
+    dueTime = /early/i.test(lower) ? "06:00" : "09:00"; confidence += 10;
+  } else if (/\bevening\b/i.test(lower)) {
+    dueTime = "18:00"; confidence += 10;
+  } else if (/\bafternoon\b/i.test(lower)) {
+    dueTime = "14:00"; confidence += 10;
+  } else if (/\bnight\b/i.test(lower) && !/tonight/i.test(lower)) {
+    dueTime = "21:00"; confidence += 10;
+  } else if (/\bend of day\b|\beod\b/i.test(lower)) {
+    dueTime = "17:00"; confidence += 10;
+  }
+  
+  // Numeric time patterns
   const timePatterns = [
     { regex: /at (\d{1,2}):(\d{2})\s*(am|pm)?/i, handler: (m: RegExpMatchArray) => {
       let h = parseInt(m[1]); const min = m[2];
@@ -340,6 +359,12 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
       if (m[2].toLowerCase() === "am" && h === 12) h = 0;
       return `${h.toString().padStart(2, "0")}:00`;
     }},
+    { regex: /(\d{1,2}):(\d{2})\s*(am|pm)/i, handler: (m: RegExpMatchArray) => {
+      let h = parseInt(m[1]); const min = m[2];
+      if (m[3].toLowerCase() === "pm" && h !== 12) h += 12;
+      if (m[3].toLowerCase() === "am" && h === 12) h = 0;
+      return `${h.toString().padStart(2, "0")}:${min}`;
+    }},
     { regex: /(\d{1,2})(am|pm)/i, handler: (m: RegExpMatchArray) => {
       let h = parseInt(m[1]);
       if (m[2].toLowerCase() === "pm" && h !== 12) h += 12;
@@ -348,9 +373,11 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
     }}
   ];
   
-  for (const p of timePatterns) {
-    const match = input.match(p.regex);
-    if (match) { dueTime = p.handler(match); confidence += 20; break; }
+  if (!dueTime) {
+    for (const p of timePatterns) {
+      const match = input.match(p.regex);
+      if (match) { dueTime = p.handler(match); confidence += 20; break; }
+    }
   }
   
   // Parse date - use local date format to avoid UTC timezone issues
@@ -377,8 +404,32 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
   }
   else if (lower.includes("this weekend")) {
     const sat = new Date(today);
-    sat.setDate(sat.getDate() + (6 - sat.getDay()));
+    const dayOfWeek = sat.getDay();
+    // If it's already weekend (Sat=6 or Sun=0), use today, otherwise go to Saturday
+    if (dayOfWeek === 0) {
+      // Sunday - use today
+    } else if (dayOfWeek === 6) {
+      // Saturday - use today
+    } else {
+      // Weekday - go to next Saturday
+      sat.setDate(sat.getDate() + (6 - dayOfWeek));
+    }
     dueDate = formatLocalDate(sat); confidence += 15;
+  }
+  else if (lower.includes("this morning")) {
+    dueDate = formatLocalDate(today);
+    dueTime = dueTime || "09:00";
+    confidence += 15;
+  }
+  else if (lower.includes("this afternoon")) {
+    dueDate = formatLocalDate(today);
+    dueTime = dueTime || "14:00";
+    confidence += 15;
+  }
+  else if (lower.includes("this evening")) {
+    dueDate = formatLocalDate(today);
+    dueTime = dueTime || "18:00";
+    confidence += 15;
   }
   else {
     // "in X days/hours"
@@ -399,12 +450,22 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
       dueDate = formatLocalDate(fut); confidence += 15;
     }
     
-    // Day names
+    // Day names - check if it's today's day name or a future day
     const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    const shortDays = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
     for (let i = 0; i < days.length; i++) {
-      if (lower.includes(days[i]) || lower.includes(`on ${days[i]}`)) {
+      const dayRegex = new RegExp(`\\b(on\\s+)?(${days[i]}|${shortDays[i]})\\b`, 'i');
+      if (dayRegex.test(lower)) {
         const target = new Date(today);
-        const diff = (i - today.getDay() + 7) % 7 || 7;
+        const currentDay = today.getDay();
+        
+        // Calculate days until target day
+        let diff = (i - currentDay + 7) % 7;
+        // If diff is 0, it means today - keep it as today unless "next" is specified
+        if (diff === 0 && /\bnext\b/i.test(lower)) {
+          diff = 7; // Go to next week
+        }
+        
         target.setDate(target.getDate() + diff);
         dueDate = formatLocalDate(target);
         confidence += 15;
