@@ -594,6 +594,49 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const todayCount = reminders.filter(r => !r.completed && r.dueDate === new Date().toISOString().split("T")[0]).length;
   const levelInfo = calcLevel(stats.totalPoints);
   
+  // Gamification guidance - determine what hint to show based on progress
+  const getGamificationHint = (): { text: string; icon: string; points: number } | null => {
+    // First reminder
+    if (reminders.length === 0) {
+      return { text: "Add your first reminder to earn points!", icon: "🎯", points: 10 };
+    }
+    // First completion
+    if (stats.completedAllTime === 0 && reminders.length > 0) {
+      return { text: "Complete a reminder to earn your first points!", icon: "✅", points: 10 };
+    }
+    // First streak
+    if (stats.currentStreak === 0 && stats.completedAllTime > 0) {
+      return { text: "Complete a reminder today to start a streak!", icon: "🔥", points: 15 };
+    }
+    // Build streak to 3
+    if (stats.currentStreak > 0 && stats.currentStreak < 3) {
+      return { text: `${3 - stats.currentStreak} more day${stats.currentStreak === 2 ? "" : "s"} to unlock "On Fire" badge!`, icon: "🔥", points: 50 };
+    }
+    // Build streak to 7
+    if (stats.currentStreak >= 3 && stats.currentStreak < 7 && !stats.achievements.find(a => a.id === "streak7")?.unlocked) {
+      return { text: `${7 - stats.currentStreak} more days for "Week Warrior" badge!`, icon: "⚡", points: 50 };
+    }
+    // Complete 10 reminders
+    if (stats.completedAllTime < 10 && !stats.achievements.find(a => a.id === "complete10")?.unlocked) {
+      return { text: `Complete ${10 - stats.completedAllTime} more for "Getting Started" badge!`, icon: "⭐", points: 50 };
+    }
+    // Complete 50 reminders
+    if (stats.completedAllTime >= 10 && stats.completedAllTime < 50 && !stats.achievements.find(a => a.id === "complete50")?.unlocked) {
+      return { text: `${50 - stats.completedAllTime} more completions for "Productive" badge!`, icon: "🏆", points: 50 };
+    }
+    // Add recurring reminder
+    if (!reminders.some(r => r.recurrence !== "none")) {
+      return { text: "Try a recurring reminder for bonus organization!", icon: "🔄", points: 5 };
+    }
+    // Level up hint
+    if (levelInfo.progress > 70) {
+      return { text: `Almost Level ${levelInfo.level + 1}! Keep going!`, icon: "👑", points: 0 };
+    }
+    return null;
+  };
+  
+  const hint = getGamificationHint();
+  
   // Helper to format recurrence for display
   const formatRecurrence = (r: Reminder | ParsedReminder): string => {
     if (r.recurrence === "none") return "";
@@ -757,19 +800,53 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       )}
       
       {/* Header Bar */}
-      <div style={{ backgroundColor: COLORS.primary, borderRadius: 14, padding: "14px 18px", marginBottom: 14, color: "#fff" }}>
+      <div style={{ backgroundColor: COLORS.primary, borderRadius: 14, padding: "14px 18px", marginBottom: 10, color: "#fff" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <Bell size={22} />
             <span style={{ fontSize: 18, fontWeight: 700 }}>Smart Reminders</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 14, fontWeight: 500 }}>
-            <span style={{ display: "flex", alignItems: "center", gap: 5 }}><Crown size={16} color={COLORS.gold} /> Lv {levelInfo.level}</span>
-            <span style={{ display: "flex", alignItems: "center", gap: 5 }}><Star size={16} color={COLORS.gold} /> {stats.totalPoints}</span>
-            <span style={{ display: "flex", alignItems: "center", gap: 5 }}><Flame size={16} color={stats.currentStreak > 0 ? COLORS.gold : "rgba(255,255,255,0.5)"} /> {stats.currentStreak}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 13 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, backgroundColor: "rgba(255,255,255,0.15)", padding: "4px 10px", borderRadius: 8 }} title="Your current level">
+              <Crown size={14} color={COLORS.gold} />
+              <span style={{ fontWeight: 600 }}>Level {levelInfo.level}</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, backgroundColor: "rgba(255,255,255,0.15)", padding: "4px 10px", borderRadius: 8 }} title="Total points earned">
+              <Star size={14} color={COLORS.gold} />
+              <span style={{ fontWeight: 600 }}>{stats.totalPoints} pts</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, backgroundColor: stats.currentStreak > 0 ? "rgba(245,158,11,0.3)" : "rgba(255,255,255,0.15)", padding: "4px 10px", borderRadius: 8 }} title="Days in a row completing reminders">
+              <Flame size={14} color={stats.currentStreak > 0 ? COLORS.gold : "rgba(255,255,255,0.5)"} />
+              <span style={{ fontWeight: 600 }}>{stats.currentStreak} day streak</span>
+            </div>
           </div>
         </div>
       </div>
+      
+      {/* Gamification Hint/Guide */}
+      {hint && (
+        <div style={{ 
+          backgroundColor: COLORS.accentLight, 
+          borderRadius: 10, 
+          padding: "12px 16px", 
+          marginBottom: 14, 
+          display: "flex", 
+          alignItems: "center", 
+          gap: 12,
+          border: `1px solid ${COLORS.primaryLight}`
+        }}>
+          <span style={{ fontSize: 24 }}>{hint.icon}</span>
+          <div style={{ flex: 1 }}>
+            <span style={{ fontSize: 14, fontWeight: 500, color: COLORS.textMain }}>{hint.text}</span>
+            {hint.points > 0 && (
+              <span style={{ marginLeft: 8, fontSize: 12, fontWeight: 600, color: COLORS.primary, backgroundColor: COLORS.card, padding: "2px 8px", borderRadius: 6 }}>
+                +{hint.points} pts
+              </span>
+            )}
+          </div>
+          <ChevronRight size={18} color={COLORS.primary} />
+        </div>
+      )}
       
       {/* AI Input - Main Focus */}
       <div style={{ backgroundColor: COLORS.card, borderRadius: 14, padding: 16, marginBottom: 14, border: `1px solid ${COLORS.border}` }}>
