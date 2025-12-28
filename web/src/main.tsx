@@ -1,7 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 
-import TravelChecklist from "./TravelChecklist";
+import ReminderApp from "./ReminderApp";
 
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -107,18 +107,18 @@ const getHydrationData = (): any => {
   return {};
 };
 
-console.log("[Main] Travel Checklist main.tsx loading...");
+console.log("[Main] Reminder App main.tsx loading...");
 
-// App wrapper - Travel Checklist
+// App wrapper - Reminder App
 function App({ initialData }: { initialData: any }) {
-  return <TravelChecklist initialData={initialData} />;
+  return <ReminderApp initialData={initialData} />;
 }
 
 // Get initial data
-const container = document.getElementById("travel-checklist-root") || document.getElementById("crypto-portfolio-optimizer-root");
+const container = document.getElementById("reminder-app-root") || document.getElementById("travel-checklist-root");
 
 if (!container) {
-  throw new Error("travel-checklist-root element not found");
+  throw new Error("reminder-app-root element not found");
 }
 
 const root = createRoot(container);

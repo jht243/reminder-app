@@ -1,14 +1,14 @@
 {
-  "name": "travel-checklist-mcp-node",
+  "name": "smart-reminders-mcp",
   "version": "0.1.0",
   "type": "module",
   "private": true,
-  "description": "Smart Travel Checklist — generate personalized, customizable packing lists based on your trip profile.",
+  "description": "Smart Reminders — AI-powered reminder app with natural language, gamification, and notifications.",
   "keywords": [
-    "travel checklist",
-    "packing list",
-    "travel planner",
-    "vacation"
+    "reminders",
+    "todo",
+    "tasks",
+    "gamification"
   ],
   "scripts": {
     "start": "tsx src/server.ts",

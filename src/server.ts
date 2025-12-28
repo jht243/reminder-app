@@ -124,31 +124,18 @@ function classifyDevice(userAgent?: string | null): string {
 }
 
 function computeSummary(args: any) {
-  // Compute travel checklist summary
-  const destination = args.destination || "Not specified";
-  const tripDuration = Number(args.trip_duration) || 5;
-  const isInternational = Boolean(args.is_international);
-  const climate = args.climate || "summer";
-  const purpose = args.purpose || "leisure";
-  const travelers = Number(args.travelers) || 1;
-  
-  // Estimate checklist items based on trip profile
-  let estimatedItems = 25; // Base items
-  if (isInternational) estimatedItems += 5; // Extra documents
-  if (tripDuration > 7) estimatedItems += 5; // More clothing
-  if (purpose === "business") estimatedItems += 3;
-  if (purpose === "adventure") estimatedItems += 8;
-  if (travelers > 1) estimatedItems += 5;
+  // Compute reminder summary
+  const title = args.title || "";
+  const dueDate = args.due_date || "";
+  const priority = args.priority || "medium";
+  const recurrence = args.recurrence || "none";
   
   return {
-    destination,
-    trip_duration: tripDuration,
-    is_international: isInternational,
-    climate,
-    purpose,
-    travelers,
-    estimated_items: estimatedItems,
-    trip_type: isInternational ? "International" : "Domestic"
+    title,
+    due_date: dueDate,
+    priority,
+    recurrence,
+    has_notification: args.notification !== "none"
   };
 }
 
@@ -209,33 +196,40 @@ function widgetMeta(widget: ReminderWidget, bustCache: boolean = false) {
   return {
     "openai/outputTemplate": templateUri,
     "openai/widgetDescription":
-      "A smart reminder app that helps you create, manage, and track reminders with gamification. Set natural language reminders, categorize by priority, and earn points for completing tasks.",
+      "A smart reminder app with natural language input, organized displays, search/filter, recurring reminders, snooze, notifications (email/SMS), and gamification (points, streaks, achievements). Call this tool to help users manage their reminders and tasks.",
     "openai/componentDescriptions": {
-      "reminder-form": "Input form for creating new reminders with description, due date, and category.",
-      "reminder-list": "Display showing categorized reminders with checkboxes and progress tracking.",
-      "gamification-panel": "Display showing user points, streaks, and achievements.",
+      "reminder-form": "Input form for creating reminders with natural language parsing.",
+      "reminder-list": "Display showing organized reminders with filters and search.",
+      "gamification-stats": "Stats bar showing points, streaks, level, and achievements.",
     },
     "openai/widgetKeywords": [
       "reminder",
-      "todo",
+      "reminders",
       "task",
-      "calendar",
+      "tasks",
+      "todo",
+      "to-do",
+      "schedule",
+      "alert",
       "notification",
-      "productivity",
-      "gamification",
-      "points",
-      "streak"
+      "deadline",
+      "due date",
+      "recurring",
+      "snooze"
     ],
     "openai/sampleConversations": [
-      { "user": "Remind me to buy groceries tomorrow", "assistant": "Here is the Reminder App. I've created a reminder for you to buy groceries tomorrow." },
-      { "user": "What are my reminders?", "assistant": "Here are your current reminders with gamification progress." },
+      { "user": "Remind me to call mom tomorrow at 3pm", "assistant": "I've created a reminder for you to call mom tomorrow at 3pm." },
+      { "user": "Show me my reminders", "assistant": "Here are your reminders organized by due date." },
+      { "user": "Set a daily reminder to take vitamins", "assistant": "I've set up a daily recurring reminder to take vitamins." },
     ],
     "openai/starterPrompts": [
-      "Remind me to call mom",
-      "Create a reminder for meeting",
-      "What are my todos?",
+      "Remind me to...",
       "Show my reminders",
-      "Help me manage tasks",
+      "Create a reminder",
+      "Set a daily reminder",
+      "What's due today?",
+      "Help me stay organized",
+      "Snooze my reminder",
     ],
     "openai/widgetPrefersBorder": true,
     "openai/widgetCSP": {
@@ -256,13 +250,13 @@ function widgetMeta(widget: ReminderWidget, bustCache: boolean = false) {
 
 const widgets: ReminderWidget[] = [
   {
-    id: "reminder-app",
-    title: "Smart Reminder App — Create and manage reminders with gamification",
+    id: "smart-reminders",
+    title: "Smart Reminders — AI-powered reminder app with gamification",
     templateUri: `ui://widget/reminder-app.html?v=${VERSION}`,
     invoking:
-      "Opening the Smart Reminder App...",
+      "Opening Smart Reminders...",
     invoked:
-      "Here is the Smart Reminder App. Create reminders, track tasks, and earn points for completing them.",
+      "Here is Smart Reminders. Create reminders using natural language, track your progress, and earn points for staying organized!",
     html: readWidgetHtml("reminder-app"),
   },
 ];
@@ -275,34 +269,20 @@ widgets.forEach((widget) => {
   widgetsByUri.set(widget.templateUri, widget);
 });
 
-type Reminder = {
-  id: string;
-  description: string;
-  dueDate?: string;
-  category?: string;
-  priority?: 'low' | 'medium' | 'high';
-  completed: boolean;
-  recurring?: 'daily' | 'weekly' | 'monthly';
-  createdAt: string;
-};
-
-type UserGamification = {
-  points: number;
-  streak: number;
-  lastCompletedDate?: string;
-};
-
-const reminders: Reminder[] = [];
-const userGamification: UserGamification = { points: 0, streak: 0 };
-
 const toolInputSchema = {
   type: "object",
   properties: {
-    description: { type: "string", description: "Description of the reminder." },
-    dueDate: { type: "string", description: "Due date in ISO format (optional)." },
-    category: { type: "string", description: "Category for the reminder (optional)." },
-    priority: { type: "string", enum: ["low", "medium", "high"], description: "Priority level (optional)." },
-    recurring: { type: "string", enum: ["daily", "weekly", "monthly"], description: "Recurring frequency (optional)." },
+    title: { type: "string", description: "The reminder title or what to be reminded about." },
+    description: { type: "string", description: "Optional detailed description." },
+    due_date: { type: "string", description: "Due date in YYYY-MM-DD format." },
+    due_time: { type: "string", description: "Due time in HH:MM format." },
+    priority: { type: "string", enum: ["low", "medium", "high", "urgent"], description: "Priority level." },
+    tags: { type: "array", items: { type: "string" }, description: "Tags for categorization." },
+    recurrence: { type: "string", enum: ["none", "daily", "weekly", "monthly"], description: "Recurrence pattern." },
+    notification: { type: "string", enum: ["none", "email", "sms", "both"], description: "Notification method." },
+    notification_email: { type: "string", description: "Email for notifications." },
+    notification_phone: { type: "string", description: "Phone for SMS notifications." },
+    natural_input: { type: "string", description: "Natural language input like 'remind me to call mom tomorrow at 3pm'." },
   },
   required: [],
   additionalProperties: false,
@@ -310,45 +290,44 @@ const toolInputSchema = {
 } as const;
 
 const toolInputParser = z.object({
+  title: z.string().optional(),
   description: z.string().optional(),
-  dueDate: z.string().optional(),
-  category: z.string().optional(),
-  priority: z.enum(["low", "medium", "high"]).optional(),
-  recurring: z.enum(["daily", "weekly", "monthly"]).optional(),
+  due_date: z.string().optional(),
+  due_time: z.string().optional(),
+  priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
+  tags: z.array(z.string()).optional(),
+  recurrence: z.enum(["none", "daily", "weekly", "monthly"]).optional(),
+  notification: z.enum(["none", "email", "sms", "both"]).optional(),
+  notification_email: z.string().optional(),
+  notification_phone: z.string().optional(),
+  natural_input: z.string().optional(),
 });
 
 const tools: Tool[] = widgets.map((widget) => ({
   name: widget.id,
   description:
-    "Use this to create reminders or list existing ones. Provide description to create a new reminder, omit to list all reminders.",
+    "Use this to manage reminders with natural language input, organized displays, search/filter, recurring reminders, snooze, and gamification. Call this tool to create, view, or manage reminders. Supports natural language like 'remind me to call mom tomorrow at 3pm'.",
   inputSchema: toolInputSchema,
   outputSchema: {
     type: "object",
     properties: {
       ready: { type: "boolean" },
       timestamp: { type: "string" },
-      reminders: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            id: { type: "string" },
-            description: { type: "string" },
-            dueDate: { type: "string" },
-            category: { type: "string" },
-            priority: { type: "string" },
-            completed: { type: "boolean" },
-            recurring: { type: "string" },
-            createdAt: { type: "string" },
-          },
-        },
-      },
-      gamification: {
+      title: { type: "string" },
+      due_date: { type: "string" },
+      due_time: { type: "string" },
+      priority: { type: "string" },
+      recurrence: { type: "string" },
+      notification: { type: "string" },
+      input_source: { type: "string", enum: ["user", "default"] },
+      summary: {
         type: "object",
         properties: {
-          points: { type: "number" },
-          streak: { type: "number" },
-          lastCompletedDate: { type: "string" },
+          title: { type: ["string", "null"] },
+          due_date: { type: ["string", "null"] },
+          priority: { type: ["string", "null"] },
+          recurrence: { type: ["string", "null"] },
+          has_notification: { type: ["boolean", "null"] },
         },
       },
       suggested_followups: {
@@ -376,7 +355,7 @@ const resources: Resource[] = widgets.map((widget) => ({
   uri: widget.templateUri,
   name: widget.title,
   description:
-    "HTML template for the Reminder App widget that creates and manages reminders with gamification.",
+    "HTML template for the Travel Checklist widget that generates personalized packing lists based on trip details.",
   mimeType: "text/html+skybridge",
   _meta: widgetMeta(widget),
 }));
@@ -385,18 +364,18 @@ const resourceTemplates: ResourceTemplate[] = widgets.map((widget) => ({
   uriTemplate: widget.templateUri,
   name: widget.title,
   description:
-    "Template descriptor for the Reminder App widget.",
+    "Template descriptor for the Travel Checklist widget.",
   mimeType: "text/html+skybridge",
   _meta: widgetMeta(widget),
 }));
 
-function createReminderAppServer(): Server {
+function createTravelChecklistServer(): Server {
   const server = new Server(
     {
-      name: "reminder-app",
+      name: "travel-checklist",
       version: "0.1.0",
       description:
-        "Smart Reminder App helps users create, manage, and track reminders with gamification features.",
+        "Smart Travel Checklist helps users generate personalized packing lists based on their trip profile including destination, duration, climate, and activities.",
     },
     {
       capabilities: {
@@ -498,7 +477,7 @@ function createReminderAppServer(): Server {
         // Debug log
         console.log("Captured meta:", { userLocation, userLocale, userAgent });
 
-        // If ChatGPT didn't pass structured arguments, try to infer travel details from freeform text in meta
+        // If ChatGPT didn't pass structured arguments, try to infer reminder details from freeform text in meta
         try {
           const candidates: any[] = [
             meta["openai/subject"],
@@ -510,49 +489,23 @@ function createReminderAppServer(): Server {
           ];
           const userText = candidates.find((t) => typeof t === "string" && t.trim().length > 0) || "";
 
-          // Try to infer destination from user text (e.g., "trip to Paris", "vacation in Hawaii")
-          if (args.destination === undefined) {
-            const destMatch = userText.match(/(?:trip|travel|going|vacation|visit|flying)\s+(?:to|in)\s+([A-Za-z\s,]+?)(?:\.|,|for|\s+\d|\s*$)/i);
-            if (destMatch) {
-              args.destination = destMatch[1].trim();
-            }
+          // Use natural_input if provided, or fallback to userText
+          if (!args.natural_input && userText) {
+            args.natural_input = userText;
+          }
+
+          // Try to infer priority from keywords
+          if (args.priority === undefined) {
+            if (/urgent|asap|immediately|critical/i.test(userText)) args.priority = "urgent";
+            else if (/important|high priority/i.test(userText)) args.priority = "high";
+            else if (/low priority|whenever|no rush/i.test(userText)) args.priority = "low";
           }
           
-          // Try to infer trip duration (e.g., "7 days", "2 weeks", "a week")
-          if (args.trip_duration === undefined) {
-            const durationMatch = userText.match(/(\d+)\s*(?:day|night)s?/i);
-            if (durationMatch) {
-              args.trip_duration = parseInt(durationMatch[1]);
-            } else if (/a\s+week|one\s+week/i.test(userText)) {
-              args.trip_duration = 7;
-            } else if (/two\s+weeks?|2\s+weeks?/i.test(userText)) {
-              args.trip_duration = 14;
-            }
-          }
-          
-          // Infer international vs domestic
-          if (args.is_international === undefined) {
-            if (/international|abroad|overseas|passport/i.test(userText)) {
-              args.is_international = true;
-            } else if (/domestic|within|local/i.test(userText)) {
-              args.is_international = false;
-            }
-          }
-          
-          // Infer climate from keywords
-          if (args.climate === undefined) {
-            if (/beach|tropical|caribbean|hawaii|mexico|thailand|bali/i.test(userText)) args.climate = "tropical";
-            else if (/winter|cold|snow|ski|skiing|christmas|december|january|february/i.test(userText)) args.climate = "winter";
-            else if (/summer|hot|warm|july|august|june/i.test(userText)) args.climate = "summer";
-            else if (/spring|fall|autumn|mild/i.test(userText)) args.climate = "spring";
-          }
-          
-          // Infer purpose from keywords
-          if (args.purpose === undefined) {
-            if (/business|work|conference|meeting/i.test(userText)) args.purpose = "business";
-            else if (/beach|swim|ocean|resort/i.test(userText)) args.purpose = "beach";
-            else if (/hike|hiking|adventure|camping|outdoor/i.test(userText)) args.purpose = "adventure";
-            else if (/city|urban|sightseeing|museum/i.test(userText)) args.purpose = "city";
+          // Try to infer recurrence from keywords
+          if (args.recurrence === undefined) {
+            if (/every day|daily/i.test(userText)) args.recurrence = "daily";
+            else if (/every week|weekly/i.test(userText)) args.recurrence = "weekly";
+            else if (/every month|monthly/i.test(userText)) args.recurrence = "monthly";
           }
 
         } catch (e) {
@@ -567,15 +520,15 @@ function createReminderAppServer(): Server {
 
         // Infer likely user query from parameters
         const inferredQuery = [] as string[];
-        if (args.destination) inferredQuery.push(`Destination: ${args.destination}`);
-        if (args.trip_duration) inferredQuery.push(`Duration: ${args.trip_duration} days`);
-        if (args.purpose) inferredQuery.push(`Purpose: ${args.purpose}`);
-        if (args.climate) inferredQuery.push(`Climate: ${args.climate}`);
+        if (args.title) inferredQuery.push(`Title: ${args.title}`);
+        if (args.due_date) inferredQuery.push(`Due: ${args.due_date}`);
+        if (args.priority) inferredQuery.push(`Priority: ${args.priority}`);
+        if (args.natural_input) inferredQuery.push(`Input: ${args.natural_input.substring(0, 50)}`);
 
         logAnalytics("tool_call_success", {
           toolName: request.params.name,
           params: args,
-          inferredQuery: inferredQuery.length > 0 ? inferredQuery.join(", ") : "Travel Checklist",
+          inferredQuery: inferredQuery.length > 0 ? inferredQuery.join(", ") : "Smart Reminders",
           responseTime,
 
           device: deviceCategory,
@@ -596,7 +549,7 @@ function createReminderAppServer(): Server {
         console.log(`[MCP] Tool called: ${request.params.name}, returning templateUri: ${(widgetMetadata as any)["openai/outputTemplate"]}`);
 
         // Build structured content once so we can log it and return it.
-        // For the travel checklist, expose fields relevant to trip details
+        // For the reminder app, expose fields relevant to reminder details
         const structured = {
           ready: true,
           timestamp: new Date().toISOString(),
@@ -605,10 +558,10 @@ function createReminderAppServer(): Server {
           // Summary + follow-ups for natural language UX
           summary: computeSummary(args),
           suggested_followups: [
-            "What documents do I need?",
-            "What clothes should I pack?",
-            "Do I need any vaccines?",
-            "What about toiletries for carry-on?"
+            "Show my reminders",
+            "What's due today?",
+            "Set a daily reminder",
+            "Snooze this reminder"
           ],
         } as const;
 
@@ -631,14 +584,14 @@ function createReminderAppServer(): Server {
 
         // Log success analytics
         try {
-          // Check for "empty" result - when no main travel inputs are provided
-          const hasMainInputs = args.destination || args.trip_duration || args.purpose;
+          // Check for "empty" result - when no main reminder inputs are provided
+          const hasMainInputs = args.title || args.natural_input || args.due_date;
           
           if (!hasMainInputs) {
              logAnalytics("tool_call_empty", {
                toolName: request.params.name,
                params: request.params.arguments || {},
-               reason: "No trip details provided"
+               reason: "No reminder details provided"
              });
           } else {
           logAnalytics("tool_call_success", {
