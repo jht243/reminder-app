@@ -1974,75 +1974,6 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
         </div>
       )}
       
-      {/* Footer Actions */}
-      <div style={{ 
-        marginTop: 24, 
-        padding: "16px 20px", 
-        backgroundColor: COLORS.card, 
-        borderRadius: cardRadius, 
-        boxShadow: cardShadow,
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 10,
-        justifyContent: "center"
-      }}>
-        {/* Print */}
-        <button
-          onClick={() => window.print()}
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            padding: "10px 16px", borderRadius: 50,
-            backgroundColor: COLORS.cardAlt, color: COLORS.textSecondary,
-            fontSize: 13, fontWeight: 500, cursor: "pointer",
-            border: `1px solid ${COLORS.border}`
-          }}
-        >
-          🖨️ Print
-        </button>
-        
-        {/* Reset */}
-        <button
-          onClick={resetProgress}
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            padding: "10px 16px", borderRadius: 50,
-            backgroundColor: COLORS.cardAlt, color: COLORS.textSecondary,
-            fontSize: 13, fontWeight: 500, cursor: "pointer",
-            border: `1px solid ${COLORS.border}`
-          }}
-        >
-          🔄 Reset
-        </button>
-        
-        {/* Donate */}
-        <button
-          onClick={() => window.open("https://buymeacoffee.com/jhteplitsky", "_blank")}
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            padding: "10px 16px", borderRadius: 50,
-            backgroundColor: "#FFDD00", color: "#000",
-            fontSize: 13, fontWeight: 600, cursor: "pointer",
-            border: "none"
-          }}
-        >
-          ☕ Donate
-        </button>
-        
-        {/* Feedback */}
-        <button
-          onClick={() => window.open("mailto:jonathan@teplitsky.com?subject=Reminder%20App%20Feedback", "_blank")}
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            padding: "10px 16px", borderRadius: 50,
-            backgroundColor: COLORS.cardAlt, color: COLORS.textSecondary,
-            fontSize: 13, fontWeight: 500, cursor: "pointer",
-            border: `1px solid ${COLORS.border}`
-          }}
-        >
-          💬 Feedback
-        </button>
-      </div>
-      
       {/* Snooze Popup - modern style */}
       {snoozePopup && (
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16 }}>
@@ -2331,6 +2262,68 @@ OR just paste a list:
         <div style={{ fontSize: 11, color: COLORS.textMuted, marginTop: 10 }}>
           📸 Upload a screenshot of your existing reminders to import them instantly
         </div>
+      </div>
+
+      {/* Footer Buttons */}
+      <div style={{ 
+        marginTop: 16, 
+        padding: "14px 20px", 
+        backgroundColor: COLORS.card, 
+        borderRadius: cardRadius, 
+        boxShadow: cardShadow,
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 10,
+        justifyContent: "center"
+      }}>
+        <button
+          onClick={() => window.print()}
+          style={{
+            display: "flex", alignItems: "center", gap: 6,
+            padding: "10px 16px", borderRadius: 50,
+            backgroundColor: COLORS.cardAlt, color: COLORS.textSecondary,
+            fontSize: 13, fontWeight: 500, cursor: "pointer",
+            border: `1px solid ${COLORS.border}`
+          }}
+        >
+          🖨️ Print
+        </button>
+        <button
+          onClick={resetProgress}
+          style={{
+            display: "flex", alignItems: "center", gap: 6,
+            padding: "10px 16px", borderRadius: 50,
+            backgroundColor: COLORS.cardAlt, color: COLORS.textSecondary,
+            fontSize: 13, fontWeight: 500, cursor: "pointer",
+            border: `1px solid ${COLORS.border}`
+          }}
+        >
+          🔄 Reset
+        </button>
+        <button
+          onClick={() => window.open("https://buymeacoffee.com/jhteplitsky", "_blank")}
+          style={{
+            display: "flex", alignItems: "center", gap: 6,
+            padding: "10px 16px", borderRadius: 50,
+            backgroundColor: "#FFDD00", color: "#000",
+            fontSize: 13, fontWeight: 600, cursor: "pointer",
+            border: "none"
+          }}
+        >
+          ☕ Donate
+        </button>
+        <button
+          onClick={() => window.open("mailto:jonathan@teplitsky.com?subject=Reminder%20App%20Feedback", "_blank")}
+          style={{
+            display: "flex", alignItems: "center", gap: 6,
+            padding: "10px 16px", borderRadius: 50,
+            backgroundColor: COLORS.cardAlt, color: COLORS.textSecondary,
+            fontSize: 13, fontWeight: 500, cursor: "pointer",
+            border: `1px solid ${COLORS.border}`
+          }}
+        >
+          💬 Feedback
+        </button>
       </div>
 
       {/* Edit Modal - modern style */}
