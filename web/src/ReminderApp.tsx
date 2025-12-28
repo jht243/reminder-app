@@ -3,7 +3,7 @@ import {
   Bell, Plus, Check, X, Clock, Calendar, Search, Filter, Trash2,
   Edit2, Repeat, Trophy, Flame, Star, Award, Crown, Send,
   SortAsc, SortDesc, Timer, Briefcase, Users, Heart, ShoppingCart,
-  Stethoscope, GraduationCap, Plane, Home, Sparkles, ChevronRight
+  Stethoscope, GraduationCap, Plane, Home, Sparkles, ChevronRight, Upload, FileText, Download
 } from "lucide-react";
 
 type Priority = "low" | "medium" | "high" | "urgent";
@@ -190,6 +190,88 @@ const detectPriority = (text: string, dueDate?: string): Priority => {
   }
   
   return "medium";
+};
+
+// Import parsers
+const parseICS = (content: string): Partial<Reminder>[] => {
+  const events: Partial<Reminder>[] = [];
+  const lines = content.split(/\r\n|\n|\r/);
+  let inEvent = false;
+  let current: any = {};
+  
+  for (const line of lines) {
+    if (line.startsWith("BEGIN:VEVENT")) {
+      inEvent = true;
+      current = {};
+    } else if (line.startsWith("END:VEVENT")) {
+      inEvent = false;
+      if (current.summary) {
+        events.push({
+          title: current.summary,
+          dueDate: current.dtstart ? current.dtstart.split("T")[0] : new Date().toISOString().split("T")[0],
+          dueTime: current.dtstart && current.dtstart.includes("T") ? 
+            `${current.dtstart.split("T")[1].substring(0,2)}:${current.dtstart.split("T")[1].substring(2,4)}` : undefined,
+          priority: "medium",
+          category: "other",
+          recurrence: "none",
+          completed: false,
+          pointsAwarded: 0
+        });
+      }
+    } else if (inEvent) {
+      if (line.startsWith("SUMMARY:")) current.summary = line.substring(8);
+      else if (line.startsWith("DTSTART")) {
+        // Handle DTSTART;VALUE=DATE:20230101 or DTSTART:20230101T120000
+        const val = line.split(":")[1];
+        if (val) {
+          // Basic ISO parsing (YYYYMMDD or YYYYMMDDTHHMMSS)
+          const y = val.substring(0, 4), m = val.substring(4, 6), d = val.substring(6, 8);
+          let dateStr = `${y}-${m}-${d}`;
+          if (val.includes("T")) {
+            const timePart = val.split("T")[1];
+            dateStr += `T${timePart}`;
+          }
+          current.dtstart = dateStr;
+        }
+      }
+    }
+  }
+  return events;
+};
+
+const parseCSV = (content: string): Partial<Reminder>[] => {
+  const lines = content.split(/\r\n|\n|\r/).filter(l => l.trim().length > 0);
+  if (lines.length < 2) return []; // Need header + 1 row
+  
+  const headers = lines[0].toLowerCase().split(",").map(h => h.trim());
+  const titleIdx = headers.findIndex(h => h.includes("title") || h.includes("subject") || h.includes("summary") || h.includes("task"));
+  const dateIdx = headers.findIndex(h => h.includes("date") || h.includes("due") || h.includes("start"));
+  
+  if (titleIdx === -1) return [];
+  
+  const results: Partial<Reminder>[] = [];
+  
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(",").map(c => c.trim()); // Simple split, doesn't handle quoted commas
+    if (cols.length <= titleIdx) continue;
+    
+    let dateStr = new Date().toISOString().split("T")[0];
+    if (dateIdx !== -1 && cols[dateIdx]) {
+      const parsed = new Date(cols[dateIdx]);
+      if (!isNaN(parsed.getTime())) dateStr = parsed.toISOString().split("T")[0];
+    }
+    
+    results.push({
+      title: cols[titleIdx],
+      dueDate: dateStr,
+      priority: "medium",
+      category: "other",
+      recurrence: "none",
+      completed: false,
+      pointsAwarded: 0
+    });
+  }
+  return results;
 };
 
 // Full natural language parser
@@ -687,6 +769,69 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const [toast, setToast] = useState<string | null>(null);
   const [achievement, setAchievement] = useState<{ name: string; icon: string } | null>(null);
   
+  // Import Modal State
+  const [importOpen, setImportOpen] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+
+  // File Upload Handler
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
+    e.preventDefault();
+    setDragActive(false);
+    
+    let file: File | null = null;
+    if ('dataTransfer' in e) {
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) file = e.dataTransfer.files[0];
+    } else if (e.target.files && e.target.files[0]) {
+      file = e.target.files[0];
+    }
+    
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      if (!content) return;
+      
+      let imported: Partial<Reminder>[] = [];
+      if (file!.name.endsWith(".ics") || file!.name.endsWith(".icl")) {
+        imported = parseICS(content);
+      } else if (file!.name.endsWith(".csv")) {
+        imported = parseCSV(content);
+      } else {
+        setToast("Unsupported file type. Use .ics or .csv");
+        return;
+      }
+      
+      if (imported.length === 0) {
+        setToast("No valid reminders found.");
+        return;
+      }
+      
+      // Merge imported reminders
+      const newReminders: Reminder[] = imported.map(p => ({
+        id: generateId(),
+        title: p.title || "Untitled Reminder",
+        dueDate: p.dueDate || new Date().toISOString().split("T")[0],
+        dueTime: p.dueTime,
+        priority: p.priority || "medium",
+        category: p.category || "other",
+        recurrence: p.recurrence || "none",
+        recurrenceInterval: p.recurrenceInterval,
+        recurrenceUnit: p.recurrenceUnit,
+        completed: false,
+        createdAt: new Date().toISOString(),
+        pointsAwarded: 0
+      }));
+      
+      setReminders(prev => [...prev, ...newReminders]);
+      setImportOpen(false);
+      setToast(`Imported ${newReminders.length} reminders!`);
+      
+      // Check for first import achievement (could be a new progression task later)
+    };
+    reader.readAsText(file);
+  };
+
   // Persist whenever reminders or stats change
   useEffect(() => {
     persistState(reminders, stats);
@@ -1054,6 +1199,18 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
             <span style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.3px" }}>Smart Reminders</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
+            <button 
+              onClick={() => setImportOpen(true)}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                padding: "6px 12px", borderRadius: 50,
+                backgroundColor: "rgba(255,255,255,0.15)", color: "#fff",
+                border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500
+              }}
+              title="Import from Calendar/Excel"
+            >
+              <Upload size={14} /> Import
+            </button>
             <div style={{ 
               display: "flex", alignItems: "center", gap: 6, 
               backgroundColor: "rgba(255,255,255,0.12)", 
@@ -1427,6 +1584,89 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
         </div>
       )}
       
+      {/* Import Modal */}
+      {importOpen && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1100, padding: 16 }}>
+          <div style={{ backgroundColor: COLORS.card, borderRadius: 24, width: "100%", maxWidth: 480, padding: 24, boxShadow: "0 16px 48px rgba(0,0,0,0.15)", maxHeight: "90vh", overflowY: "auto" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: COLORS.textMain }}>Import Reminders</h2>
+              <button onClick={() => setImportOpen(false)} style={{ width: 36, height: 36, borderRadius: "50%", border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><X size={18} color={COLORS.textMuted} /></button>
+            </div>
+            
+            <p style={{ margin: "0 0 20px", fontSize: 14, color: COLORS.textSecondary, lineHeight: 1.5 }}>
+              Drag and drop an <b>.ics</b> (iCalendar) or <b>.csv</b> (Excel) file to import your reminders from other apps like Google Calendar, Outlook, or Apple Reminders.
+            </p>
+            
+            <div 
+              onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(true); }}
+              onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(false); }}
+              onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(true); }}
+              onDrop={handleFileUpload}
+              style={{
+                border: `2px dashed ${dragActive ? COLORS.primary : COLORS.border}`,
+                borderRadius: 16,
+                backgroundColor: dragActive ? `${COLORS.primary}10` : COLORS.inputBg,
+                padding: 40,
+                textAlign: "center",
+                transition: "all 0.2s ease",
+                cursor: "pointer",
+                marginBottom: 20,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 12
+              }}
+            >
+              <div style={{ width: 48, height: 48, borderRadius: "50%", backgroundColor: COLORS.iconBg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Upload size={24} color={COLORS.primary} />
+              </div>
+              <div>
+                <span style={{ display: "block", fontSize: 15, fontWeight: 600, color: COLORS.textMain, marginBottom: 4 }}>
+                  {dragActive ? "Drop file to import" : "Click or drag file here"}
+                </span>
+                <span style={{ fontSize: 13, color: COLORS.textMuted }}>
+                  Supports .ics and .csv
+                </span>
+              </div>
+              <input 
+                type="file" 
+                accept=".ics,.icl,.csv" 
+                onChange={handleFileUpload}
+                style={{ position: "absolute", width: "100%", height: "100%", opacity: 0, cursor: "pointer", display: "none" }}
+                id="file-upload-input"
+              />
+              <label htmlFor="file-upload-input" style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, cursor: "pointer" }} />
+            </div>
+            
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div style={{ padding: 16, backgroundColor: COLORS.cardAlt, borderRadius: 16 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: 14, fontWeight: 600, color: COLORS.textMain }}>
+                  <Calendar size={16} /> iCalendar (.ics)
+                </div>
+                <p style={{ margin: 0, fontSize: 12, color: COLORS.textMuted }}>
+                  Best for Google Calendar, Apple Calendar, and ChatGPT exports.
+                </p>
+              </div>
+              <div style={{ padding: 16, backgroundColor: COLORS.cardAlt, borderRadius: 16 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: 14, fontWeight: 600, color: COLORS.textMain }}>
+                  <FileText size={16} /> CSV (.csv)
+                </div>
+                <p style={{ margin: 0, fontSize: 12, color: COLORS.textMuted }}>
+                  Works with Outlook, Trello, Asana, and Excel sheets.
+                </p>
+              </div>
+            </div>
+            
+            <div style={{ marginTop: 24, paddingTop: 16, borderTop: `1px solid ${COLORS.border}` }}>
+              <h4 style={{ margin: "0 0 12px", fontSize: 13, fontWeight: 600, color: COLORS.textMain }}>Pro Tip: Use AI to Plan</h4>
+              <div style={{ fontSize: 13, color: COLORS.textSecondary, lineHeight: 1.5, backgroundColor: COLORS.accentLight, padding: 12, borderRadius: 12 }}>
+                Ask ChatGPT: "Create a study plan for my exam next week and export it as an ICS file." Then paste the text into a file and drop it here!
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Edit Modal - modern style */}
       {editing && (
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16, overflowY: "auto" }}>

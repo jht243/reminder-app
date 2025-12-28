@@ -24580,8 +24580,24 @@ var __iconNode7 = [
 ];
 var Crown = createLucideIcon("crown", __iconNode7);
 
-// node_modules/lucide-react/dist/esm/icons/flame.js
+// node_modules/lucide-react/dist/esm/icons/file-text.js
 var __iconNode8 = [
+  [
+    "path",
+    {
+      d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z",
+      key: "1oefj6"
+    }
+  ],
+  ["path", { d: "M14 2v5a1 1 0 0 0 1 1h5", key: "wfsgrz" }],
+  ["path", { d: "M10 9H8", key: "b1mrlr" }],
+  ["path", { d: "M16 13H8", key: "t4e002" }],
+  ["path", { d: "M16 17H8", key: "z1uh3a" }]
+];
+var FileText = createLucideIcon("file-text", __iconNode8);
+
+// node_modules/lucide-react/dist/esm/icons/flame.js
+var __iconNode9 = [
   [
     "path",
     {
@@ -24590,10 +24606,10 @@ var __iconNode8 = [
     }
   ]
 ];
-var Flame = createLucideIcon("flame", __iconNode8);
+var Flame = createLucideIcon("flame", __iconNode9);
 
 // node_modules/lucide-react/dist/esm/icons/graduation-cap.js
-var __iconNode9 = [
+var __iconNode10 = [
   [
     "path",
     {
@@ -24604,10 +24620,10 @@ var __iconNode9 = [
   ["path", { d: "M22 10v6", key: "1lu8f3" }],
   ["path", { d: "M6 12.5V16a6 3 0 0 0 12 0v-3.5", key: "1r8lef" }]
 ];
-var GraduationCap = createLucideIcon("graduation-cap", __iconNode9);
+var GraduationCap = createLucideIcon("graduation-cap", __iconNode10);
 
 // node_modules/lucide-react/dist/esm/icons/heart.js
-var __iconNode10 = [
+var __iconNode11 = [
   [
     "path",
     {
@@ -24616,10 +24632,10 @@ var __iconNode10 = [
     }
   ]
 ];
-var Heart = createLucideIcon("heart", __iconNode10);
+var Heart = createLucideIcon("heart", __iconNode11);
 
 // node_modules/lucide-react/dist/esm/icons/house.js
-var __iconNode11 = [
+var __iconNode12 = [
   ["path", { d: "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8", key: "5wwlr5" }],
   [
     "path",
@@ -24629,10 +24645,10 @@ var __iconNode11 = [
     }
   ]
 ];
-var House = createLucideIcon("house", __iconNode11);
+var House = createLucideIcon("house", __iconNode12);
 
 // node_modules/lucide-react/dist/esm/icons/pen.js
-var __iconNode12 = [
+var __iconNode13 = [
   [
     "path",
     {
@@ -24641,10 +24657,10 @@ var __iconNode12 = [
     }
   ]
 ];
-var Pen = createLucideIcon("pen", __iconNode12);
+var Pen = createLucideIcon("pen", __iconNode13);
 
 // node_modules/lucide-react/dist/esm/icons/plane.js
-var __iconNode13 = [
+var __iconNode14 = [
   [
     "path",
     {
@@ -24653,33 +24669,33 @@ var __iconNode13 = [
     }
   ]
 ];
-var Plane = createLucideIcon("plane", __iconNode13);
+var Plane = createLucideIcon("plane", __iconNode14);
 
 // node_modules/lucide-react/dist/esm/icons/plus.js
-var __iconNode14 = [
+var __iconNode15 = [
   ["path", { d: "M5 12h14", key: "1ays0h" }],
   ["path", { d: "M12 5v14", key: "s699le" }]
 ];
-var Plus = createLucideIcon("plus", __iconNode14);
+var Plus = createLucideIcon("plus", __iconNode15);
 
 // node_modules/lucide-react/dist/esm/icons/repeat.js
-var __iconNode15 = [
+var __iconNode16 = [
   ["path", { d: "m17 2 4 4-4 4", key: "nntrym" }],
   ["path", { d: "M3 11v-1a4 4 0 0 1 4-4h14", key: "84bu3i" }],
   ["path", { d: "m7 22-4-4 4-4", key: "1wqhfi" }],
   ["path", { d: "M21 13v1a4 4 0 0 1-4 4H3", key: "1rx37r" }]
 ];
-var Repeat = createLucideIcon("repeat", __iconNode15);
+var Repeat = createLucideIcon("repeat", __iconNode16);
 
 // node_modules/lucide-react/dist/esm/icons/search.js
-var __iconNode16 = [
+var __iconNode17 = [
   ["path", { d: "m21 21-4.34-4.34", key: "14j7rj" }],
   ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }]
 ];
-var Search = createLucideIcon("search", __iconNode16);
+var Search = createLucideIcon("search", __iconNode17);
 
 // node_modules/lucide-react/dist/esm/icons/shopping-cart.js
-var __iconNode17 = [
+var __iconNode18 = [
   ["circle", { cx: "8", cy: "21", r: "1", key: "jimo8o" }],
   ["circle", { cx: "19", cy: "21", r: "1", key: "13723u" }],
   [
@@ -24690,10 +24706,10 @@ var __iconNode17 = [
     }
   ]
 ];
-var ShoppingCart = createLucideIcon("shopping-cart", __iconNode17);
+var ShoppingCart = createLucideIcon("shopping-cart", __iconNode18);
 
 // node_modules/lucide-react/dist/esm/icons/star.js
-var __iconNode18 = [
+var __iconNode19 = [
   [
     "path",
     {
@@ -24702,43 +24718,51 @@ var __iconNode18 = [
     }
   ]
 ];
-var Star = createLucideIcon("star", __iconNode18);
+var Star = createLucideIcon("star", __iconNode19);
 
 // node_modules/lucide-react/dist/esm/icons/stethoscope.js
-var __iconNode19 = [
+var __iconNode20 = [
   ["path", { d: "M11 2v2", key: "1539x4" }],
   ["path", { d: "M5 2v2", key: "1yf1q8" }],
   ["path", { d: "M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1", key: "rb5t3r" }],
   ["path", { d: "M8 15a6 6 0 0 0 12 0v-3", key: "x18d4x" }],
   ["circle", { cx: "20", cy: "10", r: "2", key: "ts1r5v" }]
 ];
-var Stethoscope = createLucideIcon("stethoscope", __iconNode19);
+var Stethoscope = createLucideIcon("stethoscope", __iconNode20);
 
 // node_modules/lucide-react/dist/esm/icons/trash-2.js
-var __iconNode20 = [
+var __iconNode21 = [
   ["path", { d: "M10 11v6", key: "nco0om" }],
   ["path", { d: "M14 11v6", key: "outv1u" }],
   ["path", { d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6", key: "miytrc" }],
   ["path", { d: "M3 6h18", key: "d0wm0j" }],
   ["path", { d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2", key: "e791ji" }]
 ];
-var Trash2 = createLucideIcon("trash-2", __iconNode20);
+var Trash2 = createLucideIcon("trash-2", __iconNode21);
+
+// node_modules/lucide-react/dist/esm/icons/upload.js
+var __iconNode22 = [
+  ["path", { d: "M12 3v12", key: "1x0j5s" }],
+  ["path", { d: "m17 8-5-5-5 5", key: "7q97r8" }],
+  ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", key: "ih7n3h" }]
+];
+var Upload = createLucideIcon("upload", __iconNode22);
 
 // node_modules/lucide-react/dist/esm/icons/users.js
-var __iconNode21 = [
+var __iconNode23 = [
   ["path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", key: "1yyitq" }],
   ["path", { d: "M16 3.128a4 4 0 0 1 0 7.744", key: "16gr8j" }],
   ["path", { d: "M22 21v-2a4 4 0 0 0-3-3.87", key: "kshegd" }],
   ["circle", { cx: "9", cy: "7", r: "4", key: "nufk8" }]
 ];
-var Users = createLucideIcon("users", __iconNode21);
+var Users = createLucideIcon("users", __iconNode23);
 
 // node_modules/lucide-react/dist/esm/icons/x.js
-var __iconNode22 = [
+var __iconNode24 = [
   ["path", { d: "M18 6 6 18", key: "1bl5f8" }],
   ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
 ];
-var X = createLucideIcon("x", __iconNode22);
+var X = createLucideIcon("x", __iconNode24);
 
 // src/ReminderApp.tsx
 var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
@@ -24839,6 +24863,75 @@ var detectPriority = (text, dueDate) => {
     if (diffDays <= 3) return "medium";
   }
   return "medium";
+};
+var parseICS = (content) => {
+  const events = [];
+  const lines = content.split(/\r\n|\n|\r/);
+  let inEvent = false;
+  let current = {};
+  for (const line of lines) {
+    if (line.startsWith("BEGIN:VEVENT")) {
+      inEvent = true;
+      current = {};
+    } else if (line.startsWith("END:VEVENT")) {
+      inEvent = false;
+      if (current.summary) {
+        events.push({
+          title: current.summary,
+          dueDate: current.dtstart ? current.dtstart.split("T")[0] : (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
+          dueTime: current.dtstart && current.dtstart.includes("T") ? `${current.dtstart.split("T")[1].substring(0, 2)}:${current.dtstart.split("T")[1].substring(2, 4)}` : void 0,
+          priority: "medium",
+          category: "other",
+          recurrence: "none",
+          completed: false,
+          pointsAwarded: 0
+        });
+      }
+    } else if (inEvent) {
+      if (line.startsWith("SUMMARY:")) current.summary = line.substring(8);
+      else if (line.startsWith("DTSTART")) {
+        const val = line.split(":")[1];
+        if (val) {
+          const y = val.substring(0, 4), m = val.substring(4, 6), d = val.substring(6, 8);
+          let dateStr = `${y}-${m}-${d}`;
+          if (val.includes("T")) {
+            const timePart = val.split("T")[1];
+            dateStr += `T${timePart}`;
+          }
+          current.dtstart = dateStr;
+        }
+      }
+    }
+  }
+  return events;
+};
+var parseCSV = (content) => {
+  const lines = content.split(/\r\n|\n|\r/).filter((l) => l.trim().length > 0);
+  if (lines.length < 2) return [];
+  const headers = lines[0].toLowerCase().split(",").map((h) => h.trim());
+  const titleIdx = headers.findIndex((h) => h.includes("title") || h.includes("subject") || h.includes("summary") || h.includes("task"));
+  const dateIdx = headers.findIndex((h) => h.includes("date") || h.includes("due") || h.includes("start"));
+  if (titleIdx === -1) return [];
+  const results = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(",").map((c) => c.trim());
+    if (cols.length <= titleIdx) continue;
+    let dateStr = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
+    if (dateIdx !== -1 && cols[dateIdx]) {
+      const parsed = new Date(cols[dateIdx]);
+      if (!isNaN(parsed.getTime())) dateStr = parsed.toISOString().split("T")[0];
+    }
+    results.push({
+      title: cols[titleIdx],
+      dueDate: dateStr,
+      priority: "medium",
+      category: "other",
+      recurrence: "none",
+      completed: false,
+      pointsAwarded: 0
+    });
+  }
+  return results;
 };
 var parseNaturalLanguage = (input) => {
   const lower = input.toLowerCase();
@@ -25275,6 +25368,55 @@ function ReminderApp({ initialData: initialData2 }) {
   const [sortAsc, setSortAsc] = (0, import_react3.useState)(true);
   const [toast, setToast] = (0, import_react3.useState)(null);
   const [achievement, setAchievement] = (0, import_react3.useState)(null);
+  const [importOpen, setImportOpen] = (0, import_react3.useState)(false);
+  const [dragActive, setDragActive] = (0, import_react3.useState)(false);
+  const handleFileUpload = (e) => {
+    e.preventDefault();
+    setDragActive(false);
+    let file = null;
+    if ("dataTransfer" in e) {
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) file = e.dataTransfer.files[0];
+    } else if (e.target.files && e.target.files[0]) {
+      file = e.target.files[0];
+    }
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result;
+      if (!content) return;
+      let imported = [];
+      if (file.name.endsWith(".ics") || file.name.endsWith(".icl")) {
+        imported = parseICS(content);
+      } else if (file.name.endsWith(".csv")) {
+        imported = parseCSV(content);
+      } else {
+        setToast("Unsupported file type. Use .ics or .csv");
+        return;
+      }
+      if (imported.length === 0) {
+        setToast("No valid reminders found.");
+        return;
+      }
+      const newReminders = imported.map((p) => ({
+        id: generateId(),
+        title: p.title || "Untitled Reminder",
+        dueDate: p.dueDate || (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
+        dueTime: p.dueTime,
+        priority: p.priority || "medium",
+        category: p.category || "other",
+        recurrence: p.recurrence || "none",
+        recurrenceInterval: p.recurrenceInterval,
+        recurrenceUnit: p.recurrenceUnit,
+        completed: false,
+        createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+        pointsAwarded: 0
+      }));
+      setReminders((prev) => [...prev, ...newReminders]);
+      setImportOpen(false);
+      setToast(`Imported ${newReminders.length} reminders!`);
+    };
+    reader.readAsText(file);
+  };
   (0, import_react3.useEffect)(() => {
     persistState(reminders, stats);
   }, [reminders, stats]);
@@ -25611,6 +25753,30 @@ function ReminderApp({ initialData: initialData2 }) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 18, fontWeight: 600, letterSpacing: "-0.3px" }, children: "Smart Reminders" })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 8, fontSize: 13 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "button",
+          {
+            onClick: () => setImportOpen(true),
+            style: {
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "6px 12px",
+              borderRadius: 50,
+              backgroundColor: "rgba(255,255,255,0.15)",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              fontSize: 13,
+              fontWeight: 500
+            },
+            title: "Import from Calendar/Excel",
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Upload, { size: 14 }),
+              " Import"
+            ]
+          }
+        ),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
           display: "flex",
           alignItems: "center",
@@ -26105,6 +26271,92 @@ function ReminderApp({ initialData: initialData2 }) {
         }
       )
     ] }) }),
+    importOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1100, padding: 16 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 24, width: "100%", maxWidth: 480, padding: 24, boxShadow: "0 16px 48px rgba(0,0,0,0.15)", maxHeight: "90vh", overflowY: "auto" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { style: { margin: 0, fontSize: 18, fontWeight: 600, color: COLORS.textMain }, children: "Import Reminders" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setImportOpen(false), style: { width: 36, height: 36, borderRadius: "50%", border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 18, color: COLORS.textMuted }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { style: { margin: "0 0 20px", fontSize: 14, color: COLORS.textSecondary, lineHeight: 1.5 }, children: [
+        "Drag and drop an ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: ".ics" }),
+        " (iCalendar) or ",
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: ".csv" }),
+        " (Excel) file to import your reminders from other apps like Google Calendar, Outlook, or Apple Reminders."
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+        "div",
+        {
+          onDragEnter: (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setDragActive(true);
+          },
+          onDragLeave: (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setDragActive(false);
+          },
+          onDragOver: (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setDragActive(true);
+          },
+          onDrop: handleFileUpload,
+          style: {
+            border: `2px dashed ${dragActive ? COLORS.primary : COLORS.border}`,
+            borderRadius: 16,
+            backgroundColor: dragActive ? `${COLORS.primary}10` : COLORS.inputBg,
+            padding: 40,
+            textAlign: "center",
+            transition: "all 0.2s ease",
+            cursor: "pointer",
+            marginBottom: 20,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 12
+          },
+          children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: 48, height: 48, borderRadius: "50%", backgroundColor: COLORS.iconBg, display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Upload, { size: 24, color: COLORS.primary }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "block", fontSize: 15, fontWeight: 600, color: COLORS.textMain, marginBottom: 4 }, children: dragActive ? "Drop file to import" : "Click or drag file here" }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 13, color: COLORS.textMuted }, children: "Supports .ics and .csv" })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              "input",
+              {
+                type: "file",
+                accept: ".ics,.icl,.csv",
+                onChange: handleFileUpload,
+                style: { position: "absolute", width: "100%", height: "100%", opacity: 0, cursor: "pointer", display: "none" },
+                id: "file-upload-input"
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { htmlFor: "file-upload-input", style: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, cursor: "pointer" } })
+          ]
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { padding: 16, backgroundColor: COLORS.cardAlt, borderRadius: 16 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: 14, fontWeight: 600, color: COLORS.textMain }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Calendar, { size: 16 }),
+            " iCalendar (.ics)"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { margin: 0, fontSize: 12, color: COLORS.textMuted }, children: "Best for Google Calendar, Apple Calendar, and ChatGPT exports." })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { padding: 16, backgroundColor: COLORS.cardAlt, borderRadius: 16 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontSize: 14, fontWeight: 600, color: COLORS.textMain }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileText, { size: 16 }),
+            " CSV (.csv)"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { margin: 0, fontSize: 12, color: COLORS.textMuted }, children: "Works with Outlook, Trello, Asana, and Excel sheets." })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginTop: 24, paddingTop: 16, borderTop: `1px solid ${COLORS.border}` }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", { style: { margin: "0 0 12px", fontSize: 13, fontWeight: 600, color: COLORS.textMain }, children: "Pro Tip: Use AI to Plan" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 13, color: COLORS.textSecondary, lineHeight: 1.5, backgroundColor: COLORS.accentLight, padding: 12, borderRadius: 12 }, children: 'Ask ChatGPT: "Create a study plan for my exam next week and export it as an ICS file." Then paste the text into a file and drop it here!' })
+      ] })
+    ] }) }),
     editing && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16, overflowY: "auto" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 24, width: "100%", maxWidth: 420, padding: 24, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 16px 48px rgba(0,0,0,0.15)" }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { style: { margin: 0, fontSize: 18, fontWeight: 600, color: COLORS.textMain }, children: "Edit Reminder" }),
@@ -26481,6 +26733,14 @@ lucide-react/dist/esm/icons/crown.js:
    * See the LICENSE file in the root directory of this source tree.
    *)
 
+lucide-react/dist/esm/icons/file-text.js:
+  (**
+   * @license lucide-react v0.554.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
 lucide-react/dist/esm/icons/flame.js:
   (**
    * @license lucide-react v0.554.0 - ISC
@@ -26578,6 +26838,14 @@ lucide-react/dist/esm/icons/stethoscope.js:
    *)
 
 lucide-react/dist/esm/icons/trash-2.js:
+  (**
+   * @license lucide-react v0.554.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/upload.js:
   (**
    * @license lucide-react v0.554.0 - ISC
    *
