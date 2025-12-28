@@ -25329,14 +25329,26 @@ function ReminderApp({ initialData: initialData2 }) {
     setReminders((prev) => prev.map((x) => x.id === r.id ? { ...r, completed: false, completedAt: void 0 } : x));
     setStats((s) => ({ ...s, totalPoints: Math.max(0, s.totalPoints - r.pointsAwarded), completedAllTime: Math.max(0, s.completedAllTime - 1) }));
   };
-  const [snoozingId, setSnoozingId] = (0, import_react3.useState)(null);
+  const [snoozePopup, setSnoozePopup] = (0, import_react3.useState)(null);
   const snooze = (r, mins) => {
-    setSnoozingId(r.id);
-    const d = /* @__PURE__ */ new Date();
-    d.setMinutes(d.getMinutes() + mins);
-    setReminders((prev) => prev.map((x) => x.id === r.id ? { ...r, dueDate: d.toISOString().split("T")[0], dueTime: `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}` } : x));
-    setToast(`\u{1F4A4} Snoozed for ${mins} minutes`);
-    setTimeout(() => setSnoozingId(null), 500);
+    const now = /* @__PURE__ */ new Date();
+    const newTime = new Date(now.getTime() + mins * 60 * 1e3);
+    setReminders((prev) => prev.map((x) => x.id === r.id ? {
+      ...r,
+      dueDate: newTime.toISOString().split("T")[0],
+      dueTime: `${newTime.getHours().toString().padStart(2, "0")}:${newTime.getMinutes().toString().padStart(2, "0")}`
+    } : x));
+    let durationText = `${mins} minutes`;
+    if (mins >= 60) {
+      const hours = Math.floor(mins / 60);
+      durationText = hours === 1 ? "1 hour" : `${hours} hours`;
+    }
+    if (mins >= 1440) {
+      const days = Math.floor(mins / 1440);
+      durationText = days === 1 ? "1 day" : `${days} days`;
+    }
+    setToast(`\u{1F4A4} Snoozed for ${durationText}`);
+    setSnoozePopup(null);
   };
   const del = (id) => {
     setReminders((prev) => prev.filter((r) => r.id !== id));
@@ -25488,28 +25500,128 @@ function ReminderApp({ initialData: initialData2 }) {
         !r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
           "button",
           {
-            onClick: () => snooze(r, 15),
-            title: "Snooze 15 minutes",
+            onClick: () => setSnoozePopup(r),
+            title: "Snooze",
             style: {
               width: 32,
               height: 32,
               borderRadius: 8,
               border: "none",
-              backgroundColor: snoozingId === r.id ? COLORS.primaryLight : COLORS.inputBg,
+              backgroundColor: COLORS.inputBg,
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              transition: "all 0.2s ease",
-              transform: snoozingId === r.id ? "scale(0.9)" : "scale(1)"
+              transition: "all 0.2s ease"
             },
-            children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14, fontWeight: 600, color: snoozingId === r.id ? "#fff" : COLORS.textMuted }, children: "\u{1F4A4}" })
+            children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14 }, children: "\u{1F4A4}" })
           }
         ),
         !r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setEditing(r), title: "Edit", style: { width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { size: 16, color: COLORS.textMuted }) }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => del(r.id), title: "Delete", style: { width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { size: 16, color: COLORS.danger }) })
       ] })
     ] }) }, r.id)) }),
+    snoozePopup && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 16, width: "100%", maxWidth: 320, padding: 24, textAlign: "center" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 40, marginBottom: 12 }, children: "\u{1F4A4}" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { style: { margin: "0 0 8px", fontSize: 18, fontWeight: 700, color: COLORS.textMain }, children: "Snooze Reminder" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { style: { margin: "0 0 20px", fontSize: 14, color: COLORS.textSecondary, lineHeight: 1.4 }, children: [
+        '"',
+        snoozePopup.title,
+        '"'
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", flexDirection: "column", gap: 10 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "button",
+          {
+            onClick: () => snooze(snoozePopup, 15),
+            style: {
+              padding: "14px 20px",
+              borderRadius: 10,
+              border: "none",
+              backgroundColor: COLORS.accentLight,
+              color: COLORS.primary,
+              fontSize: 15,
+              fontWeight: 600,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8
+            },
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { size: 18 }),
+              " Snooze for 15 minutes"
+            ]
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "button",
+          {
+            onClick: () => snooze(snoozePopup, 60),
+            style: {
+              padding: "14px 20px",
+              borderRadius: 10,
+              border: "none",
+              backgroundColor: COLORS.accentLight,
+              color: COLORS.primary,
+              fontSize: 15,
+              fontWeight: 600,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8
+            },
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { size: 18 }),
+              " Snooze for 1 hour"
+            ]
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "button",
+          {
+            onClick: () => snooze(snoozePopup, 1440),
+            style: {
+              padding: "14px 20px",
+              borderRadius: 10,
+              border: "none",
+              backgroundColor: COLORS.accentLight,
+              color: COLORS.primary,
+              fontSize: 15,
+              fontWeight: 600,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8
+            },
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Calendar, { size: 18 }),
+              " Snooze for 1 day"
+            ]
+          }
+        )
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "button",
+        {
+          onClick: () => setSnoozePopup(null),
+          style: {
+            marginTop: 16,
+            padding: "12px 24px",
+            borderRadius: 10,
+            border: `1px solid ${COLORS.border}`,
+            backgroundColor: COLORS.card,
+            fontSize: 14,
+            fontWeight: 500,
+            cursor: "pointer",
+            color: COLORS.textSecondary
+          },
+          children: "Cancel"
+        }
+      )
+    ] }) }),
     editing && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16, overflowY: "auto" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 16, width: "100%", maxWidth: 420, padding: 20, maxHeight: "90vh", overflowY: "auto" }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { style: { margin: 0, fontSize: 18, fontWeight: 700, color: COLORS.textMain }, children: "Edit Reminder" }),
