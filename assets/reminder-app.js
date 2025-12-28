@@ -25616,6 +25616,11 @@ function ReminderApp({ initialData: initialData2 }) {
       setParsed(null);
     }
   }, [input]);
+  const [, forceUpdate] = (0, import_react3.useState)(0);
+  (0, import_react3.useEffect)(() => {
+    const interval = setInterval(() => forceUpdate((n) => n + 1), 5e3);
+    return () => clearInterval(interval);
+  }, []);
   (0, import_react3.useEffect)(() => {
     const notify = () => {
       if (window.openai?.notifyIntrinsicHeight) window.openai.notifyIntrinsicHeight();

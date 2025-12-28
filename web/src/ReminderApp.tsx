@@ -1040,6 +1040,13 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     }
   }, [input]);
   
+  // Force re-render every 5 seconds to update recently completed items visibility
+  const [, forceUpdate] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => forceUpdate(n => n + 1), 5000);
+    return () => clearInterval(interval);
+  }, []);
+  
   // Notify height changes
   useEffect(() => {
     const notify = () => { if ((window as any).openai?.notifyIntrinsicHeight) (window as any).openai.notifyIntrinsicHeight(); };
