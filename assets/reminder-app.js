@@ -25020,26 +25020,29 @@ var parseNaturalLanguage = (input) => {
       break;
     }
   }
-  let dueDate = today.toISOString().split("T")[0];
+  const formatLocalDate = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  let dueDate = formatLocalDate(today);
   if (lower.includes("today")) {
+    dueDate = formatLocalDate(today);
     confidence += 20;
   } else if (lower.includes("tonight")) {
+    dueDate = formatLocalDate(today);
     dueTime = dueTime || "20:00";
     confidence += 20;
   } else if (lower.includes("tomorrow")) {
     const tom = new Date(today);
     tom.setDate(tom.getDate() + 1);
-    dueDate = tom.toISOString().split("T")[0];
+    dueDate = formatLocalDate(tom);
     confidence += 20;
   } else if (lower.includes("next week")) {
     const next = new Date(today);
     next.setDate(next.getDate() + 7);
-    dueDate = next.toISOString().split("T")[0];
+    dueDate = formatLocalDate(next);
     confidence += 15;
   } else if (lower.includes("this weekend")) {
     const sat = new Date(today);
     sat.setDate(sat.getDate() + (6 - sat.getDay()));
-    dueDate = sat.toISOString().split("T")[0];
+    dueDate = formatLocalDate(sat);
     confidence += 15;
   } else {
     const daysMatch = lower.match(/in (\d+) days?/);
@@ -25048,18 +25051,18 @@ var parseNaturalLanguage = (input) => {
     if (daysMatch) {
       const fut = new Date(today);
       fut.setDate(fut.getDate() + parseInt(daysMatch[1]));
-      dueDate = fut.toISOString().split("T")[0];
+      dueDate = formatLocalDate(fut);
       confidence += 15;
     } else if (hoursMatch) {
       const fut = /* @__PURE__ */ new Date();
       fut.setHours(fut.getHours() + parseInt(hoursMatch[1]));
-      dueDate = fut.toISOString().split("T")[0];
+      dueDate = formatLocalDate(fut);
       dueTime = `${fut.getHours().toString().padStart(2, "0")}:${fut.getMinutes().toString().padStart(2, "0")}`;
       confidence += 15;
     } else if (weeksMatch) {
       const fut = new Date(today);
       fut.setDate(fut.getDate() + parseInt(weeksMatch[1]) * 7);
-      dueDate = fut.toISOString().split("T")[0];
+      dueDate = formatLocalDate(fut);
       confidence += 15;
     }
     const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
@@ -25068,7 +25071,7 @@ var parseNaturalLanguage = (input) => {
         const target = new Date(today);
         const diff = (i - today.getDay() + 7) % 7 || 7;
         target.setDate(target.getDate() + diff);
-        dueDate = target.toISOString().split("T")[0];
+        dueDate = formatLocalDate(target);
         confidence += 15;
         break;
       }
@@ -26602,32 +26605,19 @@ function ReminderApp({ initialData: initialData2 }) {
           }
         ),
         !isCollapsed && sectionReminders.map((r, i) => {
-          const isNew = r.createdAt && Date.now() - new Date(r.createdAt).getTime() < 36e5;
-          const viewedAt = viewedTasks[r.id];
-          const shouldGlow = isNew && (!viewedAt || Date.now() - viewedAt < 1e4);
+          const isNew = r.createdAt && Date.now() - new Date(r.createdAt).getTime() < 3e5;
+          const shouldGlow = isNew && Date.now() - new Date(r.createdAt).getTime() < 1e4;
           return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
             "div",
             {
-              ref: (el) => {
-                if (el && isNew && !viewedTasks[r.id]) {
-                  const observer = new IntersectionObserver((entries) => {
-                    entries.forEach((entry) => {
-                      if (entry.isIntersecting) {
-                        setViewedTasks((prev) => ({ ...prev, [r.id]: Date.now() }));
-                        observer.disconnect();
-                      }
-                    });
-                  }, { threshold: 0.5 });
-                  observer.observe(el);
-                }
-              },
               style: {
                 padding: "12px 16px",
                 borderBottom: i < sectionReminders.length - 1 ? `1px solid ${COLORS.border}` : "none",
-                backgroundColor: r.completed ? COLORS.cardAlt : COLORS.card,
+                backgroundColor: shouldGlow ? `${COLORS.primary}08` : r.completed ? COLORS.cardAlt : COLORS.card,
                 opacity: r.completed ? 0.7 : 1,
-                boxShadow: shouldGlow ? `inset 0 0 0 2px ${COLORS.primary}40, 0 0 12px ${COLORS.primary}30` : "none",
-                transition: "box-shadow 0.5s ease-out"
+                boxShadow: shouldGlow ? `inset 0 0 0 2px ${COLORS.primary}50, 0 0 16px ${COLORS.primary}25` : "none",
+                transition: "all 0.5s ease-out",
+                animation: shouldGlow ? "pulse 2s ease-in-out infinite" : "none"
               },
               children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 10 }, children: [
                 /* @__PURE__ */ (0, import_jsx_runtime.jsx)(

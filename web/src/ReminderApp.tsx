@@ -353,25 +353,32 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
     if (match) { dueTime = p.handler(match); confidence += 20; break; }
   }
   
-  // Parse date
-  let dueDate = today.toISOString().split("T")[0]; // Default to today
+  // Parse date - use local date format to avoid UTC timezone issues
+  const formatLocalDate = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  let dueDate = formatLocalDate(today); // Default to today (local)
   
-  if (lower.includes("today")) { confidence += 20; }
+  if (lower.includes("today")) { 
+    dueDate = formatLocalDate(today); // Explicitly set to today
+    confidence += 20; 
+  }
   else if (lower.includes("tonight")) { 
-    dueTime = dueTime || "20:00"; confidence += 20;
+    dueDate = formatLocalDate(today);
+    dueTime = dueTime || "20:00"; 
+    confidence += 20;
   }
   else if (lower.includes("tomorrow")) {
     const tom = new Date(today); tom.setDate(tom.getDate() + 1);
-    dueDate = tom.toISOString().split("T")[0]; confidence += 20;
+    dueDate = formatLocalDate(tom); 
+    confidence += 20;
   }
   else if (lower.includes("next week")) {
     const next = new Date(today); next.setDate(next.getDate() + 7);
-    dueDate = next.toISOString().split("T")[0]; confidence += 15;
+    dueDate = formatLocalDate(next); confidence += 15;
   }
   else if (lower.includes("this weekend")) {
     const sat = new Date(today);
     sat.setDate(sat.getDate() + (6 - sat.getDay()));
-    dueDate = sat.toISOString().split("T")[0]; confidence += 15;
+    dueDate = formatLocalDate(sat); confidence += 15;
   }
   else {
     // "in X days/hours"
@@ -381,15 +388,15 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
     
     if (daysMatch) {
       const fut = new Date(today); fut.setDate(fut.getDate() + parseInt(daysMatch[1]));
-      dueDate = fut.toISOString().split("T")[0]; confidence += 15;
+      dueDate = formatLocalDate(fut); confidence += 15;
     } else if (hoursMatch) {
       const fut = new Date(); fut.setHours(fut.getHours() + parseInt(hoursMatch[1]));
-      dueDate = fut.toISOString().split("T")[0];
+      dueDate = formatLocalDate(fut);
       dueTime = `${fut.getHours().toString().padStart(2, "0")}:${fut.getMinutes().toString().padStart(2, "0")}`;
       confidence += 15;
     } else if (weeksMatch) {
       const fut = new Date(today); fut.setDate(fut.getDate() + parseInt(weeksMatch[1]) * 7);
-      dueDate = fut.toISOString().split("T")[0]; confidence += 15;
+      dueDate = formatLocalDate(fut); confidence += 15;
     }
     
     // Day names
@@ -399,7 +406,7 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
         const target = new Date(today);
         const diff = (i - today.getDay() + 7) % 7 || 7;
         target.setDate(target.getDate() + diff);
-        dueDate = target.toISOString().split("T")[0];
+        dueDate = formatLocalDate(target);
         confidence += 15;
         break;
       }
@@ -2026,35 +2033,21 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
                 
                 {/* Section Items */}
                 {!isCollapsed && sectionReminders.map((r, i) => {
-                  // Check if task is new (created within last hour) and should glow
-                  const isNew = r.createdAt && (Date.now() - new Date(r.createdAt).getTime()) < 3600000;
-                  const viewedAt = viewedTasks[r.id];
-                  const shouldGlow = isNew && (!viewedAt || (Date.now() - viewedAt) < 10000);
+                  // Check if task is new (created within last 5 minutes) and should glow
+                  const isNew = r.createdAt && (Date.now() - new Date(r.createdAt).getTime()) < 300000; // 5 min
+                  const shouldGlow = isNew && (Date.now() - new Date(r.createdAt).getTime()) < 10000; // 10 sec glow
                   
                   return (
                   <div 
                     key={r.id} 
-                    ref={(el) => {
-                      // Use Intersection Observer to track when task enters viewport
-                      if (el && isNew && !viewedTasks[r.id]) {
-                        const observer = new IntersectionObserver((entries) => {
-                          entries.forEach(entry => {
-                            if (entry.isIntersecting) {
-                              setViewedTasks(prev => ({ ...prev, [r.id]: Date.now() }));
-                              observer.disconnect();
-                            }
-                          });
-                        }, { threshold: 0.5 });
-                        observer.observe(el);
-                      }
-                    }}
                     style={{ 
                     padding: "12px 16px", 
                     borderBottom: i < sectionReminders.length - 1 ? `1px solid ${COLORS.border}` : "none",
-                    backgroundColor: r.completed ? COLORS.cardAlt : COLORS.card,
+                    backgroundColor: shouldGlow ? `${COLORS.primary}08` : (r.completed ? COLORS.cardAlt : COLORS.card),
                     opacity: r.completed ? 0.7 : 1,
-                    boxShadow: shouldGlow ? `inset 0 0 0 2px ${COLORS.primary}40, 0 0 12px ${COLORS.primary}30` : "none",
-                    transition: "box-shadow 0.5s ease-out"
+                    boxShadow: shouldGlow ? `inset 0 0 0 2px ${COLORS.primary}50, 0 0 16px ${COLORS.primary}25` : "none",
+                    transition: "all 0.5s ease-out",
+                    animation: shouldGlow ? "pulse 2s ease-in-out infinite" : "none"
                   }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       {/* Compact checkbox */}
