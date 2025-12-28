@@ -26454,7 +26454,86 @@ function ReminderApp({ initialData: initialData2 }) {
         }
       )
     ] }) }),
-    filtered.filter((r) => !r.completed).length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: cardRadius, boxShadow: cardShadow, textAlign: "center", padding: 48, color: COLORS.textMuted }, children: [
+    quickFilter === "completed" ? (
+      // Show completed items list
+      filtered.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: cardRadius, boxShadow: cardShadow, textAlign: "center", padding: 48, color: COLORS.textMuted }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
+          width: 64,
+          height: 64,
+          borderRadius: "50%",
+          backgroundColor: COLORS.iconBg,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          margin: "0 auto 16px"
+        }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { size: 28, color: COLORS.textMuted }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { fontSize: 16, margin: 0, fontWeight: 500, color: COLORS.textMain }, children: "No completed reminders" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { fontSize: 14, marginTop: 6, color: COLORS.textMuted }, children: "Complete some tasks to see them here!" })
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: cardRadius, boxShadow: cardShadow, overflow: "hidden" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { padding: "12px 16px", backgroundColor: COLORS.cardAlt, borderBottom: `1px solid ${COLORS.border}` }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 14, fontWeight: 600, color: COLORS.success }, children: [
+          "\u2705 Completed (",
+          filtered.length,
+          ")"
+        ] }) }),
+        filtered.map((r, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
+          padding: "12px 16px",
+          borderBottom: i < filtered.length - 1 ? `1px solid ${COLORS.border}` : "none",
+          backgroundColor: COLORS.card,
+          opacity: 0.7
+        }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 10 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "button",
+            {
+              onClick: () => uncomplete(r),
+              style: {
+                width: 24,
+                height: 24,
+                borderRadius: "50%",
+                border: `2px solid ${COLORS.success}`,
+                backgroundColor: COLORS.success,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0
+              },
+              children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { size: 12, color: "#fff" })
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 18, opacity: 0.5 }, children: QUICK_FILTERS.find((f) => f.id === r.category)?.emoji || "\u{1F4CC}" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
+              fontSize: 14,
+              fontWeight: 500,
+              color: COLORS.textMuted,
+              textDecoration: "line-through"
+            }, children: r.title }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 }, children: [
+              "Completed ",
+              r.completedAt ? new Date(r.completedAt).toLocaleDateString() : ""
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "button",
+            {
+              onClick: () => del(r.id),
+              style: {
+                width: 28,
+                height: 28,
+                borderRadius: "50%",
+                border: "none",
+                backgroundColor: `${COLORS.danger}10`,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              },
+              children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { size: 12, color: COLORS.danger })
+            }
+          )
+        ] }) }, r.id))
+      ] })
+    ) : filtered.filter((r) => !r.completed || isRecentlyCompleted(r)).length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: cardRadius, boxShadow: cardShadow, textAlign: "center", padding: 48, color: COLORS.textMuted }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
         width: 64,
         height: 64,

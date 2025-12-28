@@ -1879,8 +1879,76 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
         </div>
       </div>
       
-      {/* Reminder List - Time-based sections */}
-      {filtered.filter(r => !r.completed).length === 0 ? (
+      {/* Reminder List - Time-based sections OR Completed list */}
+      {quickFilter === "completed" ? (
+        // Show completed items list
+        filtered.length === 0 ? (
+          <div style={{ backgroundColor: COLORS.card, borderRadius: cardRadius, boxShadow: cardShadow, textAlign: "center", padding: 48, color: COLORS.textMuted }}>
+            <div style={{ 
+              width: 64, height: 64, borderRadius: "50%", 
+              backgroundColor: COLORS.iconBg, 
+              display: "flex", alignItems: "center", justifyContent: "center",
+              margin: "0 auto 16px"
+            }}>
+              <Check size={28} color={COLORS.textMuted} />
+            </div>
+            <p style={{ fontSize: 16, margin: 0, fontWeight: 500, color: COLORS.textMain }}>No completed reminders</p>
+            <p style={{ fontSize: 14, marginTop: 6, color: COLORS.textMuted }}>Complete some tasks to see them here!</p>
+          </div>
+        ) : (
+          <div style={{ backgroundColor: COLORS.card, borderRadius: cardRadius, boxShadow: cardShadow, overflow: "hidden" }}>
+            <div style={{ padding: "12px 16px", backgroundColor: COLORS.cardAlt, borderBottom: `1px solid ${COLORS.border}` }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: COLORS.success }}>✅ Completed ({filtered.length})</span>
+            </div>
+            {filtered.map((r, i) => (
+              <div key={r.id} style={{ 
+                padding: "12px 16px", 
+                borderBottom: i < filtered.length - 1 ? `1px solid ${COLORS.border}` : "none",
+                backgroundColor: COLORS.card,
+                opacity: 0.7
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <button 
+                    onClick={() => uncomplete(r)} 
+                    style={{ 
+                      width: 24, height: 24, borderRadius: "50%", 
+                      border: `2px solid ${COLORS.success}`, 
+                      backgroundColor: COLORS.success, 
+                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 
+                    }}
+                  >
+                    <Check size={12} color="#fff" />
+                  </button>
+                  <span style={{ fontSize: 18, opacity: 0.5 }}>
+                    {QUICK_FILTERS.find(f => f.id === r.category)?.emoji || "📌"}
+                  </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ 
+                      fontSize: 14, fontWeight: 500, color: COLORS.textMuted,
+                      textDecoration: "line-through"
+                    }}>
+                      {r.title}
+                    </div>
+                    <div style={{ fontSize: 12, color: COLORS.textMuted, marginTop: 2 }}>
+                      Completed {r.completedAt ? new Date(r.completedAt).toLocaleDateString() : ""}
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => del(r.id)} 
+                    style={{ 
+                      width: 28, height: 28, borderRadius: "50%", border: "none", 
+                      backgroundColor: `${COLORS.danger}10`, 
+                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" 
+                    }}
+                  >
+                    <Trash2 size={12} color={COLORS.danger} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      ) : filtered.filter(r => !r.completed || isRecentlyCompleted(r)).length === 0 ? (
         <div style={{ backgroundColor: COLORS.card, borderRadius: cardRadius, boxShadow: cardShadow, textAlign: "center", padding: 48, color: COLORS.textMuted }}>
           <div style={{ 
             width: 64, height: 64, borderRadius: "50%", 
