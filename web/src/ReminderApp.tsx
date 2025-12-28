@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 
 type Priority = "low" | "medium" | "high" | "urgent";
-type RecurrenceType = "none" | "daily" | "weekly" | "monthly";
+type RecurrenceType = "none" | "daily" | "weekly" | "monthly" | "yearly" | "custom";
 type Category = "work" | "family" | "health" | "errands" | "finance" | "social" | "learning" | "travel" | "home" | "other";
 
 interface Reminder {
@@ -19,6 +19,8 @@ interface Reminder {
   priority: Priority;
   category: Category;
   recurrence: RecurrenceType;
+  recurrenceInterval?: number; // e.g., 3 for "every 3 days"
+  recurrenceUnit?: "days" | "weeks" | "months" | "years";
   completed: boolean;
   completedAt?: string;
   createdAt: string;
@@ -41,42 +43,35 @@ interface ParsedReminder {
   priority: Priority;
   category: Category;
   recurrence: RecurrenceType;
+  recurrenceInterval?: number;
+  recurrenceUnit?: "days" | "weeks" | "months" | "years";
   confidence: number;
 }
 
 const COLORS = {
-  primary: "#2F5C3B", // Forest Green
-  primaryLight: "#E8F5E9", // Very light green
-  secondary: "#8BA890", // Sage
-  success: "#4CAF50",
-  warning: "#FF9800",
-  danger: "#E53935",
-  bg: "#F4F7F4", // Soft grey-green background
-  card: "#FFFFFF",
-  textMain: "#1C241D",
-  textSecondary: "#5C6B5F",
-  textMuted: "#8C9E90",
-  border: "#E0E8E0",
-  inputBg: "#FFFFFF",
-  gold: "#FFC107",
-  purple: "#9C27B0"
+  primary: "#2D5A3D", primaryLight: "#56C596", primaryBg: "#E8F5E9",
+  success: "#2E7D32", warning: "#F59E0B", danger: "#D32F2F",
+  bg: "#F5F7F5", card: "#FFFFFF", cardAlt: "#FAFBFA",
+  textMain: "#1A1A1A", textSecondary: "#5F6368", textMuted: "#9CA3AF",
+  border: "#E0E5E0", inputBg: "#F8FAF8", gold: "#F59E0B", 
+  accent: "#3D7A5A", accentLight: "#E6F4EA"
 };
 
 const PRIORITY_COLORS: Record<Priority, string> = {
-  low: "#4CAF50", medium: "#FF9800", high: "#FF5722", urgent: "#D32F2F"
+  low: "#10B981", medium: "#F59E0B", high: "#F97316", urgent: "#EF4444"
 };
 
 const CATEGORY_CONFIG: Record<Category, { icon: any; color: string; label: string }> = {
-  work: { icon: Briefcase, color: "#5D4037", label: "Work" }, // Earthy brown
-  family: { icon: Users, color: "#D81B60", label: "Family" }, // Pink
-  health: { icon: Stethoscope, color: "#00897B", label: "Health" }, // Teal
-  errands: { icon: ShoppingCart, color: "#F57C00", label: "Errands" }, // Orange
-  finance: { icon: Briefcase, color: "#5E35B1", label: "Finance" }, // Purple
-  social: { icon: Heart, color: "#E53935", label: "Social" }, // Red
-  learning: { icon: GraduationCap, color: "#039BE5", label: "Learning" }, // Light Blue
-  travel: { icon: Plane, color: "#3949AB", label: "Travel" }, // Indigo
-  home: { icon: Home, color: "#7CB342", label: "Home" }, // Light Green
-  other: { icon: Star, color: "#757575", label: "Other" } // Grey
+  work: { icon: Briefcase, color: "#3B82F6", label: "Work" },
+  family: { icon: Users, color: "#EC4899", label: "Family" },
+  health: { icon: Stethoscope, color: "#10B981", label: "Health" },
+  errands: { icon: ShoppingCart, color: "#F59E0B", label: "Errands" },
+  finance: { icon: Briefcase, color: "#8B5CF6", label: "Finance" },
+  social: { icon: Heart, color: "#EF4444", label: "Social" },
+  learning: { icon: GraduationCap, color: "#06B6D4", label: "Learning" },
+  travel: { icon: Plane, color: "#6366F1", label: "Travel" },
+  home: { icon: Home, color: "#84CC16", label: "Home" },
+  other: { icon: Star, color: "#64748B", label: "Other" }
 };
 
 const STORAGE_KEY = "REMINDER_APP_DATA";
@@ -244,11 +239,112 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
     }
   }
   
-  // Parse recurrence
+  // Parse recurrence - Enhanced with custom intervals and semantic inference
   let recurrence: RecurrenceType = "none";
-  if (/every day|daily/i.test(lower)) { recurrence = "daily"; confidence += 10; }
-  else if (/every week|weekly/i.test(lower)) { recurrence = "weekly"; confidence += 10; }
-  else if (/every month|monthly/i.test(lower)) { recurrence = "monthly"; confidence += 10; }
+  let recurrenceInterval: number | undefined;
+  let recurrenceUnit: "days" | "weeks" | "months" | "years" | undefined;
+  
+  // 1. Explicit custom intervals: "every X days/weeks/months/years"
+  const customRecurrenceMatch = lower.match(/every\s+(\d+)\s+(day|days|week|weeks|month|months|year|years)/i);
+  if (customRecurrenceMatch) {
+    const num = parseInt(customRecurrenceMatch[1]);
+    const unit = customRecurrenceMatch[2].toLowerCase();
+    recurrenceInterval = num;
+    
+    if (unit.startsWith("day")) {
+      recurrenceUnit = "days";
+      recurrence = num === 1 ? "daily" : "custom";
+    } else if (unit.startsWith("week")) {
+      recurrenceUnit = "weeks";
+      recurrence = num === 1 ? "weekly" : "custom";
+    } else if (unit.startsWith("month")) {
+      recurrenceUnit = "months";
+      recurrence = num === 1 ? "monthly" : "custom";
+    } else if (unit.startsWith("year")) {
+      recurrenceUnit = "years";
+      recurrence = num === 1 ? "yearly" : "custom";
+    }
+    confidence += 15;
+  }
+  // 2. Standard recurrence keywords
+  else if (/\bevery\s*day\b|daily/i.test(lower)) { 
+    recurrence = "daily"; recurrenceInterval = 1; recurrenceUnit = "days"; confidence += 10; 
+  }
+  else if (/\bevery\s*week\b|weekly/i.test(lower)) { 
+    recurrence = "weekly"; recurrenceInterval = 1; recurrenceUnit = "weeks"; confidence += 10; 
+  }
+  else if (/\bevery\s*month\b|monthly/i.test(lower)) { 
+    recurrence = "monthly"; recurrenceInterval = 1; recurrenceUnit = "months"; confidence += 10; 
+  }
+  else if (/\bevery\s*year\b|yearly|annually/i.test(lower)) { 
+    recurrence = "yearly"; recurrenceInterval = 1; recurrenceUnit = "years"; confidence += 10; 
+  }
+  // 3. Bi-weekly, bi-monthly patterns
+  else if (/bi-?weekly|every other week|every 2 weeks/i.test(lower)) {
+    recurrence = "custom"; recurrenceInterval = 2; recurrenceUnit = "weeks"; confidence += 12;
+  }
+  else if (/bi-?monthly|every other month|every 2 months/i.test(lower)) {
+    recurrence = "custom"; recurrenceInterval = 2; recurrenceUnit = "months"; confidence += 12;
+  }
+  // 4. Semantic inference - Infer recurrence from context
+  else {
+    // Birthday = yearly
+    if (/\bbirthday\b/i.test(lower)) {
+      recurrence = "yearly"; recurrenceInterval = 1; recurrenceUnit = "years"; confidence += 10;
+    }
+    // Anniversary = yearly
+    else if (/\banniversary\b/i.test(lower)) {
+      recurrence = "yearly"; recurrenceInterval = 1; recurrenceUnit = "years"; confidence += 10;
+    }
+    // Medication/vitamins/pills = daily (unless otherwise specified)
+    else if (/\b(medication|medicine|vitamin|vitamins|pill|pills|meds)\b/i.test(lower) && recurrence === "none") {
+      recurrence = "daily"; recurrenceInterval = 1; recurrenceUnit = "days"; confidence += 8;
+    }
+    // Rent/mortgage = monthly
+    else if (/\b(rent|mortgage)\b/i.test(lower) && !/paid|pay.*off/i.test(lower)) {
+      recurrence = "monthly"; recurrenceInterval = 1; recurrenceUnit = "months"; confidence += 8;
+    }
+    // Paycheck/salary = bi-weekly or monthly (default to bi-weekly)
+    else if (/\b(paycheck|payday|salary)\b/i.test(lower)) {
+      recurrence = "custom"; recurrenceInterval = 2; recurrenceUnit = "weeks"; confidence += 6;
+    }
+    // Subscription renewals = monthly
+    else if (/\b(subscription|renewal|renew)\b/i.test(lower)) {
+      recurrence = "monthly"; recurrenceInterval = 1; recurrenceUnit = "months"; confidence += 6;
+    }
+    // Trash/garbage = weekly
+    else if (/\b(trash|garbage|recycling|bins)\b/i.test(lower)) {
+      recurrence = "weekly"; recurrenceInterval = 1; recurrenceUnit = "weeks"; confidence += 8;
+    }
+    // Water plants = weekly (common pattern)
+    else if (/\bwater\s*(the\s*)?(plants?|flowers?|garden)\b/i.test(lower)) {
+      recurrence = "weekly"; recurrenceInterval = 1; recurrenceUnit = "weeks"; confidence += 6;
+    }
+    // Gym/workout = daily or every other day (default every other day)
+    else if (/\b(gym|workout|exercise)\b/i.test(lower) && recurrence === "none") {
+      recurrence = "custom"; recurrenceInterval = 2; recurrenceUnit = "days"; confidence += 5;
+    }
+    // Feed pet = daily
+    else if (/\bfeed\s*(my\s*)?(cat|dog|pet|fish|bird)\b/i.test(lower)) {
+      recurrence = "daily"; recurrenceInterval = 1; recurrenceUnit = "days"; confidence += 8;
+    }
+    // Walk dog = daily
+    else if (/\bwalk\s*(my\s*)?(dog|puppy)\b/i.test(lower)) {
+      recurrence = "daily"; recurrenceInterval = 1; recurrenceUnit = "days"; confidence += 8;
+    }
+    // Oil change = every 3 months
+    else if (/\boil\s*change\b/i.test(lower)) {
+      recurrence = "custom"; recurrenceInterval = 3; recurrenceUnit = "months"; confidence += 6;
+    }
+    // Haircut = monthly
+    else if (/\bhaircut\b/i.test(lower)) {
+      recurrence = "monthly"; recurrenceInterval = 1; recurrenceUnit = "months"; confidence += 5;
+    }
+    // Dentist = every 6 months
+    else if (/\bdentist\b/i.test(lower) && !/appointment|tomorrow|today/i.test(lower)) {
+      recurrence = "custom"; recurrenceInterval = 6; recurrenceUnit = "months"; confidence += 5;
+    }
+  }
   
   // Detect category
   const category = detectCategory(input);
@@ -258,7 +354,7 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
   const priority = detectPriority(input, dueDate);
   if (priority !== "medium") confidence += 10;
   
-  // Extract clean title
+  // Extract clean title - remove all parsed elements
   let title = input
     .replace(/at \d{1,2}:?\d{0,2}\s*(am|pm)?/gi, "")
     .replace(/\d{1,2}(am|pm)/gi, "")
@@ -266,7 +362,12 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
     .replace(/in \d+ (days?|hours?|weeks?)/gi, "")
     .replace(/on (sunday|monday|tuesday|wednesday|thursday|friday|saturday)/gi, "")
     .replace(/urgent|asap|immediately|important|high priority|low priority|no rush/gi, "")
-    .replace(/every (day|week|month)|daily|weekly|monthly/gi, "")
+    // Enhanced recurrence pattern removal
+    .replace(/every\s+\d+\s+(day|days|week|weeks|month|months|year|years)/gi, "")
+    .replace(/every\s*(day|week|month|year)/gi, "")
+    .replace(/daily|weekly|monthly|yearly|annually/gi, "")
+    .replace(/bi-?weekly|bi-?monthly/gi, "")
+    .replace(/every other (day|week|month)/gi, "")
     .replace(/remind me( to)?/gi, "")
     .replace(/don't forget( to)?/gi, "")
     .replace(/need to/gi, "")
@@ -285,6 +386,8 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
     priority,
     category,
     recurrence,
+    recurrenceInterval,
+    recurrenceUnit,
     confidence: Math.min(confidence, 100)
   };
 };
@@ -303,12 +406,92 @@ const DEFAULT_ACHIEVEMENTS = [
   { id: "complete50", name: "Productive", icon: "🏆", unlocked: false },
 ];
 
-export default function ReminderApp({ initialData }: { initialData?: any }) {
-  const [reminders, setReminders] = useState<Reminder[]>([]);
-  const [stats, setStats] = useState<UserStats>({
+// Helper to persist state via OpenAI Apps SDK
+const persistState = (reminders: Reminder[], stats: UserStats) => {
+  const state = { reminders, stats, savedAt: Date.now() };
+  
+  // 1. Use OpenAI widget state (persists within conversation)
+  if ((window as any).openai?.setWidgetState) {
+    try {
+      (window as any).openai.setWidgetState(state);
+      console.log("[Persist] Saved to widget state");
+    } catch (e) {
+      console.error("[Persist] Widget state error:", e);
+    }
+  }
+  
+  // 2. Also save to localStorage as fallback
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(reminders));
+    localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+  } catch (e) {
+    console.error("[Persist] localStorage error:", e);
+  }
+  
+  // 3. Call save tool if available (for cross-session persistence)
+  if ((window as any).openai?.callTool) {
+    try {
+      (window as any).openai.callTool("save_reminders", state).catch((e: any) => {
+        console.log("[Persist] callTool not available or failed:", e);
+      });
+    } catch (e) {
+      // Tool may not exist, that's ok
+    }
+  }
+};
+
+// Helper to load initial state
+const loadInitialState = (initialData: any): { reminders: Reminder[], stats: UserStats } => {
+  const defaultStats: UserStats = {
     totalPoints: 0, currentStreak: 0, longestStreak: 0,
     completedAllTime: 0, level: 1, achievements: [...DEFAULT_ACHIEVEMENTS]
-  });
+  };
+  
+  // Priority 1: initialData from server (hydration)
+  if (initialData?.reminders && Array.isArray(initialData.reminders)) {
+    console.log("[Load] Using initialData from server:", initialData.reminders.length, "reminders");
+    return {
+      reminders: initialData.reminders,
+      stats: initialData.stats || defaultStats
+    };
+  }
+  
+  // Priority 2: Check window.openai widget state
+  try {
+    const widgetState = (window as any).openai?.widgetState;
+    if (widgetState?.reminders && Array.isArray(widgetState.reminders)) {
+      console.log("[Load] Using widget state:", widgetState.reminders.length, "reminders");
+      return {
+        reminders: widgetState.reminders,
+        stats: widgetState.stats || defaultStats
+      };
+    }
+  } catch (e) {}
+  
+  // Priority 3: localStorage fallback
+  try {
+    const savedReminders = localStorage.getItem(STORAGE_KEY);
+    const savedStats = localStorage.getItem(STATS_KEY);
+    if (savedReminders) {
+      const reminders = JSON.parse(savedReminders);
+      console.log("[Load] Using localStorage:", reminders.length, "reminders");
+      return {
+        reminders,
+        stats: savedStats ? JSON.parse(savedStats) : defaultStats
+      };
+    }
+  } catch (e) {}
+  
+  console.log("[Load] No saved data found, starting fresh");
+  return { reminders: [], stats: defaultStats };
+};
+
+export default function ReminderApp({ initialData }: { initialData?: any }) {
+  // Load initial state from best available source
+  const initial = useMemo(() => loadInitialState(initialData), []);
+  
+  const [reminders, setReminders] = useState<Reminder[]>(initial.reminders);
+  const [stats, setStats] = useState<UserStats>(initial.stats);
   
   // AI-first: single input field
   const [input, setInput] = useState("");
@@ -324,24 +507,14 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "completed" | "overdue">("all");
   const [sortField, setSortField] = useState<"dueDate" | "priority" | "category">("dueDate");
   const [sortAsc, setSortAsc] = useState(true);
-  const [showFilters, setShowFilters] = useState(false);
   
   const [toast, setToast] = useState<string | null>(null);
   const [achievement, setAchievement] = useState<{ name: string; icon: string } | null>(null);
   
-  // Load from storage
+  // Persist whenever reminders or stats change
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) setReminders(JSON.parse(saved));
-      const savedStats = localStorage.getItem(STATS_KEY);
-      if (savedStats) setStats(JSON.parse(savedStats));
-    } catch {}
-  }, []);
-  
-  // Persist
-  useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(reminders)); }, [reminders]);
-  useEffect(() => { localStorage.setItem(STATS_KEY, JSON.stringify(stats)); }, [stats]);
+    persistState(reminders, stats);
+  }, [reminders, stats]);
   useEffect(() => { if (toast) { const t = setTimeout(() => setToast(null), 3000); return () => clearTimeout(t); }}, [toast]);
   useEffect(() => { if (achievement) { const t = setTimeout(() => setAchievement(null), 4000); return () => clearTimeout(t); }}, [achievement]);
   
@@ -389,6 +562,19 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const todayCount = reminders.filter(r => !r.completed && r.dueDate === new Date().toISOString().split("T")[0]).length;
   const levelInfo = calcLevel(stats.totalPoints);
   
+  // Helper to format recurrence for display
+  const formatRecurrence = (r: Reminder | ParsedReminder): string => {
+    if (r.recurrence === "none") return "";
+    if (r.recurrence === "daily") return "Daily";
+    if (r.recurrence === "weekly") return "Weekly";
+    if (r.recurrence === "monthly") return "Monthly";
+    if (r.recurrence === "yearly") return "Yearly";
+    if (r.recurrence === "custom" && r.recurrenceInterval && r.recurrenceUnit) {
+      return `Every ${r.recurrenceInterval} ${r.recurrenceUnit}`;
+    }
+    return "";
+  };
+  
   // Create from parsed input - ONE CLICK!
   const createFromParsed = () => {
     if (!parsed || !parsed.title.trim()) { setToast("Type something to create a reminder"); return; }
@@ -400,6 +586,8 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       priority: parsed.priority,
       category: parsed.category,
       recurrence: parsed.recurrence,
+      recurrenceInterval: parsed.recurrenceInterval,
+      recurrenceUnit: parsed.recurrenceUnit,
       completed: false,
       createdAt: new Date().toISOString(),
       pointsAwarded: 0
@@ -407,7 +595,13 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     setReminders(prev => [...prev, newReminder]);
     setInput("");
     setParsed(null);
-    setToast(`Created! Auto-categorized as ${CATEGORY_CONFIG[parsed.category].label}`);
+    
+    // Enhanced toast message
+    const recurrenceText = formatRecurrence(parsed);
+    const msg = recurrenceText 
+      ? `Created ${recurrenceText.toLowerCase()} reminder!`
+      : `Created! Auto-categorized as ${CATEGORY_CONFIG[parsed.category].label}`;
+    setToast(msg);
   };
   
   // Handle Enter key
@@ -474,199 +668,174 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     return <Icon size={16} color={config.color} />;
   };
 
+  // Global input styles for box-sizing
+  const inputStyle = { boxSizing: "border-box" as const };
+
   return (
     <div style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', backgroundColor: COLORS.bg, minHeight: "100%", padding: 16 }}>
-      {toast && <div style={{ position: "fixed", top: 16, right: 16, padding: "12px 20px", borderRadius: 8, backgroundColor: COLORS.primary, color: "#fff", fontWeight: 500, zIndex: 1000, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>{toast}</div>}
+      {toast && <div style={{ position: "fixed", top: 16, right: 16, padding: "12px 20px", borderRadius: 10, backgroundColor: COLORS.primary, color: "#fff", fontWeight: 600, fontSize: 14, zIndex: 1000, boxShadow: "0 4px 16px rgba(0,0,0,0.2)" }}>{toast}</div>}
       
       {achievement && (
-        <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", padding: 32, borderRadius: 16, backgroundColor: COLORS.card, boxShadow: "0 8px 32px rgba(0,0,0,0.2)", zIndex: 1001, textAlign: "center" }}>
-          <div style={{ fontSize: 64 }}>{achievement.icon}</div>
-          <h3 style={{ color: COLORS.gold, margin: "8px 0" }}>Achievement Unlocked!</h3>
-          <p style={{ color: COLORS.textMain, fontWeight: 600 }}>{achievement.name}</p>
-          <p style={{ color: COLORS.success }}>+50 bonus points!</p>
+        <div style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", padding: 28, borderRadius: 20, backgroundColor: COLORS.card, boxShadow: "0 12px 40px rgba(0,0,0,0.25)", zIndex: 1001, textAlign: "center" }}>
+          <div style={{ fontSize: 56 }}>{achievement.icon}</div>
+          <h3 style={{ color: COLORS.primary, margin: "12px 0 4px", fontSize: 18, fontWeight: 700 }}>Achievement Unlocked!</h3>
+          <p style={{ color: COLORS.textMain, fontWeight: 600, margin: 0, fontSize: 16 }}>{achievement.name}</p>
         </div>
       )}
       
-      {/* Header & Stats - Condensed */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: 20, color: COLORS.textMain, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
-            <Sparkles size={20} color={COLORS.primary} />
-            Smart Reminders
-          </h1>
-          <p style={{ margin: "2px 0 0", fontSize: 12, color: COLORS.textSecondary }}>Level {levelInfo.level} • {stats.totalPoints} pts</p>
-        </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <div style={{ backgroundColor: COLORS.card, padding: "6px 12px", borderRadius: 20, display: "flex", alignItems: "center", gap: 6, boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }}>
-            <Flame size={14} color={stats.currentStreak > 0 ? COLORS.warning : COLORS.textMuted} />
-            <span style={{ fontSize: 13, fontWeight: 600, color: COLORS.textMain }}>{stats.currentStreak}</span>
+      {/* Header Bar */}
+      <div style={{ backgroundColor: COLORS.primary, borderRadius: 14, padding: "14px 18px", marginBottom: 14, color: "#fff" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <Bell size={22} />
+            <span style={{ fontSize: 18, fontWeight: 700 }}>Smart Reminders</span>
           </div>
-          <div style={{ backgroundColor: COLORS.card, padding: "6px 12px", borderRadius: 20, display: "flex", alignItems: "center", gap: 6, boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }}>
-            <Trophy size={14} color={COLORS.success} />
-            <span style={{ fontSize: 13, fontWeight: 600, color: COLORS.textMain }}>{stats.completedAllTime}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 14, fontWeight: 500 }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 5 }}><Crown size={16} color={COLORS.gold} /> Lv {levelInfo.level}</span>
+            <span style={{ display: "flex", alignItems: "center", gap: 5 }}><Star size={16} color={COLORS.gold} /> {stats.totalPoints}</span>
+            <span style={{ display: "flex", alignItems: "center", gap: 5 }}><Flame size={16} color={stats.currentStreak > 0 ? COLORS.gold : "rgba(255,255,255,0.5)"} /> {stats.currentStreak}</span>
           </div>
         </div>
       </div>
       
-      {/* AI-First Input - Compact Card */}
-      <div style={{ backgroundColor: COLORS.card, borderRadius: 20, padding: 16, marginBottom: 20, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
+      {/* AI Input - Main Focus */}
+      <div style={{ backgroundColor: COLORS.card, borderRadius: 14, padding: 16, marginBottom: 14, border: `1px solid ${COLORS.border}` }}>
         <div style={{ position: "relative" }}>
           <input
             ref={inputRef}
             type="text"
-            placeholder="✨ Type a new reminder..."
+            placeholder="Try: 'Call mom tomorrow 3pm' or 'Pay rent Friday urgent'"
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            style={{ width: "100%", padding: "14px 48px 14px 16px", borderRadius: 16, border: "none", backgroundColor: COLORS.bg, fontSize: 15, outline: "none", color: COLORS.textMain, fontWeight: 500 }}
+            style={{ ...inputStyle, width: "100%", padding: "14px 50px 14px 16px", borderRadius: 10, border: `2px solid ${parsed ? COLORS.primaryLight : COLORS.border}`, backgroundColor: COLORS.inputBg, fontSize: 16, outline: "none", transition: "border-color 0.2s" }}
           />
-          {parsed ? (
-            <button
-              onClick={createFromParsed}
-              style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", width: 32, height: 32, borderRadius: 12, border: "none", backgroundColor: COLORS.primary, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 6px rgba(47, 92, 59, 0.3)" }}
-            >
-              <Send size={16} />
+          {parsed && (
+            <button onClick={createFromParsed} style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", width: 36, height: 36, borderRadius: 8, border: "none", backgroundColor: COLORS.primary, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Send size={18} />
             </button>
-          ) : (
-            <div style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)" }}>
-              <ChevronRight size={20} color={COLORS.textMuted} />
-            </div>
           )}
         </div>
         
-        {/* Smart Preview */}
+        {/* Preview Card */}
         {parsed && (
-          <div style={{ marginTop: 12, padding: 12, borderRadius: 12, border: `1px solid ${COLORS.border}` }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: COLORS.primary, textTransform: "uppercase", letterSpacing: 0.5 }}>Preview</span>
-              <span style={{ fontSize: 11, color: COLORS.textMuted }}>{parsed.confidence}% match</span>
+          <div style={{ marginTop: 14, padding: 14, backgroundColor: COLORS.accentLight, borderRadius: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+              <span style={{ fontSize: 16, fontWeight: 600, color: COLORS.textMain }}>{parsed.title}</span>
+              <span style={{ fontSize: 12, color: COLORS.textMuted, backgroundColor: COLORS.card, padding: "3px 8px", borderRadius: 6 }}>{parsed.confidence}%</span>
             </div>
-            
-            <div style={{ fontSize: 16, fontWeight: 600, color: COLORS.textMain, marginBottom: 8 }}>{parsed.title}</div>
-            
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              <span style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 8, backgroundColor: COLORS.bg, fontSize: 12, color: COLORS.textSecondary }}>
-                <Calendar size={12} />
-                {formatDate(parsed.dueDate)}{parsed.dueTime && ` • ${formatTime(parsed.dueTime)}`}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", borderRadius: 8, backgroundColor: COLORS.card, fontSize: 13, color: COLORS.textSecondary }}>
+                <Calendar size={14} /> {formatDate(parsed.dueDate)}{parsed.dueTime && ` ${formatTime(parsed.dueTime)}`}
               </span>
-              
-              <span style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 8, backgroundColor: `${CATEGORY_CONFIG[parsed.category].color}15`, fontSize: 12, color: CATEGORY_CONFIG[parsed.category].color, fontWeight: 500 }}>
-                <CategoryIcon cat={parsed.category} />
-                {CATEGORY_CONFIG[parsed.category].label}
+              <span style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", borderRadius: 8, fontSize: 13, backgroundColor: `${CATEGORY_CONFIG[parsed.category].color}18`, color: CATEGORY_CONFIG[parsed.category].color }}>
+                <CategoryIcon cat={parsed.category} /> {CATEGORY_CONFIG[parsed.category].label}
               </span>
-              
-              {parsed.priority !== "medium" && (
-                <span style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 8, backgroundColor: `${PRIORITY_COLORS[parsed.priority]}15`, fontSize: 12, color: PRIORITY_COLORS[parsed.priority], fontWeight: 500, textTransform: "capitalize" }}>
-                  {parsed.priority}
-                </span>
-              )}
+              <span style={{ padding: "5px 10px", borderRadius: 8, fontSize: 13, fontWeight: 500, backgroundColor: `${PRIORITY_COLORS[parsed.priority]}18`, color: PRIORITY_COLORS[parsed.priority], textTransform: "capitalize" }}>
+                {parsed.priority}
+              </span>
+              {parsed.recurrence !== "none" && <span style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 10px", borderRadius: 8, fontSize: 13, backgroundColor: `${COLORS.primary}15`, color: COLORS.primary, fontWeight: 500 }}><Repeat size={13} /> {formatRecurrence(parsed)}</span>}
             </div>
           </div>
         )}
       </div>
       
-      {/* Quick Stats & Filters Row */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 700, color: COLORS.textMain, margin: 0 }}>My Tasks</h2>
+      {/* Stats & Filters Row */}
+      <div style={{ display: "flex", gap: 10, marginBottom: 14, alignItems: "center", flexWrap: "wrap" }}>
         <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={() => setShowFilters(!showFilters)} style={{ width: 32, height: 32, borderRadius: 10, border: "none", backgroundColor: showFilters ? COLORS.primary : COLORS.card, color: showFilters ? "#fff" : COLORS.textSecondary, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }}><Filter size={16} /></button>
-          <button onClick={() => setSortAsc(!sortAsc)} style={{ width: 32, height: 32, borderRadius: 10, border: "none", backgroundColor: COLORS.card, color: COLORS.textSecondary, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }}>{sortAsc ? <SortAsc size={16} /> : <SortDesc size={16} />}</button>
+          {overdueCount > 0 && <span style={{ padding: "6px 12px", borderRadius: 8, fontSize: 13, fontWeight: 600, backgroundColor: `${COLORS.danger}15`, color: COLORS.danger }}>{overdueCount} overdue</span>}
+          {todayCount > 0 && <span style={{ padding: "6px 12px", borderRadius: 8, fontSize: 13, fontWeight: 600, backgroundColor: `${COLORS.warning}15`, color: COLORS.warning }}>{todayCount} today</span>}
+          <span style={{ padding: "6px 12px", borderRadius: 8, fontSize: 13, fontWeight: 600, backgroundColor: COLORS.accentLight, color: COLORS.primary }}>{reminders.filter(r => !r.completed).length} pending</span>
+        </div>
+        <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
+          <div style={{ position: "relative" }}>
+            <Search size={16} color={COLORS.textMuted} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)" }} />
+            <input type="text" placeholder="Search" value={search} onChange={e => setSearch(e.target.value)} style={{ ...inputStyle, width: 120, padding: "8px 10px 8px 32px", borderRadius: 8, border: `1px solid ${COLORS.border}`, backgroundColor: COLORS.card, fontSize: 14, outline: "none" }} />
+          </div>
+          <select value={filterCategory} onChange={e => setFilterCategory(e.target.value as any)} style={{ ...inputStyle, padding: "8px 12px", borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card, cursor: "pointer" }}><option value="all">All</option>{Object.entries(CATEGORY_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select>
+          <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as any)} style={{ ...inputStyle, padding: "8px 12px", borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card, cursor: "pointer" }}><option value="all">All</option><option value="pending">Pending</option><option value="completed">Done</option><option value="overdue">Overdue</option></select>
         </div>
       </div>
-
-      {showFilters && (
-        <div style={{ marginBottom: 16, display: "flex", gap: 8, overflowX: "auto", paddingBottom: 8 }}>
-          {/* Category Chips */}
-          <button onClick={() => setFilterCategory("all")} style={{ padding: "6px 12px", borderRadius: 20, border: "none", backgroundColor: filterCategory === "all" ? COLORS.primary : COLORS.card, color: filterCategory === "all" ? "#fff" : COLORS.textSecondary, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }}>All</button>
-          {Object.entries(CATEGORY_CONFIG).map(([k, v]) => (
-            <button key={k} onClick={() => setFilterCategory(k as Category)} style={{ padding: "6px 12px", borderRadius: 20, border: "none", backgroundColor: filterCategory === k ? v.color : COLORS.card, color: filterCategory === k ? "#fff" : COLORS.textSecondary, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }}>{v.label}</button>
-          ))}
-        </div>
-      )}
       
       {/* Reminder List */}
-      <div style={{ paddingBottom: 40 }}>
+      <div style={{ backgroundColor: COLORS.card, borderRadius: 14, border: `1px solid ${COLORS.border}`, overflow: "hidden" }}>
         {filtered.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "60px 20px", color: COLORS.textMuted }}>
-            <div style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: COLORS.card, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}>
-              <Bell size={24} color={COLORS.secondary} />
-            </div>
-            <p style={{ fontSize: 15, margin: 0, fontWeight: 500, color: COLORS.textSecondary }}>All caught up!</p>
-            <p style={{ fontSize: 13, marginTop: 4 }}>Enjoy your day ✨</p>
+          <div style={{ textAlign: "center", padding: 40, color: COLORS.textMuted }}>
+            <Bell size={44} color={COLORS.border} style={{ marginBottom: 12 }} />
+            <p style={{ fontSize: 16, margin: 0, fontWeight: 500 }}>No reminders yet</p>
+            <p style={{ fontSize: 14, marginTop: 6, color: COLORS.textMuted }}>Type above to create your first one!</p>
           </div>
-        ) : filtered.map(r => (
-          <div key={r.id} style={{ backgroundColor: COLORS.card, borderRadius: 16, padding: 16, marginBottom: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.04)", opacity: r.completed ? 0.6 : 1, transition: "transform 0.2s", borderLeft: `4px solid ${CATEGORY_CONFIG[r.category].color}` }}>
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
-              <button 
-                onClick={() => r.completed ? uncomplete(r) : complete(r)} 
-                style={{ 
-                  width: 24, height: 24, borderRadius: "50%", 
-                  border: `2px solid ${r.completed ? COLORS.success : COLORS.border}`, 
-                  backgroundColor: r.completed ? COLORS.success : "transparent", 
-                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 2 
-                }}
-              >
-                {r.completed && <Check size={14} color="#fff" />}
-              </button>
-              
+        ) : filtered.map((r, i) => (
+          <div key={r.id} style={{ padding: "14px 16px", borderBottom: i < filtered.length - 1 ? `1px solid ${COLORS.border}` : "none", backgroundColor: r.completed ? COLORS.cardAlt : COLORS.card, opacity: r.completed ? 0.7 : 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <button onClick={() => r.completed ? uncomplete(r) : complete(r)} style={{ width: 24, height: 24, borderRadius: "50%", border: `2px solid ${r.completed ? COLORS.success : COLORS.border}`, backgroundColor: r.completed ? COLORS.success : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{r.completed && <Check size={14} color="#fff" />}</button>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-                  <span style={{ fontSize: 15, fontWeight: 600, color: COLORS.textMain, textDecoration: r.completed ? "line-through" : "none" }}>{r.title}</span>
-                  <span style={{ fontSize: 11, fontWeight: 500, color: COLORS.textMuted }}>{formatDate(r.dueDate)}</span>
-                </div>
-                
-                {r.description && <p style={{ fontSize: 13, color: COLORS.textSecondary, margin: "0 0 8px 0" }}>{r.description}</p>}
-                
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                  <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: CATEGORY_CONFIG[r.category].color, fontWeight: 500, backgroundColor: `${CATEGORY_CONFIG[r.category].color}10`, padding: "2px 8px", borderRadius: 6 }}>
-                    <CategoryIcon cat={r.category} />
-                    {CATEGORY_CONFIG[r.category].label}
-                  </span>
-                  
-                  {isOverdue(r) && <span style={{ fontSize: 11, fontWeight: 600, color: COLORS.danger, backgroundColor: "#FFEBEE", padding: "2px 8px", borderRadius: 6 }}>Overdue</span>}
-                  
-                  {(r.priority === "high" || r.priority === "urgent") && (
-                    <span style={{ fontSize: 11, fontWeight: 600, color: PRIORITY_COLORS[r.priority], backgroundColor: `${PRIORITY_COLORS[r.priority]}10`, padding: "2px 8px", borderRadius: 6, textTransform: "capitalize" }}>{r.priority}</span>
-                  )}
-                  
-                  {r.dueTime && (
-                    <span style={{ fontSize: 11, color: COLORS.textSecondary, display: "flex", alignItems: "center", gap: 3 }}>
-                      <Clock size={11} /> {formatTime(r.dueTime)}
-                    </span>
-                  )}
+                  <span style={{ fontSize: 15, fontWeight: 500, color: COLORS.textMain, textDecoration: r.completed ? "line-through" : "none" }}>{r.title}</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 8px", borderRadius: 6, fontSize: 12, backgroundColor: `${CATEGORY_CONFIG[r.category].color}12`, color: CATEGORY_CONFIG[r.category].color }}><CategoryIcon cat={r.category} /> {CATEGORY_CONFIG[r.category].label}</span>
+                  {isOverdue(r) && <span style={{ padding: "2px 8px", borderRadius: 6, fontSize: 12, fontWeight: 600, backgroundColor: `${COLORS.danger}12`, color: COLORS.danger }}>Overdue</span>}
+                  {r.recurrence !== "none" && <span style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "2px 8px", borderRadius: 6, fontSize: 12, backgroundColor: `${COLORS.primary}10`, color: COLORS.primary }}><Repeat size={12} /> {formatRecurrence(r)}</span>}
+                </div>
+                <div style={{ fontSize: 13, color: isOverdue(r) ? COLORS.danger : COLORS.textMuted, marginTop: 4, display: "flex", alignItems: "center", gap: 6 }}>
+                  <Clock size={13} /> {formatDate(r.dueDate)}{r.dueTime && ` at ${formatTime(r.dueTime)}`}
+                  <span style={{ marginLeft: 6, padding: "2px 8px", borderRadius: 6, fontSize: 12, backgroundColor: `${PRIORITY_COLORS[r.priority]}12`, color: PRIORITY_COLORS[r.priority], textTransform: "capitalize" }}>{r.priority}</span>
                 </div>
               </div>
-              
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                {!r.completed && <button onClick={() => setEditing(r)} style={{ border: "none", background: "none", cursor: "pointer", padding: 4 }}><Edit2 size={16} color={COLORS.textMuted} /></button>}
-                <button onClick={() => del(r.id)} style={{ border: "none", background: "none", cursor: "pointer", padding: 4 }}><Trash2 size={16} color={COLORS.textMuted} /></button>
+              <div style={{ display: "flex", gap: 6 }}>
+                {!r.completed && <button onClick={() => snooze(r, 15)} title="Snooze 15min" style={{ width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><Timer size={16} color={COLORS.textMuted} /></button>}
+                {!r.completed && <button onClick={() => setEditing(r)} title="Edit" style={{ width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><Edit2 size={16} color={COLORS.textMuted} /></button>}
+                <button onClick={() => del(r.id)} title="Delete" style={{ width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><Trash2 size={16} color={COLORS.danger} /></button>
               </div>
             </div>
           </div>
         ))}
       </div>
       
-      {/* Edit Modal (only for editing existing reminders) */}
+      {/* Edit Modal */}
       {editing && (
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16 }}>
-          <div style={{ backgroundColor: COLORS.card, borderRadius: 16, width: "100%", maxWidth: 400, padding: 24 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}><h2 style={{ margin: 0, fontSize: 18, color: COLORS.textMain }}>Edit Reminder</h2><button onClick={() => setEditing(null)} style={{ width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><X size={18} /></button></div>
-            
-            <div style={{ marginBottom: 12 }}><label style={{ fontSize: 12, fontWeight: 500, color: COLORS.textSecondary, display: "block", marginBottom: 4 }}>Title</label><input type="text" value={editing.title} onChange={e => setEditing({ ...editing, title: e.target.value })} style={{ width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14 }} /></div>
-            
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-              <div><label style={{ fontSize: 12, fontWeight: 500, color: COLORS.textSecondary, display: "block", marginBottom: 4 }}>Date</label><input type="date" value={editing.dueDate} onChange={e => setEditing({ ...editing, dueDate: e.target.value })} style={{ width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14 }} /></div>
-              <div><label style={{ fontSize: 12, fontWeight: 500, color: COLORS.textSecondary, display: "block", marginBottom: 4 }}>Time</label><input type="time" value={editing.dueTime || ""} onChange={e => setEditing({ ...editing, dueTime: e.target.value || undefined })} style={{ width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14 }} /></div>
+          <div style={{ backgroundColor: COLORS.card, borderRadius: 16, width: "100%", maxWidth: 400, padding: 20 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: COLORS.textMain }}>Edit Reminder</h2>
+              <button onClick={() => setEditing(null)} style={{ width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><X size={18} /></button>
             </div>
             
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-              <div><label style={{ fontSize: 12, fontWeight: 500, color: COLORS.textSecondary, display: "block", marginBottom: 4 }}>Category</label><select value={editing.category} onChange={e => setEditing({ ...editing, category: e.target.value as Category })} style={{ width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14 }}>{Object.entries(CATEGORY_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></div>
-              <div><label style={{ fontSize: 12, fontWeight: 500, color: COLORS.textSecondary, display: "block", marginBottom: 4 }}>Priority</label><select value={editing.priority} onChange={e => setEditing({ ...editing, priority: e.target.value as Priority })} style={{ width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14 }}><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }}>Title</label>
+              <input type="text" value={editing.title} onChange={e => setEditing({ ...editing, title: e.target.value })} style={{ ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 }} />
             </div>
             
-            <div style={{ marginBottom: 16 }}><label style={{ fontSize: 12, fontWeight: 500, color: COLORS.textSecondary, display: "block", marginBottom: 4 }}>Repeat</label><select value={editing.recurrence} onChange={e => setEditing({ ...editing, recurrence: e.target.value as RecurrenceType })} style={{ width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14 }}><option value="none">One-time</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }}>Date</label>
+                <input type="date" value={editing.dueDate} onChange={e => setEditing({ ...editing, dueDate: e.target.value })} style={{ ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 }} />
+              </div>
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }}>Time</label>
+                <input type="time" value={editing.dueTime || ""} onChange={e => setEditing({ ...editing, dueTime: e.target.value || undefined })} style={{ ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 }} />
+              </div>
+            </div>
             
-            <div style={{ display: "flex", gap: 12 }}><button onClick={() => setEditing(null)} style={{ flex: 1, padding: 12, borderRadius: 10, border: `1px solid ${COLORS.border}`, backgroundColor: COLORS.card, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Cancel</button><button onClick={() => updateReminder(editing)} style={{ flex: 1, padding: 12, borderRadius: 10, border: "none", backgroundColor: COLORS.primary, color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Save</button></div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }}>Category</label>
+                <select value={editing.category} onChange={e => setEditing({ ...editing, category: e.target.value as Category })} style={{ ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 }}>{Object.entries(CATEGORY_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select>
+              </div>
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }}>Priority</label>
+                <select value={editing.priority} onChange={e => setEditing({ ...editing, priority: e.target.value as Priority })} style={{ ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 }}><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="urgent">Urgent</option></select>
+              </div>
+            </div>
+            
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }}>Repeat</label>
+              <select value={editing.recurrence} onChange={e => setEditing({ ...editing, recurrence: e.target.value as RecurrenceType })} style={{ ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 }}><option value="none">One-time</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select>
+            </div>
+            
+            <div style={{ display: "flex", gap: 12 }}>
+              <button onClick={() => setEditing(null)} style={{ flex: 1, padding: 14, borderRadius: 10, border: `1px solid ${COLORS.border}`, backgroundColor: COLORS.card, fontSize: 15, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
+              <button onClick={() => updateReminder(editing)} style={{ flex: 1, padding: 14, borderRadius: 10, border: "none", backgroundColor: COLORS.primary, color: "#fff", fontSize: 15, fontWeight: 600, cursor: "pointer" }}>Save</button>
+            </div>
           </div>
         </div>
       )}

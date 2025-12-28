@@ -24523,28 +24523,8 @@ var createLucideIcon = (iconName, iconNode) => {
   return Component;
 };
 
-// node_modules/lucide-react/dist/esm/icons/arrow-down-wide-narrow.js
-var __iconNode = [
-  ["path", { d: "m3 16 4 4 4-4", key: "1co6wj" }],
-  ["path", { d: "M7 20V4", key: "1yoxec" }],
-  ["path", { d: "M11 4h10", key: "1w87gc" }],
-  ["path", { d: "M11 8h7", key: "djye34" }],
-  ["path", { d: "M11 12h4", key: "q8tih4" }]
-];
-var ArrowDownWideNarrow = createLucideIcon("arrow-down-wide-narrow", __iconNode);
-
-// node_modules/lucide-react/dist/esm/icons/arrow-up-narrow-wide.js
-var __iconNode2 = [
-  ["path", { d: "m3 8 4-4 4 4", key: "11wl7u" }],
-  ["path", { d: "M7 4v16", key: "1glfcx" }],
-  ["path", { d: "M11 12h4", key: "q8tih4" }],
-  ["path", { d: "M11 16h7", key: "uosisv" }],
-  ["path", { d: "M11 20h10", key: "jvxblo" }]
-];
-var ArrowUpNarrowWide = createLucideIcon("arrow-up-narrow-wide", __iconNode2);
-
 // node_modules/lucide-react/dist/esm/icons/bell.js
-var __iconNode3 = [
+var __iconNode = [
   ["path", { d: "M10.268 21a2 2 0 0 0 3.464 0", key: "vwvbt9" }],
   [
     "path",
@@ -24554,41 +24534,50 @@ var __iconNode3 = [
     }
   ]
 ];
-var Bell = createLucideIcon("bell", __iconNode3);
+var Bell = createLucideIcon("bell", __iconNode);
 
 // node_modules/lucide-react/dist/esm/icons/briefcase.js
-var __iconNode4 = [
+var __iconNode2 = [
   ["path", { d: "M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16", key: "jecpp" }],
   ["rect", { width: "20", height: "14", x: "2", y: "6", rx: "2", key: "i6l2r4" }]
 ];
-var Briefcase = createLucideIcon("briefcase", __iconNode4);
+var Briefcase = createLucideIcon("briefcase", __iconNode2);
 
 // node_modules/lucide-react/dist/esm/icons/calendar.js
-var __iconNode5 = [
+var __iconNode3 = [
   ["path", { d: "M8 2v4", key: "1cmpym" }],
   ["path", { d: "M16 2v4", key: "4m81vk" }],
   ["rect", { width: "18", height: "18", x: "3", y: "4", rx: "2", key: "1hopcy" }],
   ["path", { d: "M3 10h18", key: "8toen8" }]
 ];
-var Calendar = createLucideIcon("calendar", __iconNode5);
+var Calendar = createLucideIcon("calendar", __iconNode3);
 
 // node_modules/lucide-react/dist/esm/icons/check.js
-var __iconNode6 = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
-var Check = createLucideIcon("check", __iconNode6);
-
-// node_modules/lucide-react/dist/esm/icons/chevron-right.js
-var __iconNode7 = [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]];
-var ChevronRight = createLucideIcon("chevron-right", __iconNode7);
+var __iconNode4 = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
+var Check = createLucideIcon("check", __iconNode4);
 
 // node_modules/lucide-react/dist/esm/icons/clock.js
-var __iconNode8 = [
+var __iconNode5 = [
   ["path", { d: "M12 6v6l4 2", key: "mmk7yg" }],
   ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }]
 ];
-var Clock = createLucideIcon("clock", __iconNode8);
+var Clock = createLucideIcon("clock", __iconNode5);
+
+// node_modules/lucide-react/dist/esm/icons/crown.js
+var __iconNode6 = [
+  [
+    "path",
+    {
+      d: "M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z",
+      key: "1vdc57"
+    }
+  ],
+  ["path", { d: "M5 21h14", key: "11awu3" }]
+];
+var Crown = createLucideIcon("crown", __iconNode6);
 
 // node_modules/lucide-react/dist/esm/icons/flame.js
-var __iconNode9 = [
+var __iconNode7 = [
   [
     "path",
     {
@@ -24597,22 +24586,10 @@ var __iconNode9 = [
     }
   ]
 ];
-var Flame = createLucideIcon("flame", __iconNode9);
-
-// node_modules/lucide-react/dist/esm/icons/funnel.js
-var __iconNode10 = [
-  [
-    "path",
-    {
-      d: "M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z",
-      key: "sc7q7i"
-    }
-  ]
-];
-var Funnel = createLucideIcon("funnel", __iconNode10);
+var Flame = createLucideIcon("flame", __iconNode7);
 
 // node_modules/lucide-react/dist/esm/icons/graduation-cap.js
-var __iconNode11 = [
+var __iconNode8 = [
   [
     "path",
     {
@@ -24623,10 +24600,10 @@ var __iconNode11 = [
   ["path", { d: "M22 10v6", key: "1lu8f3" }],
   ["path", { d: "M6 12.5V16a6 3 0 0 0 12 0v-3.5", key: "1r8lef" }]
 ];
-var GraduationCap = createLucideIcon("graduation-cap", __iconNode11);
+var GraduationCap = createLucideIcon("graduation-cap", __iconNode8);
 
 // node_modules/lucide-react/dist/esm/icons/heart.js
-var __iconNode12 = [
+var __iconNode9 = [
   [
     "path",
     {
@@ -24635,10 +24612,10 @@ var __iconNode12 = [
     }
   ]
 ];
-var Heart = createLucideIcon("heart", __iconNode12);
+var Heart = createLucideIcon("heart", __iconNode9);
 
 // node_modules/lucide-react/dist/esm/icons/house.js
-var __iconNode13 = [
+var __iconNode10 = [
   ["path", { d: "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8", key: "5wwlr5" }],
   [
     "path",
@@ -24648,10 +24625,10 @@ var __iconNode13 = [
     }
   ]
 ];
-var House = createLucideIcon("house", __iconNode13);
+var House = createLucideIcon("house", __iconNode10);
 
 // node_modules/lucide-react/dist/esm/icons/pen.js
-var __iconNode14 = [
+var __iconNode11 = [
   [
     "path",
     {
@@ -24660,10 +24637,10 @@ var __iconNode14 = [
     }
   ]
 ];
-var Pen = createLucideIcon("pen", __iconNode14);
+var Pen = createLucideIcon("pen", __iconNode11);
 
 // node_modules/lucide-react/dist/esm/icons/plane.js
-var __iconNode15 = [
+var __iconNode12 = [
   [
     "path",
     {
@@ -24672,10 +24649,26 @@ var __iconNode15 = [
     }
   ]
 ];
-var Plane = createLucideIcon("plane", __iconNode15);
+var Plane = createLucideIcon("plane", __iconNode12);
+
+// node_modules/lucide-react/dist/esm/icons/repeat.js
+var __iconNode13 = [
+  ["path", { d: "m17 2 4 4-4 4", key: "nntrym" }],
+  ["path", { d: "M3 11v-1a4 4 0 0 1 4-4h14", key: "84bu3i" }],
+  ["path", { d: "m7 22-4-4 4-4", key: "1wqhfi" }],
+  ["path", { d: "M21 13v1a4 4 0 0 1-4 4H3", key: "1rx37r" }]
+];
+var Repeat = createLucideIcon("repeat", __iconNode13);
+
+// node_modules/lucide-react/dist/esm/icons/search.js
+var __iconNode14 = [
+  ["path", { d: "m21 21-4.34-4.34", key: "14j7rj" }],
+  ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }]
+];
+var Search = createLucideIcon("search", __iconNode14);
 
 // node_modules/lucide-react/dist/esm/icons/send.js
-var __iconNode16 = [
+var __iconNode15 = [
   [
     "path",
     {
@@ -24685,10 +24678,10 @@ var __iconNode16 = [
   ],
   ["path", { d: "m21.854 2.147-10.94 10.939", key: "12cjpa" }]
 ];
-var Send = createLucideIcon("send", __iconNode16);
+var Send = createLucideIcon("send", __iconNode15);
 
 // node_modules/lucide-react/dist/esm/icons/shopping-cart.js
-var __iconNode17 = [
+var __iconNode16 = [
   ["circle", { cx: "8", cy: "21", r: "1", key: "jimo8o" }],
   ["circle", { cx: "19", cy: "21", r: "1", key: "13723u" }],
   [
@@ -24699,25 +24692,10 @@ var __iconNode17 = [
     }
   ]
 ];
-var ShoppingCart = createLucideIcon("shopping-cart", __iconNode17);
-
-// node_modules/lucide-react/dist/esm/icons/sparkles.js
-var __iconNode18 = [
-  [
-    "path",
-    {
-      d: "M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z",
-      key: "1s2grr"
-    }
-  ],
-  ["path", { d: "M20 2v4", key: "1rf3ol" }],
-  ["path", { d: "M22 4h-4", key: "gwowj6" }],
-  ["circle", { cx: "4", cy: "20", r: "2", key: "6kqj1y" }]
-];
-var Sparkles = createLucideIcon("sparkles", __iconNode18);
+var ShoppingCart = createLucideIcon("shopping-cart", __iconNode16);
 
 // node_modules/lucide-react/dist/esm/icons/star.js
-var __iconNode19 = [
+var __iconNode17 = [
   [
     "path",
     {
@@ -24726,105 +24704,90 @@ var __iconNode19 = [
     }
   ]
 ];
-var Star = createLucideIcon("star", __iconNode19);
+var Star = createLucideIcon("star", __iconNode17);
 
 // node_modules/lucide-react/dist/esm/icons/stethoscope.js
-var __iconNode20 = [
+var __iconNode18 = [
   ["path", { d: "M11 2v2", key: "1539x4" }],
   ["path", { d: "M5 2v2", key: "1yf1q8" }],
   ["path", { d: "M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1", key: "rb5t3r" }],
   ["path", { d: "M8 15a6 6 0 0 0 12 0v-3", key: "x18d4x" }],
   ["circle", { cx: "20", cy: "10", r: "2", key: "ts1r5v" }]
 ];
-var Stethoscope = createLucideIcon("stethoscope", __iconNode20);
+var Stethoscope = createLucideIcon("stethoscope", __iconNode18);
+
+// node_modules/lucide-react/dist/esm/icons/timer.js
+var __iconNode19 = [
+  ["line", { x1: "10", x2: "14", y1: "2", y2: "2", key: "14vaq8" }],
+  ["line", { x1: "12", x2: "15", y1: "14", y2: "11", key: "17fdiu" }],
+  ["circle", { cx: "12", cy: "14", r: "8", key: "1e1u0o" }]
+];
+var Timer = createLucideIcon("timer", __iconNode19);
 
 // node_modules/lucide-react/dist/esm/icons/trash-2.js
-var __iconNode21 = [
+var __iconNode20 = [
   ["path", { d: "M10 11v6", key: "nco0om" }],
   ["path", { d: "M14 11v6", key: "outv1u" }],
   ["path", { d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6", key: "miytrc" }],
   ["path", { d: "M3 6h18", key: "d0wm0j" }],
   ["path", { d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2", key: "e791ji" }]
 ];
-var Trash2 = createLucideIcon("trash-2", __iconNode21);
-
-// node_modules/lucide-react/dist/esm/icons/trophy.js
-var __iconNode22 = [
-  ["path", { d: "M10 14.66v1.626a2 2 0 0 1-.976 1.696A5 5 0 0 0 7 21.978", key: "1n3hpd" }],
-  ["path", { d: "M14 14.66v1.626a2 2 0 0 0 .976 1.696A5 5 0 0 1 17 21.978", key: "rfe1zi" }],
-  ["path", { d: "M18 9h1.5a1 1 0 0 0 0-5H18", key: "7xy6bh" }],
-  ["path", { d: "M4 22h16", key: "57wxv0" }],
-  ["path", { d: "M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z", key: "1mhfuq" }],
-  ["path", { d: "M6 9H4.5a1 1 0 0 1 0-5H6", key: "tex48p" }]
-];
-var Trophy = createLucideIcon("trophy", __iconNode22);
+var Trash2 = createLucideIcon("trash-2", __iconNode20);
 
 // node_modules/lucide-react/dist/esm/icons/users.js
-var __iconNode23 = [
+var __iconNode21 = [
   ["path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", key: "1yyitq" }],
   ["path", { d: "M16 3.128a4 4 0 0 1 0 7.744", key: "16gr8j" }],
   ["path", { d: "M22 21v-2a4 4 0 0 0-3-3.87", key: "kshegd" }],
   ["circle", { cx: "9", cy: "7", r: "4", key: "nufk8" }]
 ];
-var Users = createLucideIcon("users", __iconNode23);
+var Users = createLucideIcon("users", __iconNode21);
 
 // node_modules/lucide-react/dist/esm/icons/x.js
-var __iconNode24 = [
+var __iconNode22 = [
   ["path", { d: "M18 6 6 18", key: "1bl5f8" }],
   ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
 ];
-var X = createLucideIcon("x", __iconNode24);
+var X = createLucideIcon("x", __iconNode22);
 
 // src/ReminderApp.tsx
 var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
 var COLORS = {
-  primary: "#2F5C3B",
-  // Forest Green
-  primaryLight: "#E8F5E9",
-  // Very light green
-  secondary: "#8BA890",
-  // Sage
-  success: "#4CAF50",
-  warning: "#FF9800",
-  danger: "#E53935",
-  bg: "#F4F7F4",
-  // Soft grey-green background
+  primary: "#2D5A3D",
+  primaryLight: "#56C596",
+  primaryBg: "#E8F5E9",
+  success: "#2E7D32",
+  warning: "#F59E0B",
+  danger: "#D32F2F",
+  bg: "#F5F7F5",
   card: "#FFFFFF",
-  textMain: "#1C241D",
-  textSecondary: "#5C6B5F",
-  textMuted: "#8C9E90",
-  border: "#E0E8E0",
-  inputBg: "#FFFFFF",
-  gold: "#FFC107",
-  purple: "#9C27B0"
+  cardAlt: "#FAFBFA",
+  textMain: "#1A1A1A",
+  textSecondary: "#5F6368",
+  textMuted: "#9CA3AF",
+  border: "#E0E5E0",
+  inputBg: "#F8FAF8",
+  gold: "#F59E0B",
+  accent: "#3D7A5A",
+  accentLight: "#E6F4EA"
 };
 var PRIORITY_COLORS = {
-  low: "#4CAF50",
-  medium: "#FF9800",
-  high: "#FF5722",
-  urgent: "#D32F2F"
+  low: "#10B981",
+  medium: "#F59E0B",
+  high: "#F97316",
+  urgent: "#EF4444"
 };
 var CATEGORY_CONFIG = {
-  work: { icon: Briefcase, color: "#5D4037", label: "Work" },
-  // Earthy brown
-  family: { icon: Users, color: "#D81B60", label: "Family" },
-  // Pink
-  health: { icon: Stethoscope, color: "#00897B", label: "Health" },
-  // Teal
-  errands: { icon: ShoppingCart, color: "#F57C00", label: "Errands" },
-  // Orange
-  finance: { icon: Briefcase, color: "#5E35B1", label: "Finance" },
-  // Purple
-  social: { icon: Heart, color: "#E53935", label: "Social" },
-  // Red
-  learning: { icon: GraduationCap, color: "#039BE5", label: "Learning" },
-  // Light Blue
-  travel: { icon: Plane, color: "#3949AB", label: "Travel" },
-  // Indigo
-  home: { icon: House, color: "#7CB342", label: "Home" },
-  // Light Green
-  other: { icon: Star, color: "#757575", label: "Other" }
-  // Grey
+  work: { icon: Briefcase, color: "#3B82F6", label: "Work" },
+  family: { icon: Users, color: "#EC4899", label: "Family" },
+  health: { icon: Stethoscope, color: "#10B981", label: "Health" },
+  errands: { icon: ShoppingCart, color: "#F59E0B", label: "Errands" },
+  finance: { icon: Briefcase, color: "#8B5CF6", label: "Finance" },
+  social: { icon: Heart, color: "#EF4444", label: "Social" },
+  learning: { icon: GraduationCap, color: "#06B6D4", label: "Learning" },
+  travel: { icon: Plane, color: "#6366F1", label: "Travel" },
+  home: { icon: House, color: "#84CC16", label: "Home" },
+  other: { icon: Star, color: "#64748B", label: "Other" }
 };
 var STORAGE_KEY = "REMINDER_APP_DATA";
 var STATS_KEY = "REMINDER_APP_STATS";
@@ -24962,21 +24925,135 @@ var parseNaturalLanguage = (input) => {
     }
   }
   let recurrence = "none";
-  if (/every day|daily/i.test(lower)) {
+  let recurrenceInterval;
+  let recurrenceUnit;
+  const customRecurrenceMatch = lower.match(/every\s+(\d+)\s+(day|days|week|weeks|month|months|year|years)/i);
+  if (customRecurrenceMatch) {
+    const num = parseInt(customRecurrenceMatch[1]);
+    const unit = customRecurrenceMatch[2].toLowerCase();
+    recurrenceInterval = num;
+    if (unit.startsWith("day")) {
+      recurrenceUnit = "days";
+      recurrence = num === 1 ? "daily" : "custom";
+    } else if (unit.startsWith("week")) {
+      recurrenceUnit = "weeks";
+      recurrence = num === 1 ? "weekly" : "custom";
+    } else if (unit.startsWith("month")) {
+      recurrenceUnit = "months";
+      recurrence = num === 1 ? "monthly" : "custom";
+    } else if (unit.startsWith("year")) {
+      recurrenceUnit = "years";
+      recurrence = num === 1 ? "yearly" : "custom";
+    }
+    confidence += 15;
+  } else if (/\bevery\s*day\b|daily/i.test(lower)) {
     recurrence = "daily";
+    recurrenceInterval = 1;
+    recurrenceUnit = "days";
     confidence += 10;
-  } else if (/every week|weekly/i.test(lower)) {
+  } else if (/\bevery\s*week\b|weekly/i.test(lower)) {
     recurrence = "weekly";
+    recurrenceInterval = 1;
+    recurrenceUnit = "weeks";
     confidence += 10;
-  } else if (/every month|monthly/i.test(lower)) {
+  } else if (/\bevery\s*month\b|monthly/i.test(lower)) {
     recurrence = "monthly";
+    recurrenceInterval = 1;
+    recurrenceUnit = "months";
     confidence += 10;
+  } else if (/\bevery\s*year\b|yearly|annually/i.test(lower)) {
+    recurrence = "yearly";
+    recurrenceInterval = 1;
+    recurrenceUnit = "years";
+    confidence += 10;
+  } else if (/bi-?weekly|every other week|every 2 weeks/i.test(lower)) {
+    recurrence = "custom";
+    recurrenceInterval = 2;
+    recurrenceUnit = "weeks";
+    confidence += 12;
+  } else if (/bi-?monthly|every other month|every 2 months/i.test(lower)) {
+    recurrence = "custom";
+    recurrenceInterval = 2;
+    recurrenceUnit = "months";
+    confidence += 12;
+  } else {
+    if (/\bbirthday\b/i.test(lower)) {
+      recurrence = "yearly";
+      recurrenceInterval = 1;
+      recurrenceUnit = "years";
+      confidence += 10;
+    } else if (/\banniversary\b/i.test(lower)) {
+      recurrence = "yearly";
+      recurrenceInterval = 1;
+      recurrenceUnit = "years";
+      confidence += 10;
+    } else if (/\b(medication|medicine|vitamin|vitamins|pill|pills|meds)\b/i.test(lower) && recurrence === "none") {
+      recurrence = "daily";
+      recurrenceInterval = 1;
+      recurrenceUnit = "days";
+      confidence += 8;
+    } else if (/\b(rent|mortgage)\b/i.test(lower) && !/paid|pay.*off/i.test(lower)) {
+      recurrence = "monthly";
+      recurrenceInterval = 1;
+      recurrenceUnit = "months";
+      confidence += 8;
+    } else if (/\b(paycheck|payday|salary)\b/i.test(lower)) {
+      recurrence = "custom";
+      recurrenceInterval = 2;
+      recurrenceUnit = "weeks";
+      confidence += 6;
+    } else if (/\b(subscription|renewal|renew)\b/i.test(lower)) {
+      recurrence = "monthly";
+      recurrenceInterval = 1;
+      recurrenceUnit = "months";
+      confidence += 6;
+    } else if (/\b(trash|garbage|recycling|bins)\b/i.test(lower)) {
+      recurrence = "weekly";
+      recurrenceInterval = 1;
+      recurrenceUnit = "weeks";
+      confidence += 8;
+    } else if (/\bwater\s*(the\s*)?(plants?|flowers?|garden)\b/i.test(lower)) {
+      recurrence = "weekly";
+      recurrenceInterval = 1;
+      recurrenceUnit = "weeks";
+      confidence += 6;
+    } else if (/\b(gym|workout|exercise)\b/i.test(lower) && recurrence === "none") {
+      recurrence = "custom";
+      recurrenceInterval = 2;
+      recurrenceUnit = "days";
+      confidence += 5;
+    } else if (/\bfeed\s*(my\s*)?(cat|dog|pet|fish|bird)\b/i.test(lower)) {
+      recurrence = "daily";
+      recurrenceInterval = 1;
+      recurrenceUnit = "days";
+      confidence += 8;
+    } else if (/\bwalk\s*(my\s*)?(dog|puppy)\b/i.test(lower)) {
+      recurrence = "daily";
+      recurrenceInterval = 1;
+      recurrenceUnit = "days";
+      confidence += 8;
+    } else if (/\boil\s*change\b/i.test(lower)) {
+      recurrence = "custom";
+      recurrenceInterval = 3;
+      recurrenceUnit = "months";
+      confidence += 6;
+    } else if (/\bhaircut\b/i.test(lower)) {
+      recurrence = "monthly";
+      recurrenceInterval = 1;
+      recurrenceUnit = "months";
+      confidence += 5;
+    } else if (/\bdentist\b/i.test(lower) && !/appointment|tomorrow|today/i.test(lower)) {
+      recurrence = "custom";
+      recurrenceInterval = 6;
+      recurrenceUnit = "months";
+      confidence += 5;
+    }
   }
   const category = detectCategory(input);
   if (category !== "other") confidence += 15;
   const priority = detectPriority(input, dueDate);
   if (priority !== "medium") confidence += 10;
-  let title = input.replace(/at \d{1,2}:?\d{0,2}\s*(am|pm)?/gi, "").replace(/\d{1,2}(am|pm)/gi, "").replace(/today|tomorrow|tonight|next week|this weekend/gi, "").replace(/in \d+ (days?|hours?|weeks?)/gi, "").replace(/on (sunday|monday|tuesday|wednesday|thursday|friday|saturday)/gi, "").replace(/urgent|asap|immediately|important|high priority|low priority|no rush/gi, "").replace(/every (day|week|month)|daily|weekly|monthly/gi, "").replace(/remind me( to)?/gi, "").replace(/don't forget( to)?/gi, "").replace(/need to/gi, "").replace(/\s+/g, " ").trim();
+  let title = input.replace(/at \d{1,2}:?\d{0,2}\s*(am|pm)?/gi, "").replace(/\d{1,2}(am|pm)/gi, "").replace(/today|tomorrow|tonight|next week|this weekend/gi, "").replace(/in \d+ (days?|hours?|weeks?)/gi, "").replace(/on (sunday|monday|tuesday|wednesday|thursday|friday|saturday)/gi, "").replace(/urgent|asap|immediately|important|high priority|low priority|no rush/gi, "").replace(/every\s+\d+\s+(day|days|week|weeks|month|months|year|years)/gi, "").replace(/every\s*(day|week|month|year)/gi, "").replace(/daily|weekly|monthly|yearly|annually/gi, "").replace(/bi-?weekly|bi-?monthly/gi, "").replace(/every other (day|week|month)/gi, "").replace(/remind me( to)?/gi, "").replace(/don't forget( to)?/gi, "").replace(/need to/gi, "").replace(/\s+/g, " ").trim();
   if (title) {
     title = title.charAt(0).toUpperCase() + title.slice(1);
     confidence += 25;
@@ -24988,6 +25065,8 @@ var parseNaturalLanguage = (input) => {
     priority,
     category,
     recurrence,
+    recurrenceInterval,
+    recurrenceUnit,
     confidence: Math.min(confidence, 100)
   };
 };
@@ -25007,16 +25086,78 @@ var DEFAULT_ACHIEVEMENTS = [
   { id: "complete10", name: "Getting Started", icon: "\u2B50", unlocked: false },
   { id: "complete50", name: "Productive", icon: "\u{1F3C6}", unlocked: false }
 ];
-function ReminderApp({ initialData: initialData2 }) {
-  const [reminders, setReminders] = (0, import_react3.useState)([]);
-  const [stats, setStats] = (0, import_react3.useState)({
+var persistState = (reminders, stats) => {
+  const state = { reminders, stats, savedAt: Date.now() };
+  if (window.openai?.setWidgetState) {
+    try {
+      window.openai.setWidgetState(state);
+      console.log("[Persist] Saved to widget state");
+    } catch (e) {
+      console.error("[Persist] Widget state error:", e);
+    }
+  }
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(reminders));
+    localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+  } catch (e) {
+    console.error("[Persist] localStorage error:", e);
+  }
+  if (window.openai?.callTool) {
+    try {
+      window.openai.callTool("save_reminders", state).catch((e) => {
+        console.log("[Persist] callTool not available or failed:", e);
+      });
+    } catch (e) {
+    }
+  }
+};
+var loadInitialState = (initialData2) => {
+  const defaultStats = {
     totalPoints: 0,
     currentStreak: 0,
     longestStreak: 0,
     completedAllTime: 0,
     level: 1,
     achievements: [...DEFAULT_ACHIEVEMENTS]
-  });
+  };
+  if (initialData2?.reminders && Array.isArray(initialData2.reminders)) {
+    console.log("[Load] Using initialData from server:", initialData2.reminders.length, "reminders");
+    return {
+      reminders: initialData2.reminders,
+      stats: initialData2.stats || defaultStats
+    };
+  }
+  try {
+    const widgetState = window.openai?.widgetState;
+    if (widgetState?.reminders && Array.isArray(widgetState.reminders)) {
+      console.log("[Load] Using widget state:", widgetState.reminders.length, "reminders");
+      return {
+        reminders: widgetState.reminders,
+        stats: widgetState.stats || defaultStats
+      };
+    }
+  } catch (e) {
+  }
+  try {
+    const savedReminders = localStorage.getItem(STORAGE_KEY);
+    const savedStats = localStorage.getItem(STATS_KEY);
+    if (savedReminders) {
+      const reminders = JSON.parse(savedReminders);
+      console.log("[Load] Using localStorage:", reminders.length, "reminders");
+      return {
+        reminders,
+        stats: savedStats ? JSON.parse(savedStats) : defaultStats
+      };
+    }
+  } catch (e) {
+  }
+  console.log("[Load] No saved data found, starting fresh");
+  return { reminders: [], stats: defaultStats };
+};
+function ReminderApp({ initialData: initialData2 }) {
+  const initial = (0, import_react3.useMemo)(() => loadInitialState(initialData2), []);
+  const [reminders, setReminders] = (0, import_react3.useState)(initial.reminders);
+  const [stats, setStats] = (0, import_react3.useState)(initial.stats);
   const [input, setInput] = (0, import_react3.useState)("");
   const [parsed, setParsed] = (0, import_react3.useState)(null);
   const inputRef = (0, import_react3.useRef)(null);
@@ -25026,24 +25167,11 @@ function ReminderApp({ initialData: initialData2 }) {
   const [filterStatus, setFilterStatus] = (0, import_react3.useState)("all");
   const [sortField, setSortField] = (0, import_react3.useState)("dueDate");
   const [sortAsc, setSortAsc] = (0, import_react3.useState)(true);
-  const [showFilters, setShowFilters] = (0, import_react3.useState)(false);
   const [toast, setToast] = (0, import_react3.useState)(null);
   const [achievement, setAchievement] = (0, import_react3.useState)(null);
   (0, import_react3.useEffect)(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) setReminders(JSON.parse(saved));
-      const savedStats = localStorage.getItem(STATS_KEY);
-      if (savedStats) setStats(JSON.parse(savedStats));
-    } catch {
-    }
-  }, []);
-  (0, import_react3.useEffect)(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(reminders));
-  }, [reminders]);
-  (0, import_react3.useEffect)(() => {
-    localStorage.setItem(STATS_KEY, JSON.stringify(stats));
-  }, [stats]);
+    persistState(reminders, stats);
+  }, [reminders, stats]);
   (0, import_react3.useEffect)(() => {
     if (toast) {
       const t = setTimeout(() => setToast(null), 3e3);
@@ -25097,6 +25225,17 @@ function ReminderApp({ initialData: initialData2 }) {
   const overdueCount = reminders.filter(isOverdue).length;
   const todayCount = reminders.filter((r) => !r.completed && r.dueDate === (/* @__PURE__ */ new Date()).toISOString().split("T")[0]).length;
   const levelInfo = calcLevel(stats.totalPoints);
+  const formatRecurrence = (r) => {
+    if (r.recurrence === "none") return "";
+    if (r.recurrence === "daily") return "Daily";
+    if (r.recurrence === "weekly") return "Weekly";
+    if (r.recurrence === "monthly") return "Monthly";
+    if (r.recurrence === "yearly") return "Yearly";
+    if (r.recurrence === "custom" && r.recurrenceInterval && r.recurrenceUnit) {
+      return `Every ${r.recurrenceInterval} ${r.recurrenceUnit}`;
+    }
+    return "";
+  };
   const createFromParsed = () => {
     if (!parsed || !parsed.title.trim()) {
       setToast("Type something to create a reminder");
@@ -25110,6 +25249,8 @@ function ReminderApp({ initialData: initialData2 }) {
       priority: parsed.priority,
       category: parsed.category,
       recurrence: parsed.recurrence,
+      recurrenceInterval: parsed.recurrenceInterval,
+      recurrenceUnit: parsed.recurrenceUnit,
       completed: false,
       createdAt: (/* @__PURE__ */ new Date()).toISOString(),
       pointsAwarded: 0
@@ -25117,7 +25258,9 @@ function ReminderApp({ initialData: initialData2 }) {
     setReminders((prev) => [...prev, newReminder]);
     setInput("");
     setParsed(null);
-    setToast(`Created! Auto-categorized as ${CATEGORY_CONFIG[parsed.category].label}`);
+    const recurrenceText = formatRecurrence(parsed);
+    const msg = recurrenceText ? `Created ${recurrenceText.toLowerCase()} reminder!` : `Created! Auto-categorized as ${CATEGORY_CONFIG[parsed.category].label}`;
+    setToast(msg);
   };
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && parsed) {
@@ -25194,173 +25337,176 @@ function ReminderApp({ initialData: initialData2 }) {
     const Icon2 = config.icon;
     return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon2, { size: 16, color: config.color });
   };
+  const inputStyle = { boxSizing: "border-box" };
   return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', backgroundColor: COLORS.bg, minHeight: "100%", padding: 16 }, children: [
-    toast && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 16, right: 16, padding: "12px 20px", borderRadius: 8, backgroundColor: COLORS.primary, color: "#fff", fontWeight: 500, zIndex: 1e3, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }, children: toast }),
-    achievement && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", padding: 32, borderRadius: 16, backgroundColor: COLORS.card, boxShadow: "0 8px 32px rgba(0,0,0,0.2)", zIndex: 1001, textAlign: "center" }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 64 }, children: achievement.icon }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { style: { color: COLORS.gold, margin: "8px 0" }, children: "Achievement Unlocked!" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { color: COLORS.textMain, fontWeight: 600 }, children: achievement.name }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { color: COLORS.success }, children: "+50 bonus points!" })
+    toast && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 16, right: 16, padding: "12px 20px", borderRadius: 10, backgroundColor: COLORS.primary, color: "#fff", fontWeight: 600, fontSize: 14, zIndex: 1e3, boxShadow: "0 4px 16px rgba(0,0,0,0.2)" }, children: toast }),
+    achievement && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", padding: 28, borderRadius: 20, backgroundColor: COLORS.card, boxShadow: "0 12px 40px rgba(0,0,0,0.25)", zIndex: 1001, textAlign: "center" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 56 }, children: achievement.icon }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { style: { color: COLORS.primary, margin: "12px 0 4px", fontSize: 18, fontWeight: 700 }, children: "Achievement Unlocked!" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { color: COLORS.textMain, fontWeight: 600, margin: 0, fontSize: 16 }, children: achievement.name })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", { style: { margin: 0, fontSize: 20, color: COLORS.textMain, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sparkles, { size: 20, color: COLORS.primary }),
-          "Smart Reminders"
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", { style: { margin: "2px 0 0", fontSize: 12, color: COLORS.textSecondary }, children: [
-          "Level ",
-          levelInfo.level,
-          " \u2022 ",
-          stats.totalPoints,
-          " pts"
-        ] })
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { backgroundColor: COLORS.primary, borderRadius: 14, padding: "14px 18px", marginBottom: 14, color: "#fff" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 10 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { size: 22 }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 18, fontWeight: 700 }, children: "Smart Reminders" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, padding: "6px 12px", borderRadius: 20, display: "flex", alignItems: "center", gap: 6, boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Flame, { size: 14, color: stats.currentStreak > 0 ? COLORS.warning : COLORS.textMuted }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textMain }, children: stats.currentStreak })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 16, fontSize: 14, fontWeight: 500 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 5 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Crown, { size: 16, color: COLORS.gold }),
+          " Lv ",
+          levelInfo.level
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, padding: "6px 12px", borderRadius: 20, display: "flex", alignItems: "center", gap: 6, boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trophy, { size: 14, color: COLORS.success }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textMain }, children: stats.completedAllTime })
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 5 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { size: 16, color: COLORS.gold }),
+          " ",
+          stats.totalPoints
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 5 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Flame, { size: 16, color: stats.currentStreak > 0 ? COLORS.gold : "rgba(255,255,255,0.5)" }),
+          " ",
+          stats.currentStreak
         ] })
       ] })
-    ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 20, padding: 16, marginBottom: 20, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }, children: [
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 14, padding: 16, marginBottom: 14, border: `1px solid ${COLORS.border}` }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative" }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
           "input",
           {
             ref: inputRef,
             type: "text",
-            placeholder: "\u2728 Type a new reminder...",
+            placeholder: "Try: 'Call mom tomorrow 3pm' or 'Pay rent Friday urgent'",
             value: input,
             onChange: (e) => setInput(e.target.value),
             onKeyDown: handleKeyDown,
-            style: { width: "100%", padding: "14px 48px 14px 16px", borderRadius: 16, border: "none", backgroundColor: COLORS.bg, fontSize: 15, outline: "none", color: COLORS.textMain, fontWeight: 500 }
+            style: { ...inputStyle, width: "100%", padding: "14px 50px 14px 16px", borderRadius: 10, border: `2px solid ${parsed ? COLORS.primaryLight : COLORS.border}`, backgroundColor: COLORS.inputBg, fontSize: 16, outline: "none", transition: "border-color 0.2s" }
           }
         ),
-        parsed ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-          "button",
-          {
-            onClick: createFromParsed,
-            style: { position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", width: 32, height: 32, borderRadius: 12, border: "none", backgroundColor: COLORS.primary, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 6px rgba(47, 92, 59, 0.3)" },
-            children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { size: 16 })
-          }
-        ) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { size: 20, color: COLORS.textMuted }) })
+        parsed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: createFromParsed, style: { position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", width: 36, height: 36, borderRadius: 8, border: "none", backgroundColor: COLORS.primary, color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { size: 18 }) })
       ] }),
-      parsed && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginTop: 12, padding: 12, borderRadius: 12, border: `1px solid ${COLORS.border}` }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 11, fontWeight: 600, color: COLORS.primary, textTransform: "uppercase", letterSpacing: 0.5 }, children: "Preview" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 11, color: COLORS.textMuted }, children: [
+      parsed && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginTop: 14, padding: 14, backgroundColor: COLORS.accentLight, borderRadius: 10 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 16, fontWeight: 600, color: COLORS.textMain }, children: parsed.title }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 12, color: COLORS.textMuted, backgroundColor: COLORS.card, padding: "3px 8px", borderRadius: 6 }, children: [
             parsed.confidence,
-            "% match"
+            "%"
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 16, fontWeight: 600, color: COLORS.textMain, marginBottom: 8 }, children: parsed.title }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", flexWrap: "wrap", gap: 6 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 8, backgroundColor: COLORS.bg, fontSize: 12, color: COLORS.textSecondary }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Calendar, { size: 12 }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", flexWrap: "wrap", gap: 8 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", borderRadius: 8, backgroundColor: COLORS.card, fontSize: 13, color: COLORS.textSecondary }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Calendar, { size: 14 }),
+            " ",
             formatDate(parsed.dueDate),
-            parsed.dueTime && ` \u2022 ${formatTime(parsed.dueTime)}`
+            parsed.dueTime && ` ${formatTime(parsed.dueTime)}`
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 8, backgroundColor: `${CATEGORY_CONFIG[parsed.category].color}15`, fontSize: 12, color: CATEGORY_CONFIG[parsed.category].color, fontWeight: 500 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 5, padding: "5px 10px", borderRadius: 8, fontSize: 13, backgroundColor: `${CATEGORY_CONFIG[parsed.category].color}18`, color: CATEGORY_CONFIG[parsed.category].color }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CategoryIcon, { cat: parsed.category }),
+            " ",
             CATEGORY_CONFIG[parsed.category].label
           ] }),
-          parsed.priority !== "medium" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 8, backgroundColor: `${PRIORITY_COLORS[parsed.priority]}15`, fontSize: 12, color: PRIORITY_COLORS[parsed.priority], fontWeight: 500, textTransform: "capitalize" }, children: parsed.priority })
-        ] })
-      ] })
-    ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { style: { fontSize: 16, fontWeight: 700, color: COLORS.textMain, margin: 0 }, children: "My Tasks" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setShowFilters(!showFilters), style: { width: 32, height: 32, borderRadius: 10, border: "none", backgroundColor: showFilters ? COLORS.primary : COLORS.card, color: showFilters ? "#fff" : COLORS.textSecondary, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Funnel, { size: 16 }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setSortAsc(!sortAsc), style: { width: 32, height: 32, borderRadius: 10, border: "none", backgroundColor: COLORS.card, color: COLORS.textSecondary, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }, children: sortAsc ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUpNarrowWide, { size: 16 }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDownWideNarrow, { size: 16 }) })
-      ] })
-    ] }),
-    showFilters && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginBottom: 16, display: "flex", gap: 8, overflowX: "auto", paddingBottom: 8 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setFilterCategory("all"), style: { padding: "6px 12px", borderRadius: 20, border: "none", backgroundColor: filterCategory === "all" ? COLORS.primary : COLORS.card, color: filterCategory === "all" ? "#fff" : COLORS.textSecondary, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }, children: "All" }),
-      Object.entries(CATEGORY_CONFIG).map(([k, v]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setFilterCategory(k), style: { padding: "6px 12px", borderRadius: 20, border: "none", backgroundColor: filterCategory === k ? v.color : COLORS.card, color: filterCategory === k ? "#fff" : COLORS.textSecondary, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }, children: v.label }, k))
-    ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { paddingBottom: 40 }, children: filtered.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { textAlign: "center", padding: "60px 20px", color: COLORS.textMuted }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { width: 64, height: 64, borderRadius: 32, backgroundColor: COLORS.card, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { size: 24, color: COLORS.secondary }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { fontSize: 15, margin: 0, fontWeight: 500, color: COLORS.textSecondary }, children: "All caught up!" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { fontSize: 13, marginTop: 4 }, children: "Enjoy your day \u2728" })
-    ] }) : filtered.map((r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { backgroundColor: COLORS.card, borderRadius: 16, padding: 16, marginBottom: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.04)", opacity: r.completed ? 0.6 : 1, transition: "transform 0.2s", borderLeft: `4px solid ${CATEGORY_CONFIG[r.category].color}` }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "flex-start", gap: 14 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-        "button",
-        {
-          onClick: () => r.completed ? uncomplete(r) : complete(r),
-          style: {
-            width: 24,
-            height: 24,
-            borderRadius: "50%",
-            border: `2px solid ${r.completed ? COLORS.success : COLORS.border}`,
-            backgroundColor: r.completed ? COLORS.success : "transparent",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-            marginTop: 2
-          },
-          children: r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { size: 14, color: "#fff" })
-        }
-      ),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 15, fontWeight: 600, color: COLORS.textMain, textDecoration: r.completed ? "line-through" : "none" }, children: r.title }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 11, fontWeight: 500, color: COLORS.textMuted }, children: formatDate(r.dueDate) })
-        ] }),
-        r.description && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { fontSize: 13, color: COLORS.textSecondary, margin: "0 0 8px 0" }, children: r.description }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: CATEGORY_CONFIG[r.category].color, fontWeight: 500, backgroundColor: `${CATEGORY_CONFIG[r.category].color}10`, padding: "2px 8px", borderRadius: 6 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CategoryIcon, { cat: r.category }),
-            CATEGORY_CONFIG[r.category].label
-          ] }),
-          isOverdue(r) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 11, fontWeight: 600, color: COLORS.danger, backgroundColor: "#FFEBEE", padding: "2px 8px", borderRadius: 6 }, children: "Overdue" }),
-          (r.priority === "high" || r.priority === "urgent") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 11, fontWeight: 600, color: PRIORITY_COLORS[r.priority], backgroundColor: `${PRIORITY_COLORS[r.priority]}10`, padding: "2px 8px", borderRadius: 6, textTransform: "capitalize" }, children: r.priority }),
-          r.dueTime && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontSize: 11, color: COLORS.textSecondary, display: "flex", alignItems: "center", gap: 3 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { size: 11 }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { padding: "5px 10px", borderRadius: 8, fontSize: 13, fontWeight: 500, backgroundColor: `${PRIORITY_COLORS[parsed.priority]}18`, color: PRIORITY_COLORS[parsed.priority], textTransform: "capitalize" }, children: parsed.priority }),
+          parsed.recurrence !== "none" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "flex", alignItems: "center", gap: 4, padding: "5px 10px", borderRadius: 8, fontSize: 13, backgroundColor: `${COLORS.primary}15`, color: COLORS.primary, fontWeight: 500 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Repeat, { size: 13 }),
             " ",
-            formatTime(r.dueTime)
+            formatRecurrence(parsed)
           ] })
         ] })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", flexDirection: "column", gap: 4 }, children: [
-        !r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setEditing(r), style: { border: "none", background: "none", cursor: "pointer", padding: 4 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { size: 16, color: COLORS.textMuted }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => del(r.id), style: { border: "none", background: "none", cursor: "pointer", padding: 4 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { size: 16, color: COLORS.textMuted }) })
       ] })
-    ] }) }, r.id)) }),
-    editing && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 16, width: "100%", maxWidth: 400, padding: 24 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { style: { margin: 0, fontSize: 18, color: COLORS.textMain }, children: "Edit Reminder" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setEditing(null), style: { width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 18 }) })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginBottom: 12 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, fontWeight: 500, color: COLORS.textSecondary, display: "block", marginBottom: 4 }, children: "Title" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "text", value: editing.title, onChange: (e) => setEditing({ ...editing, title: e.target.value }), style: { width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14 } })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, fontWeight: 500, color: COLORS.textSecondary, display: "block", marginBottom: 4 }, children: "Date" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "date", value: editing.dueDate, onChange: (e) => setEditing({ ...editing, dueDate: e.target.value }), style: { width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14 } })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 10, marginBottom: 14, alignItems: "center", flexWrap: "wrap" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8 }, children: [
+        overdueCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { padding: "6px 12px", borderRadius: 8, fontSize: 13, fontWeight: 600, backgroundColor: `${COLORS.danger}15`, color: COLORS.danger }, children: [
+          overdueCount,
+          " overdue"
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, fontWeight: 500, color: COLORS.textSecondary, display: "block", marginBottom: 4 }, children: "Time" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "time", value: editing.dueTime || "", onChange: (e) => setEditing({ ...editing, dueTime: e.target.value || void 0 }), style: { width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14 } })
+        todayCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { padding: "6px 12px", borderRadius: 8, fontSize: 13, fontWeight: 600, backgroundColor: `${COLORS.warning}15`, color: COLORS.warning }, children: [
+          todayCount,
+          " today"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { padding: "6px 12px", borderRadius: 8, fontSize: 13, fontWeight: 600, backgroundColor: COLORS.accentLight, color: COLORS.primary }, children: [
+          reminders.filter((r) => !r.completed).length,
+          " pending"
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { size: 16, color: COLORS.textMuted, style: { position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)" } }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "text", placeholder: "Search", value: search, onChange: (e) => setSearch(e.target.value), style: { ...inputStyle, width: 120, padding: "8px 10px 8px 32px", borderRadius: 8, border: `1px solid ${COLORS.border}`, backgroundColor: COLORS.card, fontSize: 14, outline: "none" } })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { value: filterCategory, onChange: (e) => setFilterCategory(e.target.value), style: { ...inputStyle, padding: "8px 12px", borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card, cursor: "pointer" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "all", children: "All" }),
+          Object.entries(CATEGORY_CONFIG).map(([k, v]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: k, children: v.label }, k))
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { value: filterStatus, onChange: (e) => setFilterStatus(e.target.value), style: { ...inputStyle, padding: "8px 12px", borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14, backgroundColor: COLORS.card, cursor: "pointer" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "all", children: "All" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "pending", children: "Pending" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "completed", children: "Done" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "overdue", children: "Overdue" })
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { backgroundColor: COLORS.card, borderRadius: 14, border: `1px solid ${COLORS.border}`, overflow: "hidden" }, children: filtered.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { textAlign: "center", padding: 40, color: COLORS.textMuted }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { size: 44, color: COLORS.border, style: { marginBottom: 12 } }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { fontSize: 16, margin: 0, fontWeight: 500 }, children: "No reminders yet" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { fontSize: 14, marginTop: 6, color: COLORS.textMuted }, children: "Type above to create your first one!" })
+    ] }) : filtered.map((r, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { padding: "14px 16px", borderBottom: i < filtered.length - 1 ? `1px solid ${COLORS.border}` : "none", backgroundColor: r.completed ? COLORS.cardAlt : COLORS.card, opacity: r.completed ? 0.7 : 1 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 12 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => r.completed ? uncomplete(r) : complete(r), style: { width: 24, height: 24, borderRadius: "50%", border: `2px solid ${r.completed ? COLORS.success : COLORS.border}`, backgroundColor: r.completed ? COLORS.success : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }, children: r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { size: 14, color: "#fff" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 15, fontWeight: 500, color: COLORS.textMain, textDecoration: r.completed ? "line-through" : "none" }, children: r.title }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 8px", borderRadius: 6, fontSize: 12, backgroundColor: `${CATEGORY_CONFIG[r.category].color}12`, color: CATEGORY_CONFIG[r.category].color }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CategoryIcon, { cat: r.category }),
+            " ",
+            CATEGORY_CONFIG[r.category].label
+          ] }),
+          isOverdue(r) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { padding: "2px 8px", borderRadius: 6, fontSize: 12, fontWeight: 600, backgroundColor: `${COLORS.danger}12`, color: COLORS.danger }, children: "Overdue" }),
+          r.recurrence !== "none" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "inline-flex", alignItems: "center", gap: 3, padding: "2px 8px", borderRadius: 6, fontSize: 12, backgroundColor: `${COLORS.primary}10`, color: COLORS.primary }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Repeat, { size: 12 }),
+            " ",
+            formatRecurrence(r)
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 13, color: isOverdue(r) ? COLORS.danger : COLORS.textMuted, marginTop: 4, display: "flex", alignItems: "center", gap: 6 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { size: 13 }),
+          " ",
+          formatDate(r.dueDate),
+          r.dueTime && ` at ${formatTime(r.dueTime)}`,
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { marginLeft: 6, padding: "2px 8px", borderRadius: 6, fontSize: 12, backgroundColor: `${PRIORITY_COLORS[r.priority]}12`, color: PRIORITY_COLORS[r.priority], textTransform: "capitalize" }, children: r.priority })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 6 }, children: [
+        !r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => snooze(r, 15), title: "Snooze 15min", style: { width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Timer, { size: 16, color: COLORS.textMuted }) }),
+        !r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setEditing(r), title: "Edit", style: { width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { size: 16, color: COLORS.textMuted }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => del(r.id), title: "Delete", style: { width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { size: 16, color: COLORS.danger }) })
+      ] })
+    ] }) }, r.id)) }),
+    editing && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 16, width: "100%", maxWidth: 400, padding: 20 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { style: { margin: 0, fontSize: 18, fontWeight: 700, color: COLORS.textMain }, children: "Edit Reminder" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setEditing(null), style: { width: 32, height: 32, borderRadius: 8, border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 18 }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginBottom: 14 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }, children: "Title" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "text", value: editing.title, onChange: (e) => setEditing({ ...editing, title: e.target.value }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 } })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, fontWeight: 500, color: COLORS.textSecondary, display: "block", marginBottom: 4 }, children: "Category" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", { value: editing.category, onChange: (e) => setEditing({ ...editing, category: e.target.value }), style: { width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14 }, children: Object.entries(CATEGORY_CONFIG).map(([k, v]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: k, children: v.label }, k)) })
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }, children: "Date" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "date", value: editing.dueDate, onChange: (e) => setEditing({ ...editing, dueDate: e.target.value }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 } })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, fontWeight: 500, color: COLORS.textSecondary, display: "block", marginBottom: 4 }, children: "Priority" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { value: editing.priority, onChange: (e) => setEditing({ ...editing, priority: e.target.value }), style: { width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }, children: "Time" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "time", value: editing.dueTime || "", onChange: (e) => setEditing({ ...editing, dueTime: e.target.value || void 0 }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 } })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }, children: "Category" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", { value: editing.category, onChange: (e) => setEditing({ ...editing, category: e.target.value }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 }, children: Object.entries(CATEGORY_CONFIG).map(([k, v]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: k, children: v.label }, k)) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }, children: "Priority" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { value: editing.priority, onChange: (e) => setEditing({ ...editing, priority: e.target.value }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "low", children: "Low" }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "medium", children: "Medium" }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "high", children: "High" }),
@@ -25368,9 +25514,9 @@ function ReminderApp({ initialData: initialData2 }) {
           ] })
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginBottom: 16 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 12, fontWeight: 500, color: COLORS.textSecondary, display: "block", marginBottom: 4 }, children: "Repeat" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { value: editing.recurrence, onChange: (e) => setEditing({ ...editing, recurrence: e.target.value }), style: { width: "100%", padding: 10, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 14 }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginBottom: 18 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textSecondary, display: "block", marginBottom: 6 }, children: "Repeat" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { value: editing.recurrence, onChange: (e) => setEditing({ ...editing, recurrence: e.target.value }), style: { ...inputStyle, width: "100%", padding: 12, borderRadius: 8, border: `1px solid ${COLORS.border}`, fontSize: 15 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "none", children: "One-time" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "daily", children: "Daily" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "weekly", children: "Weekly" }),
@@ -25378,8 +25524,8 @@ function ReminderApp({ initialData: initialData2 }) {
         ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 12 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setEditing(null), style: { flex: 1, padding: 12, borderRadius: 10, border: `1px solid ${COLORS.border}`, backgroundColor: COLORS.card, fontSize: 14, fontWeight: 600, cursor: "pointer" }, children: "Cancel" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => updateReminder(editing), style: { flex: 1, padding: 12, borderRadius: 10, border: "none", backgroundColor: COLORS.primary, color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer" }, children: "Save" })
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setEditing(null), style: { flex: 1, padding: 14, borderRadius: 10, border: `1px solid ${COLORS.border}`, backgroundColor: COLORS.card, fontSize: 15, fontWeight: 600, cursor: "pointer" }, children: "Cancel" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => updateReminder(editing), style: { flex: 1, padding: 14, borderRadius: 10, border: "none", backgroundColor: COLORS.primary, color: "#fff", fontSize: 15, fontWeight: 600, cursor: "pointer" }, children: "Save" })
       ] })
     ] }) })
   ] });
@@ -25584,22 +25730,6 @@ lucide-react/dist/esm/createLucideIcon.js:
    * See the LICENSE file in the root directory of this source tree.
    *)
 
-lucide-react/dist/esm/icons/arrow-down-wide-narrow.js:
-  (**
-   * @license lucide-react v0.554.0 - ISC
-   *
-   * This source code is licensed under the ISC license.
-   * See the LICENSE file in the root directory of this source tree.
-   *)
-
-lucide-react/dist/esm/icons/arrow-up-narrow-wide.js:
-  (**
-   * @license lucide-react v0.554.0 - ISC
-   *
-   * This source code is licensed under the ISC license.
-   * See the LICENSE file in the root directory of this source tree.
-   *)
-
 lucide-react/dist/esm/icons/bell.js:
   (**
    * @license lucide-react v0.554.0 - ISC
@@ -25632,14 +25762,6 @@ lucide-react/dist/esm/icons/check.js:
    * See the LICENSE file in the root directory of this source tree.
    *)
 
-lucide-react/dist/esm/icons/chevron-right.js:
-  (**
-   * @license lucide-react v0.554.0 - ISC
-   *
-   * This source code is licensed under the ISC license.
-   * See the LICENSE file in the root directory of this source tree.
-   *)
-
 lucide-react/dist/esm/icons/clock.js:
   (**
    * @license lucide-react v0.554.0 - ISC
@@ -25648,7 +25770,7 @@ lucide-react/dist/esm/icons/clock.js:
    * See the LICENSE file in the root directory of this source tree.
    *)
 
-lucide-react/dist/esm/icons/flame.js:
+lucide-react/dist/esm/icons/crown.js:
   (**
    * @license lucide-react v0.554.0 - ISC
    *
@@ -25656,7 +25778,7 @@ lucide-react/dist/esm/icons/flame.js:
    * See the LICENSE file in the root directory of this source tree.
    *)
 
-lucide-react/dist/esm/icons/funnel.js:
+lucide-react/dist/esm/icons/flame.js:
   (**
    * @license lucide-react v0.554.0 - ISC
    *
@@ -25704,6 +25826,22 @@ lucide-react/dist/esm/icons/plane.js:
    * See the LICENSE file in the root directory of this source tree.
    *)
 
+lucide-react/dist/esm/icons/repeat.js:
+  (**
+   * @license lucide-react v0.554.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/search.js:
+  (**
+   * @license lucide-react v0.554.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
 lucide-react/dist/esm/icons/send.js:
   (**
    * @license lucide-react v0.554.0 - ISC
@@ -25713,14 +25851,6 @@ lucide-react/dist/esm/icons/send.js:
    *)
 
 lucide-react/dist/esm/icons/shopping-cart.js:
-  (**
-   * @license lucide-react v0.554.0 - ISC
-   *
-   * This source code is licensed under the ISC license.
-   * See the LICENSE file in the root directory of this source tree.
-   *)
-
-lucide-react/dist/esm/icons/sparkles.js:
   (**
    * @license lucide-react v0.554.0 - ISC
    *
@@ -25744,7 +25874,7 @@ lucide-react/dist/esm/icons/stethoscope.js:
    * See the LICENSE file in the root directory of this source tree.
    *)
 
-lucide-react/dist/esm/icons/trash-2.js:
+lucide-react/dist/esm/icons/timer.js:
   (**
    * @license lucide-react v0.554.0 - ISC
    *
@@ -25752,7 +25882,7 @@ lucide-react/dist/esm/icons/trash-2.js:
    * See the LICENSE file in the root directory of this source tree.
    *)
 
-lucide-react/dist/esm/icons/trophy.js:
+lucide-react/dist/esm/icons/trash-2.js:
   (**
    * @license lucide-react v0.554.0 - ISC
    *

@@ -303,7 +303,48 @@ const toolInputParser = z.object({
   natural_input: z.string().optional(),
 });
 
-const tools: Tool[] = widgets.map((widget) => ({
+// Storage for user reminders (in-memory, persists during server lifetime)
+const userRemindersStore: Map<string, { reminders: any[], stats: any, savedAt: number }> = new Map();
+
+// Save reminders tool schema
+const saveRemindersSchema = {
+  type: "object",
+  properties: {
+    reminders: { type: "array", description: "Array of reminder objects to save." },
+    stats: { type: "object", description: "User stats object." },
+    savedAt: { type: "number", description: "Timestamp when saved." },
+  },
+  required: ["reminders"],
+  additionalProperties: true,
+  $schema: "http://json-schema.org/draft-07/schema#",
+} as const;
+
+// Create the save_reminders tool
+const saveRemindersTool: Tool = {
+  name: "save_reminders",
+  description: "Save user's reminders and stats for persistence. Called automatically by the widget.",
+  inputSchema: saveRemindersSchema,
+  outputSchema: {
+    type: "object",
+    properties: {
+      success: { type: "boolean" },
+      savedCount: { type: "number" },
+      savedAt: { type: "number" },
+    },
+  },
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+};
+
+const tools: Tool[] = [
+  // Add save_reminders tool
+  saveRemindersTool,
+  // Add widget tools
+  ...widgets.map((widget) => ({
   name: widget.id,
   description:
     "Use this to manage reminders with natural language input, organized displays, search/filter, recurring reminders, snooze, and gamification. Call this tool to create, view, or manage reminders. Supports natural language like 'remind me to call mom tomorrow at 3pm'.",
@@ -349,7 +390,7 @@ const tools: Tool[] = widgets.map((widget) => ({
     idempotentHint: true,
     openWorldHint: false,
   },
-}));
+}))];
 
 const resources: Resource[] = widgets.map((widget) => ({
   uri: widget.templateUri,
@@ -443,6 +484,39 @@ function createTravelChecklistServer(): Server {
       console.log("Full request object:", JSON.stringify(request, null, 2));
       
       try {
+        // Handle save_reminders tool for persistence
+        if (request.params.name === "save_reminders") {
+          const args = request.params.arguments as any || {};
+          const sessionId = (request as any)._meta?.sessionId || "default";
+          
+          // Store reminders in memory
+          userRemindersStore.set(sessionId, {
+            reminders: args.reminders || [],
+            stats: args.stats || {},
+            savedAt: Date.now(),
+          });
+          
+          console.log(`[Save] Saved ${args.reminders?.length || 0} reminders for session ${sessionId}`);
+          
+          return {
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify({
+                  success: true,
+                  savedCount: args.reminders?.length || 0,
+                  savedAt: Date.now(),
+                }),
+              },
+            ],
+            structuredContent: {
+              success: true,
+              savedCount: args.reminders?.length || 0,
+              savedAt: Date.now(),
+            },
+          };
+        }
+        
         const widget = widgetsById.get(request.params.name);
 
         if (!widget) {
@@ -548,6 +622,10 @@ function createTravelChecklistServer(): Server {
         const widgetMetadata = widgetMeta(widget, false);
         console.log(`[MCP] Tool called: ${request.params.name}, returning templateUri: ${(widgetMetadata as any)["openai/outputTemplate"]}`);
 
+        // Try to load saved reminders for this session
+        const sessionId = (request as any)._meta?.sessionId || "default";
+        const savedData = userRemindersStore.get(sessionId);
+        
         // Build structured content once so we can log it and return it.
         // For the reminder app, expose fields relevant to reminder details
         const structured = {
@@ -555,6 +633,9 @@ function createTravelChecklistServer(): Server {
           timestamp: new Date().toISOString(),
           ...args,
           input_source: usedDefaults ? "default" : "user",
+          // Include saved reminders for hydration
+          reminders: savedData?.reminders || [],
+          stats: savedData?.stats || null,
           // Summary + follow-ups for natural language UX
           summary: computeSummary(args),
           suggested_followups: [
