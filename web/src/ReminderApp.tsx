@@ -28,6 +28,16 @@ interface Reminder {
   pointsAwarded: number;
 }
 
+interface ProgressionTask {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  points: number;
+  completed: boolean;
+  check: (reminders: Reminder[], stats: UserStats) => boolean;
+}
+
 interface UserStats {
   totalPoints: number;
   currentStreak: number;
@@ -35,6 +45,7 @@ interface UserStats {
   completedAllTime: number;
   level: number;
   achievements: { id: string; name: string; icon: string; unlocked: boolean }[];
+  completedTasks: string[]; // IDs of completed progression tasks
 }
 
 interface ParsedReminder {
@@ -438,6 +449,106 @@ const DEFAULT_ACHIEVEMENTS = [
   { id: "complete50", name: "Productive", icon: "🏆", unlocked: false },
 ];
 
+// Progression tasks - ordered sequence of onboarding tasks
+const PROGRESSION_TASKS: Omit<ProgressionTask, 'completed'>[] = [
+  {
+    id: "first_reminder",
+    name: "Getting Started",
+    description: "Add your first reminder",
+    icon: "🎯",
+    points: 15,
+    check: (reminders) => reminders.length >= 1
+  },
+  {
+    id: "first_complete",
+    name: "Task Master",
+    description: "Complete your first reminder",
+    icon: "✅",
+    points: 20,
+    check: (_, stats) => stats.completedAllTime >= 1
+  },
+  {
+    id: "add_birthday",
+    name: "Never Forget",
+    description: "Add a birthday reminder (type 'birthday')",
+    icon: "🎂",
+    points: 15,
+    check: (reminders) => reminders.some(r => /birthday/i.test(r.title))
+  },
+  {
+    id: "add_work",
+    name: "Stay Professional",
+    description: "Add a work reminder (meeting, deadline, etc.)",
+    icon: "💼",
+    points: 15,
+    check: (reminders) => reminders.some(r => r.category === "work")
+  },
+  {
+    id: "add_health",
+    name: "Health First",
+    description: "Add a health reminder (doctor, vitamins, etc.)",
+    icon: "💊",
+    points: 15,
+    check: (reminders) => reminders.some(r => r.category === "health")
+  },
+  {
+    id: "add_recurring",
+    name: "Habit Builder",
+    description: "Create a recurring reminder",
+    icon: "🔄",
+    points: 20,
+    check: (reminders) => reminders.some(r => r.recurrence !== "none")
+  },
+  {
+    id: "complete_3",
+    name: "On a Roll",
+    description: "Complete 3 reminders total",
+    icon: "🎳",
+    points: 25,
+    check: (_, stats) => stats.completedAllTime >= 3
+  },
+  {
+    id: "add_family",
+    name: "Family Matters",
+    description: "Add a family reminder (call mom, anniversary, etc.)",
+    icon: "👨‍👩‍👧",
+    points: 15,
+    check: (reminders) => reminders.some(r => r.category === "family")
+  },
+  {
+    id: "start_streak",
+    name: "Streak Starter",
+    description: "Build a 2-day streak",
+    icon: "🔥",
+    points: 30,
+    check: (_, stats) => stats.currentStreak >= 2 || stats.longestStreak >= 2
+  },
+  {
+    id: "add_bill",
+    name: "Bill Tracker",
+    description: "Add a bill/payment reminder (rent, utilities, etc.)",
+    icon: "💰",
+    points: 15,
+    check: (reminders) => reminders.some(r => r.category === "finance" || /bill|rent|pay|mortgage|insurance/i.test(r.title))
+  },
+  {
+    id: "complete_10",
+    name: "Power User",
+    description: "Complete 10 reminders total",
+    icon: "⭐",
+    points: 50,
+    check: (_, stats) => stats.completedAllTime >= 10
+  },
+  {
+    id: "week_streak",
+    name: "Week Warrior",
+    description: "Maintain a 7-day streak",
+    icon: "⚡",
+    points: 100,
+    check: (_, stats) => stats.currentStreak >= 7 || stats.longestStreak >= 7
+  }
+];
+
 // Helper to persist state via OpenAI Apps SDK
 const persistState = (reminders: Reminder[], stats: UserStats) => {
   const state = { reminders, stats, savedAt: Date.now() };
@@ -476,7 +587,8 @@ const persistState = (reminders: Reminder[], stats: UserStats) => {
 const loadInitialState = (initialData: any): { reminders: Reminder[], stats: UserStats } => {
   const defaultStats: UserStats = {
     totalPoints: 0, currentStreak: 0, longestStreak: 0,
-    completedAllTime: 0, level: 1, achievements: [...DEFAULT_ACHIEVEMENTS]
+    completedAllTime: 0, level: 1, achievements: [...DEFAULT_ACHIEVEMENTS],
+    completedTasks: []
   };
   
   // Priority 1: initialData from server (hydration)
@@ -594,48 +706,67 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const todayCount = reminders.filter(r => !r.completed && r.dueDate === new Date().toISOString().split("T")[0]).length;
   const levelInfo = calcLevel(stats.totalPoints);
   
-  // Gamification guidance - determine what hint to show based on progress
-  const getGamificationHint = (): { text: string; icon: string; points: number } | null => {
-    // First reminder
-    if (reminders.length === 0) {
-      return { text: "Add your first reminder to earn points!", icon: "🎯", points: 10 };
+  // Check for newly completed progression tasks and award points
+  useEffect(() => {
+    const completedTasks = stats.completedTasks || [];
+    let pointsToAdd = 0;
+    const newlyCompleted: string[] = [];
+    
+    for (const task of PROGRESSION_TASKS) {
+      // Skip if already completed
+      if (completedTasks.includes(task.id)) continue;
+      
+      // Check if task is now complete
+      if (task.check(reminders, stats)) {
+        pointsToAdd += task.points;
+        newlyCompleted.push(task.id);
+      }
     }
-    // First completion
-    if (stats.completedAllTime === 0 && reminders.length > 0) {
-      return { text: "Complete a reminder to earn your first points!", icon: "✅", points: 10 };
+    
+    // Award points for newly completed tasks
+    if (newlyCompleted.length > 0) {
+      const taskName = PROGRESSION_TASKS.find(t => t.id === newlyCompleted[0])?.name || "Task";
+      setStats(prev => ({
+        ...prev,
+        totalPoints: prev.totalPoints + pointsToAdd,
+        completedTasks: [...(prev.completedTasks || []), ...newlyCompleted]
+      }));
+      setToast(`🎉 "${taskName}" complete! +${pointsToAdd} pts`);
     }
-    // First streak
-    if (stats.currentStreak === 0 && stats.completedAllTime > 0) {
-      return { text: "Complete a reminder today to start a streak!", icon: "🔥", points: 15 };
+  }, [reminders, stats.completedAllTime, stats.currentStreak, stats.longestStreak]);
+  
+  // Get the current progression task to show as hint
+  const getCurrentProgressionTask = (): { text: string; icon: string; points: number; name: string } | null => {
+    const completedTasks = stats.completedTasks || [];
+    
+    // Find the first incomplete task in order
+    for (const task of PROGRESSION_TASKS) {
+      if (!completedTasks.includes(task.id) && !task.check(reminders, stats)) {
+        return {
+          text: task.description,
+          icon: task.icon,
+          points: task.points,
+          name: task.name
+        };
+      }
     }
-    // Build streak to 3
-    if (stats.currentStreak > 0 && stats.currentStreak < 3) {
-      return { text: `${3 - stats.currentStreak} more day${stats.currentStreak === 2 ? "" : "s"} to unlock "On Fire" badge!`, icon: "🔥", points: 50 };
+    
+    // All tasks complete - show level progress
+    if (levelInfo.progress > 0) {
+      return {
+        text: `${Math.round(levelInfo.progress)}% to Level ${levelInfo.level + 1}`,
+        icon: "👑",
+        points: 0,
+        name: "Keep Going!"
+      };
     }
-    // Build streak to 7
-    if (stats.currentStreak >= 3 && stats.currentStreak < 7 && !stats.achievements.find(a => a.id === "streak7")?.unlocked) {
-      return { text: `${7 - stats.currentStreak} more days for "Week Warrior" badge!`, icon: "⚡", points: 50 };
-    }
-    // Complete 10 reminders
-    if (stats.completedAllTime < 10 && !stats.achievements.find(a => a.id === "complete10")?.unlocked) {
-      return { text: `Complete ${10 - stats.completedAllTime} more for "Getting Started" badge!`, icon: "⭐", points: 50 };
-    }
-    // Complete 50 reminders
-    if (stats.completedAllTime >= 10 && stats.completedAllTime < 50 && !stats.achievements.find(a => a.id === "complete50")?.unlocked) {
-      return { text: `${50 - stats.completedAllTime} more completions for "Productive" badge!`, icon: "🏆", points: 50 };
-    }
-    // Add recurring reminder
-    if (!reminders.some(r => r.recurrence !== "none")) {
-      return { text: "Try a recurring reminder for bonus organization!", icon: "🔄", points: 5 };
-    }
-    // Level up hint
-    if (levelInfo.progress > 70) {
-      return { text: `Almost Level ${levelInfo.level + 1}! Keep going!`, icon: "👑", points: 0 };
-    }
+    
     return null;
   };
   
-  const hint = getGamificationHint();
+  const hint = getCurrentProgressionTask();
+  const completedTaskCount = (stats.completedTasks || []).length;
+  const totalTaskCount = PROGRESSION_TASKS.length;
   
   // Helper to format recurrence for display
   const formatRecurrence = (r: Reminder | ParsedReminder): string => {
@@ -830,21 +961,47 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
           borderRadius: 10, 
           padding: "12px 16px", 
           marginBottom: 14, 
-          display: "flex", 
-          alignItems: "center", 
-          gap: 12,
           border: `1px solid ${COLORS.primaryLight}`
         }}>
-          <span style={{ fontSize: 24 }}>{hint.icon}</span>
-          <div style={{ flex: 1 }}>
-            <span style={{ fontSize: 14, fontWeight: 500, color: COLORS.textMain }}>{hint.text}</span>
-            {hint.points > 0 && (
-              <span style={{ marginLeft: 8, fontSize: 12, fontWeight: 600, color: COLORS.primary, backgroundColor: COLORS.card, padding: "2px 8px", borderRadius: 6 }}>
-                +{hint.points} pts
-              </span>
-            )}
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: 28 }}>{hint.icon}</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.primary, marginBottom: 2 }}>
+                {hint.name} {hint.points > 0 && <span style={{ fontWeight: 500, color: COLORS.textMuted }}>• +{hint.points} pts</span>}
+              </div>
+              <span style={{ fontSize: 14, color: COLORS.textMain }}>{hint.text}</span>
+            </div>
+            <div style={{ textAlign: "right", fontSize: 12, color: COLORS.textMuted }}>
+              {completedTaskCount}/{totalTaskCount}
+            </div>
           </div>
-          <ChevronRight size={18} color={COLORS.primary} />
+          {/* Progress bar */}
+          <div style={{ marginTop: 10, height: 6, backgroundColor: COLORS.border, borderRadius: 3, overflow: "hidden" }}>
+            <div style={{ 
+              height: "100%", 
+              width: `${(completedTaskCount / totalTaskCount) * 100}%`, 
+              backgroundColor: COLORS.primaryLight, 
+              borderRadius: 3,
+              transition: "width 0.3s ease"
+            }} />
+          </div>
+        </div>
+      )}
+      
+      {/* All tasks complete celebration */}
+      {completedTaskCount === totalTaskCount && totalTaskCount > 0 && (
+        <div style={{ 
+          backgroundColor: `${COLORS.gold}15`, 
+          borderRadius: 10, 
+          padding: "12px 16px", 
+          marginBottom: 14, 
+          textAlign: "center",
+          border: `1px solid ${COLORS.gold}`
+        }}>
+          <span style={{ fontSize: 20 }}>🏆</span>
+          <span style={{ marginLeft: 8, fontSize: 14, fontWeight: 600, color: COLORS.textMain }}>
+            All progression tasks complete! You're a reminder master!
+          </span>
         </div>
       )}
       

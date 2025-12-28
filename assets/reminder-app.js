@@ -24556,19 +24556,15 @@ var Calendar = createLucideIcon("calendar", __iconNode3);
 var __iconNode4 = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
 var Check = createLucideIcon("check", __iconNode4);
 
-// node_modules/lucide-react/dist/esm/icons/chevron-right.js
-var __iconNode5 = [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]];
-var ChevronRight = createLucideIcon("chevron-right", __iconNode5);
-
 // node_modules/lucide-react/dist/esm/icons/clock.js
-var __iconNode6 = [
+var __iconNode5 = [
   ["path", { d: "M12 6v6l4 2", key: "mmk7yg" }],
   ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }]
 ];
-var Clock = createLucideIcon("clock", __iconNode6);
+var Clock = createLucideIcon("clock", __iconNode5);
 
 // node_modules/lucide-react/dist/esm/icons/crown.js
-var __iconNode7 = [
+var __iconNode6 = [
   [
     "path",
     {
@@ -24578,10 +24574,10 @@ var __iconNode7 = [
   ],
   ["path", { d: "M5 21h14", key: "11awu3" }]
 ];
-var Crown = createLucideIcon("crown", __iconNode7);
+var Crown = createLucideIcon("crown", __iconNode6);
 
 // node_modules/lucide-react/dist/esm/icons/flame.js
-var __iconNode8 = [
+var __iconNode7 = [
   [
     "path",
     {
@@ -24590,10 +24586,10 @@ var __iconNode8 = [
     }
   ]
 ];
-var Flame = createLucideIcon("flame", __iconNode8);
+var Flame = createLucideIcon("flame", __iconNode7);
 
 // node_modules/lucide-react/dist/esm/icons/graduation-cap.js
-var __iconNode9 = [
+var __iconNode8 = [
   [
     "path",
     {
@@ -24604,10 +24600,10 @@ var __iconNode9 = [
   ["path", { d: "M22 10v6", key: "1lu8f3" }],
   ["path", { d: "M6 12.5V16a6 3 0 0 0 12 0v-3.5", key: "1r8lef" }]
 ];
-var GraduationCap = createLucideIcon("graduation-cap", __iconNode9);
+var GraduationCap = createLucideIcon("graduation-cap", __iconNode8);
 
 // node_modules/lucide-react/dist/esm/icons/heart.js
-var __iconNode10 = [
+var __iconNode9 = [
   [
     "path",
     {
@@ -24616,10 +24612,10 @@ var __iconNode10 = [
     }
   ]
 ];
-var Heart = createLucideIcon("heart", __iconNode10);
+var Heart = createLucideIcon("heart", __iconNode9);
 
 // node_modules/lucide-react/dist/esm/icons/house.js
-var __iconNode11 = [
+var __iconNode10 = [
   ["path", { d: "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8", key: "5wwlr5" }],
   [
     "path",
@@ -24629,10 +24625,10 @@ var __iconNode11 = [
     }
   ]
 ];
-var House = createLucideIcon("house", __iconNode11);
+var House = createLucideIcon("house", __iconNode10);
 
 // node_modules/lucide-react/dist/esm/icons/pen.js
-var __iconNode12 = [
+var __iconNode11 = [
   [
     "path",
     {
@@ -24641,10 +24637,10 @@ var __iconNode12 = [
     }
   ]
 ];
-var Pen = createLucideIcon("pen", __iconNode12);
+var Pen = createLucideIcon("pen", __iconNode11);
 
 // node_modules/lucide-react/dist/esm/icons/plane.js
-var __iconNode13 = [
+var __iconNode12 = [
   [
     "path",
     {
@@ -24653,26 +24649,26 @@ var __iconNode13 = [
     }
   ]
 ];
-var Plane = createLucideIcon("plane", __iconNode13);
+var Plane = createLucideIcon("plane", __iconNode12);
 
 // node_modules/lucide-react/dist/esm/icons/repeat.js
-var __iconNode14 = [
+var __iconNode13 = [
   ["path", { d: "m17 2 4 4-4 4", key: "nntrym" }],
   ["path", { d: "M3 11v-1a4 4 0 0 1 4-4h14", key: "84bu3i" }],
   ["path", { d: "m7 22-4-4 4-4", key: "1wqhfi" }],
   ["path", { d: "M21 13v1a4 4 0 0 1-4 4H3", key: "1rx37r" }]
 ];
-var Repeat = createLucideIcon("repeat", __iconNode14);
+var Repeat = createLucideIcon("repeat", __iconNode13);
 
 // node_modules/lucide-react/dist/esm/icons/search.js
-var __iconNode15 = [
+var __iconNode14 = [
   ["path", { d: "m21 21-4.34-4.34", key: "14j7rj" }],
   ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }]
 ];
-var Search = createLucideIcon("search", __iconNode15);
+var Search = createLucideIcon("search", __iconNode14);
 
 // node_modules/lucide-react/dist/esm/icons/send.js
-var __iconNode16 = [
+var __iconNode15 = [
   [
     "path",
     {
@@ -24682,10 +24678,10 @@ var __iconNode16 = [
   ],
   ["path", { d: "m21.854 2.147-10.94 10.939", key: "12cjpa" }]
 ];
-var Send = createLucideIcon("send", __iconNode16);
+var Send = createLucideIcon("send", __iconNode15);
 
 // node_modules/lucide-react/dist/esm/icons/shopping-cart.js
-var __iconNode17 = [
+var __iconNode16 = [
   ["circle", { cx: "8", cy: "21", r: "1", key: "jimo8o" }],
   ["circle", { cx: "19", cy: "21", r: "1", key: "13723u" }],
   [
@@ -24696,10 +24692,10 @@ var __iconNode17 = [
     }
   ]
 ];
-var ShoppingCart = createLucideIcon("shopping-cart", __iconNode17);
+var ShoppingCart = createLucideIcon("shopping-cart", __iconNode16);
 
 // node_modules/lucide-react/dist/esm/icons/star.js
-var __iconNode18 = [
+var __iconNode17 = [
   [
     "path",
     {
@@ -24708,43 +24704,43 @@ var __iconNode18 = [
     }
   ]
 ];
-var Star = createLucideIcon("star", __iconNode18);
+var Star = createLucideIcon("star", __iconNode17);
 
 // node_modules/lucide-react/dist/esm/icons/stethoscope.js
-var __iconNode19 = [
+var __iconNode18 = [
   ["path", { d: "M11 2v2", key: "1539x4" }],
   ["path", { d: "M5 2v2", key: "1yf1q8" }],
   ["path", { d: "M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1", key: "rb5t3r" }],
   ["path", { d: "M8 15a6 6 0 0 0 12 0v-3", key: "x18d4x" }],
   ["circle", { cx: "20", cy: "10", r: "2", key: "ts1r5v" }]
 ];
-var Stethoscope = createLucideIcon("stethoscope", __iconNode19);
+var Stethoscope = createLucideIcon("stethoscope", __iconNode18);
 
 // node_modules/lucide-react/dist/esm/icons/trash-2.js
-var __iconNode20 = [
+var __iconNode19 = [
   ["path", { d: "M10 11v6", key: "nco0om" }],
   ["path", { d: "M14 11v6", key: "outv1u" }],
   ["path", { d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6", key: "miytrc" }],
   ["path", { d: "M3 6h18", key: "d0wm0j" }],
   ["path", { d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2", key: "e791ji" }]
 ];
-var Trash2 = createLucideIcon("trash-2", __iconNode20);
+var Trash2 = createLucideIcon("trash-2", __iconNode19);
 
 // node_modules/lucide-react/dist/esm/icons/users.js
-var __iconNode21 = [
+var __iconNode20 = [
   ["path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", key: "1yyitq" }],
   ["path", { d: "M16 3.128a4 4 0 0 1 0 7.744", key: "16gr8j" }],
   ["path", { d: "M22 21v-2a4 4 0 0 0-3-3.87", key: "kshegd" }],
   ["circle", { cx: "9", cy: "7", r: "4", key: "nufk8" }]
 ];
-var Users = createLucideIcon("users", __iconNode21);
+var Users = createLucideIcon("users", __iconNode20);
 
 // node_modules/lucide-react/dist/esm/icons/x.js
-var __iconNode22 = [
+var __iconNode21 = [
   ["path", { d: "M18 6 6 18", key: "1bl5f8" }],
   ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
 ];
-var X = createLucideIcon("x", __iconNode22);
+var X = createLucideIcon("x", __iconNode21);
 
 // src/ReminderApp.tsx
 var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
@@ -25082,6 +25078,104 @@ var DEFAULT_ACHIEVEMENTS = [
   { id: "complete10", name: "Getting Started", icon: "\u2B50", unlocked: false },
   { id: "complete50", name: "Productive", icon: "\u{1F3C6}", unlocked: false }
 ];
+var PROGRESSION_TASKS = [
+  {
+    id: "first_reminder",
+    name: "Getting Started",
+    description: "Add your first reminder",
+    icon: "\u{1F3AF}",
+    points: 15,
+    check: (reminders) => reminders.length >= 1
+  },
+  {
+    id: "first_complete",
+    name: "Task Master",
+    description: "Complete your first reminder",
+    icon: "\u2705",
+    points: 20,
+    check: (_, stats) => stats.completedAllTime >= 1
+  },
+  {
+    id: "add_birthday",
+    name: "Never Forget",
+    description: "Add a birthday reminder (type 'birthday')",
+    icon: "\u{1F382}",
+    points: 15,
+    check: (reminders) => reminders.some((r) => /birthday/i.test(r.title))
+  },
+  {
+    id: "add_work",
+    name: "Stay Professional",
+    description: "Add a work reminder (meeting, deadline, etc.)",
+    icon: "\u{1F4BC}",
+    points: 15,
+    check: (reminders) => reminders.some((r) => r.category === "work")
+  },
+  {
+    id: "add_health",
+    name: "Health First",
+    description: "Add a health reminder (doctor, vitamins, etc.)",
+    icon: "\u{1F48A}",
+    points: 15,
+    check: (reminders) => reminders.some((r) => r.category === "health")
+  },
+  {
+    id: "add_recurring",
+    name: "Habit Builder",
+    description: "Create a recurring reminder",
+    icon: "\u{1F504}",
+    points: 20,
+    check: (reminders) => reminders.some((r) => r.recurrence !== "none")
+  },
+  {
+    id: "complete_3",
+    name: "On a Roll",
+    description: "Complete 3 reminders total",
+    icon: "\u{1F3B3}",
+    points: 25,
+    check: (_, stats) => stats.completedAllTime >= 3
+  },
+  {
+    id: "add_family",
+    name: "Family Matters",
+    description: "Add a family reminder (call mom, anniversary, etc.)",
+    icon: "\u{1F468}\u200D\u{1F469}\u200D\u{1F467}",
+    points: 15,
+    check: (reminders) => reminders.some((r) => r.category === "family")
+  },
+  {
+    id: "start_streak",
+    name: "Streak Starter",
+    description: "Build a 2-day streak",
+    icon: "\u{1F525}",
+    points: 30,
+    check: (_, stats) => stats.currentStreak >= 2 || stats.longestStreak >= 2
+  },
+  {
+    id: "add_bill",
+    name: "Bill Tracker",
+    description: "Add a bill/payment reminder (rent, utilities, etc.)",
+    icon: "\u{1F4B0}",
+    points: 15,
+    check: (reminders) => reminders.some((r) => r.category === "finance" || /bill|rent|pay|mortgage|insurance/i.test(r.title))
+  },
+  {
+    id: "complete_10",
+    name: "Power User",
+    description: "Complete 10 reminders total",
+    icon: "\u2B50",
+    points: 50,
+    check: (_, stats) => stats.completedAllTime >= 10
+  },
+  {
+    id: "week_streak",
+    name: "Week Warrior",
+    description: "Maintain a 7-day streak",
+    icon: "\u26A1",
+    points: 100,
+    check: (_, stats) => stats.currentStreak >= 7 || stats.longestStreak >= 7
+  }
+];
 var persistState = (reminders, stats) => {
   const state = { reminders, stats, savedAt: Date.now() };
   if (window.openai?.setWidgetState) {
@@ -25114,7 +25208,8 @@ var loadInitialState = (initialData2) => {
     longestStreak: 0,
     completedAllTime: 0,
     level: 1,
-    achievements: [...DEFAULT_ACHIEVEMENTS]
+    achievements: [...DEFAULT_ACHIEVEMENTS],
+    completedTasks: []
   };
   if (initialData2?.reminders && Array.isArray(initialData2.reminders)) {
     console.log("[Load] Using initialData from server:", initialData2.reminders.length, "reminders");
@@ -25221,37 +25316,52 @@ function ReminderApp({ initialData: initialData2 }) {
   const overdueCount = reminders.filter(isOverdue).length;
   const todayCount = reminders.filter((r) => !r.completed && r.dueDate === (/* @__PURE__ */ new Date()).toISOString().split("T")[0]).length;
   const levelInfo = calcLevel(stats.totalPoints);
-  const getGamificationHint = () => {
-    if (reminders.length === 0) {
-      return { text: "Add your first reminder to earn points!", icon: "\u{1F3AF}", points: 10 };
+  (0, import_react3.useEffect)(() => {
+    const completedTasks = stats.completedTasks || [];
+    let pointsToAdd = 0;
+    const newlyCompleted = [];
+    for (const task of PROGRESSION_TASKS) {
+      if (completedTasks.includes(task.id)) continue;
+      if (task.check(reminders, stats)) {
+        pointsToAdd += task.points;
+        newlyCompleted.push(task.id);
+      }
     }
-    if (stats.completedAllTime === 0 && reminders.length > 0) {
-      return { text: "Complete a reminder to earn your first points!", icon: "\u2705", points: 10 };
+    if (newlyCompleted.length > 0) {
+      const taskName = PROGRESSION_TASKS.find((t) => t.id === newlyCompleted[0])?.name || "Task";
+      setStats((prev) => ({
+        ...prev,
+        totalPoints: prev.totalPoints + pointsToAdd,
+        completedTasks: [...prev.completedTasks || [], ...newlyCompleted]
+      }));
+      setToast(`\u{1F389} "${taskName}" complete! +${pointsToAdd} pts`);
     }
-    if (stats.currentStreak === 0 && stats.completedAllTime > 0) {
-      return { text: "Complete a reminder today to start a streak!", icon: "\u{1F525}", points: 15 };
+  }, [reminders, stats.completedAllTime, stats.currentStreak, stats.longestStreak]);
+  const getCurrentProgressionTask = () => {
+    const completedTasks = stats.completedTasks || [];
+    for (const task of PROGRESSION_TASKS) {
+      if (!completedTasks.includes(task.id) && !task.check(reminders, stats)) {
+        return {
+          text: task.description,
+          icon: task.icon,
+          points: task.points,
+          name: task.name
+        };
+      }
     }
-    if (stats.currentStreak > 0 && stats.currentStreak < 3) {
-      return { text: `${3 - stats.currentStreak} more day${stats.currentStreak === 2 ? "" : "s"} to unlock "On Fire" badge!`, icon: "\u{1F525}", points: 50 };
-    }
-    if (stats.currentStreak >= 3 && stats.currentStreak < 7 && !stats.achievements.find((a) => a.id === "streak7")?.unlocked) {
-      return { text: `${7 - stats.currentStreak} more days for "Week Warrior" badge!`, icon: "\u26A1", points: 50 };
-    }
-    if (stats.completedAllTime < 10 && !stats.achievements.find((a) => a.id === "complete10")?.unlocked) {
-      return { text: `Complete ${10 - stats.completedAllTime} more for "Getting Started" badge!`, icon: "\u2B50", points: 50 };
-    }
-    if (stats.completedAllTime >= 10 && stats.completedAllTime < 50 && !stats.achievements.find((a) => a.id === "complete50")?.unlocked) {
-      return { text: `${50 - stats.completedAllTime} more completions for "Productive" badge!`, icon: "\u{1F3C6}", points: 50 };
-    }
-    if (!reminders.some((r) => r.recurrence !== "none")) {
-      return { text: "Try a recurring reminder for bonus organization!", icon: "\u{1F504}", points: 5 };
-    }
-    if (levelInfo.progress > 70) {
-      return { text: `Almost Level ${levelInfo.level + 1}! Keep going!`, icon: "\u{1F451}", points: 0 };
+    if (levelInfo.progress > 0) {
+      return {
+        text: `${Math.round(levelInfo.progress)}% to Level ${levelInfo.level + 1}`,
+        icon: "\u{1F451}",
+        points: 0,
+        name: "Keep Going!"
+      };
     }
     return null;
   };
-  const hint = getGamificationHint();
+  const hint = getCurrentProgressionTask();
+  const completedTaskCount = (stats.completedTasks || []).length;
+  const totalTaskCount = PROGRESSION_TASKS.length;
   const formatRecurrence = (r) => {
     if (r.recurrence === "none") return "";
     if (r.recurrence === "daily") return "Daily";
@@ -25436,21 +25546,46 @@ function ReminderApp({ initialData: initialData2 }) {
       borderRadius: 10,
       padding: "12px 16px",
       marginBottom: 14,
-      display: "flex",
-      alignItems: "center",
-      gap: 12,
       border: `1px solid ${COLORS.primaryLight}`
     }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 24 }, children: hint.icon }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14, fontWeight: 500, color: COLORS.textMain }, children: hint.text }),
-        hint.points > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { marginLeft: 8, fontSize: 12, fontWeight: 600, color: COLORS.primary, backgroundColor: COLORS.card, padding: "2px 8px", borderRadius: 6 }, children: [
-          "+",
-          hint.points,
-          " pts"
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 12 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 28 }, children: hint.icon }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 13, fontWeight: 600, color: COLORS.primary, marginBottom: 2 }, children: [
+            hint.name,
+            " ",
+            hint.points > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { fontWeight: 500, color: COLORS.textMuted }, children: [
+              "\u2022 +",
+              hint.points,
+              " pts"
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14, color: COLORS.textMain }, children: hint.text })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { textAlign: "right", fontSize: 12, color: COLORS.textMuted }, children: [
+          completedTaskCount,
+          "/",
+          totalTaskCount
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { size: 18, color: COLORS.primary })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginTop: 10, height: 6, backgroundColor: COLORS.border, borderRadius: 3, overflow: "hidden" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
+        height: "100%",
+        width: `${completedTaskCount / totalTaskCount * 100}%`,
+        backgroundColor: COLORS.primaryLight,
+        borderRadius: 3,
+        transition: "width 0.3s ease"
+      } }) })
+    ] }),
+    completedTaskCount === totalTaskCount && totalTaskCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
+      backgroundColor: `${COLORS.gold}15`,
+      borderRadius: 10,
+      padding: "12px 16px",
+      marginBottom: 14,
+      textAlign: "center",
+      border: `1px solid ${COLORS.gold}`
+    }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 20 }, children: "\u{1F3C6}" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { marginLeft: 8, fontSize: 14, fontWeight: 600, color: COLORS.textMain }, children: "All progression tasks complete! You're a reminder master!" })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 14, padding: 16, marginBottom: 14, border: `1px solid ${COLORS.border}` }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative" }, children: [
@@ -26029,14 +26164,6 @@ lucide-react/dist/esm/icons/calendar.js:
    *)
 
 lucide-react/dist/esm/icons/check.js:
-  (**
-   * @license lucide-react v0.554.0 - ISC
-   *
-   * This source code is licensed under the ISC license.
-   * See the LICENSE file in the root directory of this source tree.
-   *)
-
-lucide-react/dist/esm/icons/chevron-right.js:
   (**
    * @license lucide-react v0.554.0 - ISC
    *
