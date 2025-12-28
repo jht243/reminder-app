@@ -117,6 +117,23 @@ const CATEGORY_CONFIG: Record<Category, { icon: any; color: string; bg: string; 
 const STORAGE_KEY = "REMINDER_APP_DATA";
 const STATS_KEY = "REMINDER_APP_STATS";
 
+// Quick filter chips configuration - modern emoji-based filtering
+const QUICK_FILTERS: { id: string; label: string; emoji: string; color: string; bg: string }[] = [
+  { id: "all", label: "All", emoji: "📋", color: COLORS.primary, bg: COLORS.iconBg },
+  { id: "urgent", label: "Urgent", emoji: "🔥", color: "#C97070", bg: "#F5E8E8" },
+  { id: "today", label: "Today", emoji: "📅", color: "#D4A574", bg: "#F5F0E8" },
+  { id: "overdue", label: "Overdue", emoji: "⚠️", color: "#C97070", bg: "#F5E8E8" },
+  { id: "work", label: "Work", emoji: "💼", color: "#4A7C59", bg: "#E8F0E8" },
+  { id: "family", label: "Family", emoji: "👨‍👩‍👧", color: "#B87A9E", bg: "#F5E8F0" },
+  { id: "health", label: "Health", emoji: "💪", color: "#5A9B7A", bg: "#E8F5F0" },
+  { id: "errands", label: "Errands", emoji: "🛒", color: "#D4A574", bg: "#F5F0E8" },
+  { id: "finance", label: "Finance", emoji: "💰", color: "#7A6B9B", bg: "#F0E8F5" },
+  { id: "social", label: "Social", emoji: "🎉", color: "#C97070", bg: "#F5E8E8" },
+  { id: "learning", label: "Learn", emoji: "📚", color: "#5A8B9B", bg: "#E8F0F5" },
+  { id: "travel", label: "Travel", emoji: "✈️", color: "#6B7A9B", bg: "#E8ECF5" },
+  { id: "home", label: "Home", emoji: "🏠", color: "#7A9B6B", bg: "#ECF5E8" },
+];
+
 const generateId = () => `rem_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
 const formatDate = (dateStr: string) => {
@@ -135,6 +152,32 @@ const formatTime = (time?: string) => {
 };
 
 const isOverdue = (r: Reminder) => !r.completed && new Date(`${r.dueDate}T${r.dueTime || "23:59"}`) < new Date();
+
+// Helper to get time-based section for a reminder
+const getTimeSection = (r: Reminder): "overdue" | "today" | "tomorrow" | "thisWeek" | "later" => {
+  if (r.completed) return "later";
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
+  const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7);
+  const dueDate = new Date(r.dueDate);
+  const dueDateOnly = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
+  
+  if (isOverdue(r)) return "overdue";
+  if (dueDateOnly.getTime() === today.getTime()) return "today";
+  if (dueDateOnly.getTime() === tomorrow.getTime()) return "tomorrow";
+  if (dueDateOnly < weekEnd) return "thisWeek";
+  return "later";
+};
+
+// Section labels with emojis for modern look
+const SECTION_CONFIG: Record<string, { label: string; emoji: string; color: string }> = {
+  overdue: { label: "Overdue", emoji: "⚠️", color: "#C97070" },
+  today: { label: "Today", emoji: "📅", color: "#D4A574" },
+  tomorrow: { label: "Tomorrow", emoji: "🌅", color: "#5A8B9B" },
+  thisWeek: { label: "This Week", emoji: "📆", color: "#4A7C59" },
+  later: { label: "Later", emoji: "📌", color: "#8A998A" },
+};
 
 // Smart category detection based on keywords
 const detectCategory = (text: string): Category => {
@@ -766,6 +809,10 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const [sortField, setSortField] = useState<"dueDate" | "priority" | "category">("dueDate");
   const [sortAsc, setSortAsc] = useState(true);
   
+  // Modern quick filter - single active chip
+  const [quickFilter, setQuickFilter] = useState<"all" | "urgent" | "today" | "overdue" | Category>("all");
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+  
   const [toast, setToast] = useState<string | null>(null);
   const [achievement, setAchievement] = useState<{ name: string; icon: string } | null>(null);
   
@@ -855,29 +902,64 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     return () => window.removeEventListener("resize", notify);
   }, [reminders, parsed, editing]);
   
-  // Filter and sort reminders
+  // Filter and sort reminders with quick filter support
   const filtered = useMemo(() => {
     let f = [...reminders];
-    if (search) { const q = search.toLowerCase(); f = f.filter(r => r.title.toLowerCase().includes(q) || r.category.includes(q)); }
-    if (filterCategory !== "all") f = f.filter(r => r.category === filterCategory);
-    if (filterStatus === "pending") f = f.filter(r => !r.completed && !isOverdue(r));
-    else if (filterStatus === "completed") f = f.filter(r => r.completed);
-    else if (filterStatus === "overdue") f = f.filter(r => isOverdue(r));
+    
+    // Apply search
+    if (search) { 
+      const q = search.toLowerCase(); 
+      f = f.filter(r => r.title.toLowerCase().includes(q) || r.category.includes(q)); 
+    }
+    
+    // Apply quick filter
+    if (quickFilter !== "all") {
+      if (quickFilter === "urgent") {
+        f = f.filter(r => !r.completed && r.priority === "urgent");
+      } else if (quickFilter === "today") {
+        f = f.filter(r => !r.completed && r.dueDate === new Date().toISOString().split("T")[0]);
+      } else if (quickFilter === "overdue") {
+        f = f.filter(r => isOverdue(r));
+      } else {
+        // Category filter
+        f = f.filter(r => !r.completed && r.category === quickFilter);
+      }
+    }
+    
+    // Sort by date and priority
     f.sort((a, b) => {
-      if (sortField === "dueDate") return (new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()) * (sortAsc ? 1 : -1);
-      if (sortField === "category") return a.category.localeCompare(b.category) * (sortAsc ? 1 : -1);
+      // Overdue first, then by date, then by priority
+      const aOverdue = isOverdue(a) ? 0 : 1;
+      const bOverdue = isOverdue(b) ? 0 : 1;
+      if (aOverdue !== bOverdue) return aOverdue - bOverdue;
+      
+      const dateCompare = new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      if (dateCompare !== 0) return dateCompare;
+      
       const order = { urgent: 0, high: 1, medium: 2, low: 3 };
-      return (order[a.priority] - order[b.priority]) * (sortAsc ? 1 : -1);
+      return order[a.priority] - order[b.priority];
     });
     return f;
-  }, [reminders, search, filterCategory, filterStatus, sortField, sortAsc]);
+  }, [reminders, search, quickFilter]);
   
-  // Group reminders by category
-  const groupedByCategory = useMemo(() => {
-    const groups: Record<Category, Reminder[]> = { work: [], family: [], health: [], errands: [], finance: [], social: [], learning: [], travel: [], home: [], other: [] };
-    filtered.forEach(r => groups[r.category].push(r));
+  // Group reminders by time section for smart display
+  const groupedByTime = useMemo(() => {
+    const groups: Record<string, Reminder[]> = {
+      overdue: [],
+      today: [],
+      tomorrow: [],
+      thisWeek: [],
+      later: []
+    };
+    filtered.filter(r => !r.completed).forEach(r => {
+      const section = getTimeSection(r);
+      groups[section].push(r);
+    });
     return groups;
   }, [filtered]);
+  
+  // Section order for display
+  const sectionOrder = ["overdue", "today", "tomorrow", "thisWeek", "later"] as const;
   
   const overdueCount = reminders.filter(isOverdue).length;
   const todayCount = reminders.filter(r => !r.completed && r.dueDate === new Date().toISOString().split("T")[0]).length;
@@ -1564,125 +1646,267 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
         )}
       </div>
       
-      {/* Stats & Filters Row - modern pill style */}
+      {/* Modern Quick Filter Chips - horizontal scrollable */}
       <div style={{ 
         backgroundColor: COLORS.card, 
         borderRadius: cardRadius, 
-        padding: "14px 20px", 
+        padding: "12px 16px", 
         marginBottom: 12, 
-        boxShadow: cardShadow,
-        display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" 
+        boxShadow: cardShadow
       }}>
-        <div style={{ display: "flex", gap: 8 }}>
-          {overdueCount > 0 && <span style={{ padding: "6px 14px", borderRadius: 50, fontSize: 13, fontWeight: 500, backgroundColor: `${COLORS.danger}15`, color: COLORS.danger }}>{overdueCount} overdue</span>}
-          {todayCount > 0 && <span style={{ padding: "6px 14px", borderRadius: 50, fontSize: 13, fontWeight: 500, backgroundColor: `${COLORS.gold}20`, color: COLORS.gold }}>{todayCount} today</span>}
-          <span style={{ padding: "6px 14px", borderRadius: 50, fontSize: 13, fontWeight: 500, backgroundColor: COLORS.iconBg, color: COLORS.primary }}>{reminders.filter(r => !r.completed).length} pending</span>
+        {/* Search bar - compact */}
+        <div style={{ position: "relative", marginBottom: 12 }}>
+          <Search size={16} color={COLORS.textMuted} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
+          <input 
+            type="text" 
+            placeholder="Search reminders..." 
+            value={search} 
+            onChange={e => setSearch(e.target.value)} 
+            style={{ 
+              ...inputStyle, 
+              width: "100%", 
+              padding: "12px 16px 12px 42px", 
+              borderRadius: 50, 
+              border: "none", 
+              backgroundColor: COLORS.inputBg, 
+              fontSize: 14, 
+              outline: "none" 
+            }} 
+          />
         </div>
-        <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
-          <div style={{ position: "relative" }}>
-            <Search size={16} color={COLORS.textMuted} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }} />
-            <input type="text" placeholder="Search" value={search} onChange={e => setSearch(e.target.value)} style={{ ...inputStyle, width: 130, padding: "10px 14px 10px 36px", borderRadius: 50, border: "none", backgroundColor: COLORS.inputBg, fontSize: 14, outline: "none" }} />
-          </div>
-          <select value={filterCategory} onChange={e => setFilterCategory(e.target.value as any)} style={{ ...inputStyle, padding: "10px 16px", borderRadius: 50, border: "none", fontSize: 14, backgroundColor: COLORS.inputBg, cursor: "pointer" }}><option value="all">All</option>{Object.entries(CATEGORY_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select>
-          <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as any)} style={{ ...inputStyle, padding: "10px 16px", borderRadius: 50, border: "none", fontSize: 14, backgroundColor: COLORS.inputBg, cursor: "pointer" }}><option value="all">All</option><option value="pending">Pending</option><option value="completed">Done</option><option value="overdue">Overdue</option></select>
+        
+        {/* Quick filter chips - horizontal scroll */}
+        <div style={{ 
+          display: "flex", 
+          gap: 8, 
+          overflowX: "auto", 
+          paddingBottom: 4,
+          scrollbarWidth: "none",
+          msOverflowStyle: "none"
+        }}>
+          {QUICK_FILTERS.map(filter => {
+            const isActive = quickFilter === filter.id;
+            const count = filter.id === "all" 
+              ? reminders.filter(r => !r.completed).length
+              : filter.id === "urgent" 
+                ? reminders.filter(r => !r.completed && r.priority === "urgent").length
+              : filter.id === "today"
+                ? todayCount
+              : filter.id === "overdue"
+                ? overdueCount
+              : reminders.filter(r => !r.completed && r.category === filter.id).length;
+            
+            return (
+              <button
+                key={filter.id}
+                onClick={() => setQuickFilter(filter.id as any)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 14px",
+                  borderRadius: 50,
+                  border: isActive ? `2px solid ${filter.color}` : "2px solid transparent",
+                  backgroundColor: isActive ? filter.bg : COLORS.cardAlt,
+                  color: isActive ? filter.color : COLORS.textSecondary,
+                  fontSize: 13,
+                  fontWeight: isActive ? 600 : 500,
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
+                  transition: "all 0.2s"
+                }}
+              >
+                <span style={{ fontSize: 14 }}>{filter.emoji}</span>
+                {filter.label}
+                {count > 0 && (
+                  <span style={{ 
+                    fontSize: 11, 
+                    backgroundColor: isActive ? filter.color : COLORS.textMuted,
+                    color: "#fff",
+                    padding: "2px 6px",
+                    borderRadius: 50,
+                    minWidth: 18,
+                    textAlign: "center"
+                  }}>
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
       
-      {/* Reminder List - modern card style */}
-      <div style={{ backgroundColor: COLORS.card, borderRadius: cardRadius, boxShadow: cardShadow, overflow: "hidden" }}>
-        {filtered.length === 0 ? (
-          <div style={{ textAlign: "center", padding: 48, color: COLORS.textMuted }}>
-            <div style={{ 
-              width: 64, height: 64, borderRadius: "50%", 
-              backgroundColor: COLORS.iconBg, 
-              display: "flex", alignItems: "center", justifyContent: "center",
-              margin: "0 auto 16px"
-            }}>
-              <Bell size={28} color={COLORS.textMuted} />
-            </div>
-            <p style={{ fontSize: 16, margin: 0, fontWeight: 500, color: COLORS.textMain }}>No reminders yet</p>
-            <p style={{ fontSize: 14, marginTop: 6, color: COLORS.textMuted }}>Type above to create your first one!</p>
-          </div>
-        ) : filtered.map((r, i) => (
-          <div key={r.id} style={{ 
-            padding: "16px 20px", 
-            borderBottom: i < filtered.length - 1 ? `1px solid ${COLORS.border}` : "none", 
-            backgroundColor: r.completed ? COLORS.cardAlt : COLORS.card, 
-            opacity: r.completed ? 0.7 : 1 
+      {/* Reminder List - Time-based sections */}
+      {filtered.filter(r => !r.completed).length === 0 ? (
+        <div style={{ backgroundColor: COLORS.card, borderRadius: cardRadius, boxShadow: cardShadow, textAlign: "center", padding: 48, color: COLORS.textMuted }}>
+          <div style={{ 
+            width: 64, height: 64, borderRadius: "50%", 
+            backgroundColor: COLORS.iconBg, 
+            display: "flex", alignItems: "center", justifyContent: "center",
+            margin: "0 auto 16px"
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              {/* Round checkbox */}
-              <button 
-                onClick={() => r.completed ? uncomplete(r) : complete(r)} 
-                style={{ 
-                  width: 28, height: 28, borderRadius: "50%", 
-                  border: `2px solid ${r.completed ? COLORS.success : COLORS.border}`, 
-                  backgroundColor: r.completed ? COLORS.success : "transparent", 
-                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 
-                }}
-              >
-                {r.completed && <Check size={14} color="#fff" />}
-              </button>
-              
-              {/* Category icon - round */}
-              <CategoryIcon cat={r.category} size={40} />
-              
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                  <span style={{ fontSize: 15, fontWeight: 500, color: COLORS.textMain, textDecoration: r.completed ? "line-through" : "none" }}>{r.title}</span>
-                  {isOverdue(r) && <span style={{ padding: "3px 10px", borderRadius: 50, fontSize: 11, fontWeight: 500, backgroundColor: `${COLORS.danger}15`, color: COLORS.danger }}>Overdue</span>}
-                  {r.recurrence !== "none" && <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", borderRadius: 50, fontSize: 11, backgroundColor: COLORS.iconBg, color: COLORS.primary }}><Repeat size={11} /> {formatRecurrence(r)}</span>}
-                </div>
-                <div style={{ fontSize: 13, color: isOverdue(r) ? COLORS.danger : COLORS.textMuted, marginTop: 4, display: "flex", alignItems: "center", gap: 8 }}>
-                  <Clock size={13} /> {formatDate(r.dueDate)}{r.dueTime && ` at ${formatTime(r.dueTime)}`}
-                  <span style={{ padding: "3px 10px", borderRadius: 50, fontSize: 11, backgroundColor: `${PRIORITY_COLORS[r.priority]}15`, color: PRIORITY_COLORS[r.priority], textTransform: "capitalize" }}>{r.priority}</span>
-                </div>
-              </div>
-              
-              {/* Action buttons - round */}
-              <div style={{ display: "flex", gap: 8 }}>
-                {!r.completed && (
-                  <button 
-                    onClick={() => setSnoozePopup(r)} 
-                    title="Snooze" 
-                    style={{ 
-                      width: 36, height: 36, borderRadius: "50%", border: "none", 
-                      backgroundColor: COLORS.inputBg, 
-                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center"
-                    }}
-                  >
-                    <span style={{ fontSize: 16 }}>💤</span>
-                  </button>
-                )}
-                {!r.completed && (
-                  <button 
-                    onClick={() => setEditing(r)} 
-                    title="Edit" 
-                    style={{ 
-                      width: 36, height: 36, borderRadius: "50%", border: "none", 
-                      backgroundColor: COLORS.inputBg, 
-                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" 
-                    }}
-                  >
-                    <Edit2 size={16} color={COLORS.textMuted} />
-                  </button>
-                )}
-                <button 
-                  onClick={() => del(r.id)} 
-                  title="Delete" 
-                  style={{ 
-                    width: 36, height: 36, borderRadius: "50%", border: "none", 
-                    backgroundColor: `${COLORS.danger}10`, 
-                    cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" 
+            <Bell size={28} color={COLORS.textMuted} />
+          </div>
+          <p style={{ fontSize: 16, margin: 0, fontWeight: 500, color: COLORS.textMain }}>
+            {quickFilter === "all" ? "No reminders yet" : `No ${quickFilter} reminders`}
+          </p>
+          <p style={{ fontSize: 14, marginTop: 6, color: COLORS.textMuted }}>
+            {quickFilter === "all" ? "Type above to create your first one!" : "Try a different filter"}
+          </p>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {sectionOrder.map(sectionKey => {
+            const sectionReminders = groupedByTime[sectionKey];
+            if (sectionReminders.length === 0) return null;
+            
+            const config = SECTION_CONFIG[sectionKey];
+            const isCollapsed = collapsedSections.has(sectionKey);
+            
+            return (
+              <div key={sectionKey} style={{ backgroundColor: COLORS.card, borderRadius: cardRadius, boxShadow: cardShadow, overflow: "hidden" }}>
+                {/* Section Header - Clickable to collapse */}
+                <button
+                  onClick={() => {
+                    setCollapsedSections(prev => {
+                      const next = new Set(prev);
+                      if (next.has(sectionKey)) next.delete(sectionKey);
+                      else next.add(sectionKey);
+                      return next;
+                    });
+                  }}
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "12px 16px",
+                    backgroundColor: sectionKey === "overdue" ? `${config.color}10` : COLORS.cardAlt,
+                    border: "none",
+                    cursor: "pointer",
+                    borderBottom: isCollapsed ? "none" : `1px solid ${COLORS.border}`
                   }}
                 >
-                  <Trash2 size={16} color={COLORS.danger} />
+                  <span style={{ fontSize: 16 }}>{config.emoji}</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: config.color }}>{config.label}</span>
+                  <span style={{ 
+                    fontSize: 12, 
+                    backgroundColor: config.color,
+                    color: "#fff",
+                    padding: "2px 8px",
+                    borderRadius: 50,
+                    marginLeft: 4
+                  }}>
+                    {sectionReminders.length}
+                  </span>
+                  <ChevronRight 
+                    size={16} 
+                    color={COLORS.textMuted} 
+                    style={{ 
+                      marginLeft: "auto", 
+                      transform: isCollapsed ? "rotate(0deg)" : "rotate(90deg)",
+                      transition: "transform 0.2s"
+                    }} 
+                  />
                 </button>
+                
+                {/* Section Items */}
+                {!isCollapsed && sectionReminders.map((r, i) => (
+                  <div key={r.id} style={{ 
+                    padding: "12px 16px", 
+                    borderBottom: i < sectionReminders.length - 1 ? `1px solid ${COLORS.border}` : "none",
+                    backgroundColor: COLORS.card
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      {/* Compact checkbox */}
+                      <button 
+                        onClick={() => complete(r)} 
+                        style={{ 
+                          width: 24, height: 24, borderRadius: "50%", 
+                          border: `2px solid ${COLORS.border}`, 
+                          backgroundColor: "transparent", 
+                          cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 
+                        }}
+                      />
+                      
+                      {/* Category emoji instead of icon for compactness */}
+                      <span style={{ fontSize: 18 }}>
+                        {QUICK_FILTERS.find(f => f.id === r.category)?.emoji || "📌"}
+                      </span>
+                      
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ 
+                          fontSize: 14, 
+                          fontWeight: 500, 
+                          color: COLORS.textMain,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis"
+                        }}>
+                          {r.title}
+                        </div>
+                        <div style={{ 
+                          fontSize: 12, 
+                          color: sectionKey === "overdue" ? COLORS.danger : COLORS.textMuted, 
+                          marginTop: 2,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6
+                        }}>
+                          {r.dueTime && <span>{formatTime(r.dueTime)}</span>}
+                          {r.priority !== "medium" && (
+                            <span style={{ 
+                              padding: "1px 6px", 
+                              borderRadius: 50, 
+                              fontSize: 10, 
+                              backgroundColor: `${PRIORITY_COLORS[r.priority]}20`, 
+                              color: PRIORITY_COLORS[r.priority],
+                              textTransform: "capitalize"
+                            }}>
+                              {r.priority}
+                            </span>
+                          )}
+                          {r.recurrence !== "none" && (
+                            <span style={{ display: "inline-flex", alignItems: "center", gap: 2 }}>
+                              <Repeat size={10} color={COLORS.primary} />
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Compact action buttons */}
+                      <div style={{ display: "flex", gap: 4 }}>
+                        <button 
+                          onClick={() => setEditing(r)} 
+                          style={{ 
+                            width: 28, height: 28, borderRadius: "50%", border: "none", 
+                            backgroundColor: COLORS.inputBg, 
+                            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" 
+                          }}
+                        >
+                          <Edit2 size={12} color={COLORS.textMuted} />
+                        </button>
+                        <button 
+                          onClick={() => del(r.id)} 
+                          style={{ 
+                            width: 28, height: 28, borderRadius: "50%", border: "none", 
+                            backgroundColor: `${COLORS.danger}10`, 
+                            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" 
+                          }}
+                        >
+                          <Trash2 size={12} color={COLORS.danger} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          </div>
-        ))}
-      </div>
+            );
+          })}
+        </div>
+      )}
       
       {/* Snooze Popup - modern style */}
       {snoozePopup && (

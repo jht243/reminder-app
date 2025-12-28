@@ -24565,23 +24565,19 @@ var __iconNode4 = [
 ];
 var Camera = createLucideIcon("camera", __iconNode4);
 
-// node_modules/lucide-react/dist/esm/icons/check.js
-var __iconNode5 = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
-var Check = createLucideIcon("check", __iconNode5);
-
 // node_modules/lucide-react/dist/esm/icons/chevron-right.js
-var __iconNode6 = [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]];
-var ChevronRight = createLucideIcon("chevron-right", __iconNode6);
+var __iconNode5 = [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]];
+var ChevronRight = createLucideIcon("chevron-right", __iconNode5);
 
 // node_modules/lucide-react/dist/esm/icons/clock.js
-var __iconNode7 = [
+var __iconNode6 = [
   ["path", { d: "M12 6v6l4 2", key: "mmk7yg" }],
   ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }]
 ];
-var Clock = createLucideIcon("clock", __iconNode7);
+var Clock = createLucideIcon("clock", __iconNode6);
 
 // node_modules/lucide-react/dist/esm/icons/crown.js
-var __iconNode8 = [
+var __iconNode7 = [
   [
     "path",
     {
@@ -24591,10 +24587,10 @@ var __iconNode8 = [
   ],
   ["path", { d: "M5 21h14", key: "11awu3" }]
 ];
-var Crown = createLucideIcon("crown", __iconNode8);
+var Crown = createLucideIcon("crown", __iconNode7);
 
 // node_modules/lucide-react/dist/esm/icons/flame.js
-var __iconNode9 = [
+var __iconNode8 = [
   [
     "path",
     {
@@ -24603,10 +24599,10 @@ var __iconNode9 = [
     }
   ]
 ];
-var Flame = createLucideIcon("flame", __iconNode9);
+var Flame = createLucideIcon("flame", __iconNode8);
 
 // node_modules/lucide-react/dist/esm/icons/graduation-cap.js
-var __iconNode10 = [
+var __iconNode9 = [
   [
     "path",
     {
@@ -24617,10 +24613,10 @@ var __iconNode10 = [
   ["path", { d: "M22 10v6", key: "1lu8f3" }],
   ["path", { d: "M6 12.5V16a6 3 0 0 0 12 0v-3.5", key: "1r8lef" }]
 ];
-var GraduationCap = createLucideIcon("graduation-cap", __iconNode10);
+var GraduationCap = createLucideIcon("graduation-cap", __iconNode9);
 
 // node_modules/lucide-react/dist/esm/icons/heart.js
-var __iconNode11 = [
+var __iconNode10 = [
   [
     "path",
     {
@@ -24629,10 +24625,10 @@ var __iconNode11 = [
     }
   ]
 ];
-var Heart = createLucideIcon("heart", __iconNode11);
+var Heart = createLucideIcon("heart", __iconNode10);
 
 // node_modules/lucide-react/dist/esm/icons/house.js
-var __iconNode12 = [
+var __iconNode11 = [
   ["path", { d: "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8", key: "5wwlr5" }],
   [
     "path",
@@ -24642,10 +24638,10 @@ var __iconNode12 = [
     }
   ]
 ];
-var House = createLucideIcon("house", __iconNode12);
+var House = createLucideIcon("house", __iconNode11);
 
 // node_modules/lucide-react/dist/esm/icons/pen.js
-var __iconNode13 = [
+var __iconNode12 = [
   [
     "path",
     {
@@ -24654,10 +24650,10 @@ var __iconNode13 = [
     }
   ]
 ];
-var Pen = createLucideIcon("pen", __iconNode13);
+var Pen = createLucideIcon("pen", __iconNode12);
 
 // node_modules/lucide-react/dist/esm/icons/plane.js
-var __iconNode14 = [
+var __iconNode13 = [
   [
     "path",
     {
@@ -24666,33 +24662,33 @@ var __iconNode14 = [
     }
   ]
 ];
-var Plane = createLucideIcon("plane", __iconNode14);
+var Plane = createLucideIcon("plane", __iconNode13);
 
 // node_modules/lucide-react/dist/esm/icons/plus.js
-var __iconNode15 = [
+var __iconNode14 = [
   ["path", { d: "M5 12h14", key: "1ays0h" }],
   ["path", { d: "M12 5v14", key: "s699le" }]
 ];
-var Plus = createLucideIcon("plus", __iconNode15);
+var Plus = createLucideIcon("plus", __iconNode14);
 
 // node_modules/lucide-react/dist/esm/icons/repeat.js
-var __iconNode16 = [
+var __iconNode15 = [
   ["path", { d: "m17 2 4 4-4 4", key: "nntrym" }],
   ["path", { d: "M3 11v-1a4 4 0 0 1 4-4h14", key: "84bu3i" }],
   ["path", { d: "m7 22-4-4 4-4", key: "1wqhfi" }],
   ["path", { d: "M21 13v1a4 4 0 0 1-4 4H3", key: "1rx37r" }]
 ];
-var Repeat = createLucideIcon("repeat", __iconNode16);
+var Repeat = createLucideIcon("repeat", __iconNode15);
 
 // node_modules/lucide-react/dist/esm/icons/search.js
-var __iconNode17 = [
+var __iconNode16 = [
   ["path", { d: "m21 21-4.34-4.34", key: "14j7rj" }],
   ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }]
 ];
-var Search = createLucideIcon("search", __iconNode17);
+var Search = createLucideIcon("search", __iconNode16);
 
 // node_modules/lucide-react/dist/esm/icons/shopping-cart.js
-var __iconNode18 = [
+var __iconNode17 = [
   ["circle", { cx: "8", cy: "21", r: "1", key: "jimo8o" }],
   ["circle", { cx: "19", cy: "21", r: "1", key: "13723u" }],
   [
@@ -24703,10 +24699,10 @@ var __iconNode18 = [
     }
   ]
 ];
-var ShoppingCart = createLucideIcon("shopping-cart", __iconNode18);
+var ShoppingCart = createLucideIcon("shopping-cart", __iconNode17);
 
 // node_modules/lucide-react/dist/esm/icons/star.js
-var __iconNode19 = [
+var __iconNode18 = [
   [
     "path",
     {
@@ -24715,47 +24711,47 @@ var __iconNode19 = [
     }
   ]
 ];
-var Star = createLucideIcon("star", __iconNode19);
+var Star = createLucideIcon("star", __iconNode18);
 
 // node_modules/lucide-react/dist/esm/icons/stethoscope.js
-var __iconNode20 = [
+var __iconNode19 = [
   ["path", { d: "M11 2v2", key: "1539x4" }],
   ["path", { d: "M5 2v2", key: "1yf1q8" }],
   ["path", { d: "M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1", key: "rb5t3r" }],
   ["path", { d: "M8 15a6 6 0 0 0 12 0v-3", key: "x18d4x" }],
   ["circle", { cx: "20", cy: "10", r: "2", key: "ts1r5v" }]
 ];
-var Stethoscope = createLucideIcon("stethoscope", __iconNode20);
+var Stethoscope = createLucideIcon("stethoscope", __iconNode19);
 
 // node_modules/lucide-react/dist/esm/icons/trash-2.js
-var __iconNode21 = [
+var __iconNode20 = [
   ["path", { d: "M10 11v6", key: "nco0om" }],
   ["path", { d: "M14 11v6", key: "outv1u" }],
   ["path", { d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6", key: "miytrc" }],
   ["path", { d: "M3 6h18", key: "d0wm0j" }],
   ["path", { d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2", key: "e791ji" }]
 ];
-var Trash2 = createLucideIcon("trash-2", __iconNode21);
+var Trash2 = createLucideIcon("trash-2", __iconNode20);
 
 // node_modules/lucide-react/dist/esm/icons/upload.js
-var __iconNode22 = [
+var __iconNode21 = [
   ["path", { d: "M12 3v12", key: "1x0j5s" }],
   ["path", { d: "m17 8-5-5-5 5", key: "7q97r8" }],
   ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", key: "ih7n3h" }]
 ];
-var Upload = createLucideIcon("upload", __iconNode22);
+var Upload = createLucideIcon("upload", __iconNode21);
 
 // node_modules/lucide-react/dist/esm/icons/users.js
-var __iconNode23 = [
+var __iconNode22 = [
   ["path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", key: "1yyitq" }],
   ["path", { d: "M16 3.128a4 4 0 0 1 0 7.744", key: "16gr8j" }],
   ["path", { d: "M22 21v-2a4 4 0 0 0-3-3.87", key: "kshegd" }],
   ["circle", { cx: "9", cy: "7", r: "4", key: "nufk8" }]
 ];
-var Users = createLucideIcon("users", __iconNode23);
+var Users = createLucideIcon("users", __iconNode22);
 
 // node_modules/lucide-react/dist/esm/icons/wand-sparkles.js
-var __iconNode24 = [
+var __iconNode23 = [
   [
     "path",
     {
@@ -24771,14 +24767,14 @@ var __iconNode24 = [
   ["path", { d: "M21 16h-4", key: "1cnmox" }],
   ["path", { d: "M11 3H9", key: "1obp7u" }]
 ];
-var WandSparkles = createLucideIcon("wand-sparkles", __iconNode24);
+var WandSparkles = createLucideIcon("wand-sparkles", __iconNode23);
 
 // node_modules/lucide-react/dist/esm/icons/x.js
-var __iconNode25 = [
+var __iconNode24 = [
   ["path", { d: "M18 6 6 18", key: "1bl5f8" }],
   ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
 ];
-var X = createLucideIcon("x", __iconNode25);
+var X = createLucideIcon("x", __iconNode24);
 
 // src/ReminderApp.tsx
 var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
@@ -24835,6 +24831,21 @@ var CATEGORY_CONFIG = {
 };
 var STORAGE_KEY = "REMINDER_APP_DATA";
 var STATS_KEY = "REMINDER_APP_STATS";
+var QUICK_FILTERS = [
+  { id: "all", label: "All", emoji: "\u{1F4CB}", color: COLORS.primary, bg: COLORS.iconBg },
+  { id: "urgent", label: "Urgent", emoji: "\u{1F525}", color: "#C97070", bg: "#F5E8E8" },
+  { id: "today", label: "Today", emoji: "\u{1F4C5}", color: "#D4A574", bg: "#F5F0E8" },
+  { id: "overdue", label: "Overdue", emoji: "\u26A0\uFE0F", color: "#C97070", bg: "#F5E8E8" },
+  { id: "work", label: "Work", emoji: "\u{1F4BC}", color: "#4A7C59", bg: "#E8F0E8" },
+  { id: "family", label: "Family", emoji: "\u{1F468}\u200D\u{1F469}\u200D\u{1F467}", color: "#B87A9E", bg: "#F5E8F0" },
+  { id: "health", label: "Health", emoji: "\u{1F4AA}", color: "#5A9B7A", bg: "#E8F5F0" },
+  { id: "errands", label: "Errands", emoji: "\u{1F6D2}", color: "#D4A574", bg: "#F5F0E8" },
+  { id: "finance", label: "Finance", emoji: "\u{1F4B0}", color: "#7A6B9B", bg: "#F0E8F5" },
+  { id: "social", label: "Social", emoji: "\u{1F389}", color: "#C97070", bg: "#F5E8E8" },
+  { id: "learning", label: "Learn", emoji: "\u{1F4DA}", color: "#5A8B9B", bg: "#E8F0F5" },
+  { id: "travel", label: "Travel", emoji: "\u2708\uFE0F", color: "#6B7A9B", bg: "#E8ECF5" },
+  { id: "home", label: "Home", emoji: "\u{1F3E0}", color: "#7A9B6B", bg: "#ECF5E8" }
+];
 var generateId = () => `rem_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 var formatDate = (dateStr) => {
   const date = new Date(dateStr);
@@ -24852,6 +24863,29 @@ var formatTime = (time) => {
   return `${hour % 12 || 12}:${m} ${hour >= 12 ? "PM" : "AM"}`;
 };
 var isOverdue = (r) => !r.completed && /* @__PURE__ */ new Date(`${r.dueDate}T${r.dueTime || "23:59"}`) < /* @__PURE__ */ new Date();
+var getTimeSection = (r) => {
+  if (r.completed) return "later";
+  const now = /* @__PURE__ */ new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const weekEnd = new Date(today);
+  weekEnd.setDate(weekEnd.getDate() + 7);
+  const dueDate = new Date(r.dueDate);
+  const dueDateOnly = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
+  if (isOverdue(r)) return "overdue";
+  if (dueDateOnly.getTime() === today.getTime()) return "today";
+  if (dueDateOnly.getTime() === tomorrow.getTime()) return "tomorrow";
+  if (dueDateOnly < weekEnd) return "thisWeek";
+  return "later";
+};
+var SECTION_CONFIG = {
+  overdue: { label: "Overdue", emoji: "\u26A0\uFE0F", color: "#C97070" },
+  today: { label: "Today", emoji: "\u{1F4C5}", color: "#D4A574" },
+  tomorrow: { label: "Tomorrow", emoji: "\u{1F305}", color: "#5A8B9B" },
+  thisWeek: { label: "This Week", emoji: "\u{1F4C6}", color: "#4A7C59" },
+  later: { label: "Later", emoji: "\u{1F4CC}", color: "#8A998A" }
+};
 var detectCategory = (text) => {
   const lower = text.toLowerCase();
   if (/\b(meeting|email|report|deadline|project|client|boss|office|presentation|call with|sync|standup|review|submit|proposal)\b/.test(lower)) return "work";
@@ -25382,6 +25416,8 @@ function ReminderApp({ initialData: initialData2 }) {
   const [filterStatus, setFilterStatus] = (0, import_react3.useState)("all");
   const [sortField, setSortField] = (0, import_react3.useState)("dueDate");
   const [sortAsc, setSortAsc] = (0, import_react3.useState)(true);
+  const [quickFilter, setQuickFilter] = (0, import_react3.useState)("all");
+  const [collapsedSections, setCollapsedSections] = (0, import_react3.useState)(/* @__PURE__ */ new Set());
   const [toast, setToast] = (0, import_react3.useState)(null);
   const [achievement, setAchievement] = (0, import_react3.useState)(null);
   const [importOpen, setImportOpen] = (0, import_react3.useState)(false);
@@ -25469,23 +25505,43 @@ function ReminderApp({ initialData: initialData2 }) {
       const q = search.toLowerCase();
       f = f.filter((r) => r.title.toLowerCase().includes(q) || r.category.includes(q));
     }
-    if (filterCategory !== "all") f = f.filter((r) => r.category === filterCategory);
-    if (filterStatus === "pending") f = f.filter((r) => !r.completed && !isOverdue(r));
-    else if (filterStatus === "completed") f = f.filter((r) => r.completed);
-    else if (filterStatus === "overdue") f = f.filter((r) => isOverdue(r));
+    if (quickFilter !== "all") {
+      if (quickFilter === "urgent") {
+        f = f.filter((r) => !r.completed && r.priority === "urgent");
+      } else if (quickFilter === "today") {
+        f = f.filter((r) => !r.completed && r.dueDate === (/* @__PURE__ */ new Date()).toISOString().split("T")[0]);
+      } else if (quickFilter === "overdue") {
+        f = f.filter((r) => isOverdue(r));
+      } else {
+        f = f.filter((r) => !r.completed && r.category === quickFilter);
+      }
+    }
     f.sort((a, b) => {
-      if (sortField === "dueDate") return (new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()) * (sortAsc ? 1 : -1);
-      if (sortField === "category") return a.category.localeCompare(b.category) * (sortAsc ? 1 : -1);
+      const aOverdue = isOverdue(a) ? 0 : 1;
+      const bOverdue = isOverdue(b) ? 0 : 1;
+      if (aOverdue !== bOverdue) return aOverdue - bOverdue;
+      const dateCompare = new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      if (dateCompare !== 0) return dateCompare;
       const order = { urgent: 0, high: 1, medium: 2, low: 3 };
-      return (order[a.priority] - order[b.priority]) * (sortAsc ? 1 : -1);
+      return order[a.priority] - order[b.priority];
     });
     return f;
-  }, [reminders, search, filterCategory, filterStatus, sortField, sortAsc]);
-  const groupedByCategory = (0, import_react3.useMemo)(() => {
-    const groups = { work: [], family: [], health: [], errands: [], finance: [], social: [], learning: [], travel: [], home: [], other: [] };
-    filtered.forEach((r) => groups[r.category].push(r));
+  }, [reminders, search, quickFilter]);
+  const groupedByTime = (0, import_react3.useMemo)(() => {
+    const groups = {
+      overdue: [],
+      today: [],
+      tomorrow: [],
+      thisWeek: [],
+      later: []
+    };
+    filtered.filter((r) => !r.completed).forEach((r) => {
+      const section = getTimeSection(r);
+      groups[section].push(r);
+    });
     return groups;
   }, [filtered]);
+  const sectionOrder = ["overdue", "today", "tomorrow", "thisWeek", "later"];
   const overdueCount = reminders.filter(isOverdue).length;
   const todayCount = reminders.filter((r) => !r.completed && r.dueDate === (/* @__PURE__ */ new Date()).toISOString().split("T")[0]).length;
   const levelInfo = calcLevel(stats.totalPoints);
@@ -26161,46 +26217,81 @@ function ReminderApp({ initialData: initialData2 }) {
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
       backgroundColor: COLORS.card,
       borderRadius: cardRadius,
-      padding: "14px 20px",
+      padding: "12px 16px",
       marginBottom: 12,
-      boxShadow: cardShadow,
-      display: "flex",
-      gap: 12,
-      alignItems: "center",
-      flexWrap: "wrap"
+      boxShadow: cardShadow
     }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8 }, children: [
-        overdueCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { padding: "6px 14px", borderRadius: 50, fontSize: 13, fontWeight: 500, backgroundColor: `${COLORS.danger}15`, color: COLORS.danger }, children: [
-          overdueCount,
-          " overdue"
-        ] }),
-        todayCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { padding: "6px 14px", borderRadius: 50, fontSize: 13, fontWeight: 500, backgroundColor: `${COLORS.gold}20`, color: COLORS.gold }, children: [
-          todayCount,
-          " today"
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { padding: "6px 14px", borderRadius: 50, fontSize: 13, fontWeight: 500, backgroundColor: COLORS.iconBg, color: COLORS.primary }, children: [
-          reminders.filter((r) => !r.completed).length,
-          " pending"
-        ] })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative", marginBottom: 12 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { size: 16, color: COLORS.textMuted, style: { position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" } }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "input",
+          {
+            type: "text",
+            placeholder: "Search reminders...",
+            value: search,
+            onChange: (e) => setSearch(e.target.value),
+            style: {
+              ...inputStyle,
+              width: "100%",
+              padding: "12px 16px 12px 42px",
+              borderRadius: 50,
+              border: "none",
+              backgroundColor: COLORS.inputBg,
+              fontSize: 14,
+              outline: "none"
+            }
+          }
+        )
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { position: "relative" }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { size: 16, color: COLORS.textMuted, style: { position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" } }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", { type: "text", placeholder: "Search", value: search, onChange: (e) => setSearch(e.target.value), style: { ...inputStyle, width: 130, padding: "10px 14px 10px 36px", borderRadius: 50, border: "none", backgroundColor: COLORS.inputBg, fontSize: 14, outline: "none" } })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { value: filterCategory, onChange: (e) => setFilterCategory(e.target.value), style: { ...inputStyle, padding: "10px 16px", borderRadius: 50, border: "none", fontSize: 14, backgroundColor: COLORS.inputBg, cursor: "pointer" }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "all", children: "All" }),
-          Object.entries(CATEGORY_CONFIG).map(([k, v]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: k, children: v.label }, k))
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", { value: filterStatus, onChange: (e) => setFilterStatus(e.target.value), style: { ...inputStyle, padding: "10px 16px", borderRadius: 50, border: "none", fontSize: 14, backgroundColor: COLORS.inputBg, cursor: "pointer" }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "all", children: "All" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "pending", children: "Pending" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "completed", children: "Done" }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: "overdue", children: "Overdue" })
-        ] })
-      ] })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
+        display: "flex",
+        gap: 8,
+        overflowX: "auto",
+        paddingBottom: 4,
+        scrollbarWidth: "none",
+        msOverflowStyle: "none"
+      }, children: QUICK_FILTERS.map((filter) => {
+        const isActive = quickFilter === filter.id;
+        const count = filter.id === "all" ? reminders.filter((r) => !r.completed).length : filter.id === "urgent" ? reminders.filter((r) => !r.completed && r.priority === "urgent").length : filter.id === "today" ? todayCount : filter.id === "overdue" ? overdueCount : reminders.filter((r) => !r.completed && r.category === filter.id).length;
+        return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "button",
+          {
+            onClick: () => setQuickFilter(filter.id),
+            style: {
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "8px 14px",
+              borderRadius: 50,
+              border: isActive ? `2px solid ${filter.color}` : "2px solid transparent",
+              backgroundColor: isActive ? filter.bg : COLORS.cardAlt,
+              color: isActive ? filter.color : COLORS.textSecondary,
+              fontSize: 13,
+              fontWeight: isActive ? 600 : 500,
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+              transition: "all 0.2s"
+            },
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14 }, children: filter.emoji }),
+              filter.label,
+              count > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: {
+                fontSize: 11,
+                backgroundColor: isActive ? filter.color : COLORS.textMuted,
+                color: "#fff",
+                padding: "2px 6px",
+                borderRadius: 50,
+                minWidth: 18,
+                textAlign: "center"
+              }, children: count })
+            ]
+          },
+          filter.id
+        );
+      }) })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { backgroundColor: COLORS.card, borderRadius: cardRadius, boxShadow: cardShadow, overflow: "hidden" }, children: filtered.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { textAlign: "center", padding: 48, color: COLORS.textMuted }, children: [
+    filtered.filter((r) => !r.completed).length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: cardRadius, boxShadow: cardShadow, textAlign: "center", padding: 48, color: COLORS.textMuted }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
         width: 64,
         height: 64,
@@ -26211,112 +26302,156 @@ function ReminderApp({ initialData: initialData2 }) {
         justifyContent: "center",
         margin: "0 auto 16px"
       }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { size: 28, color: COLORS.textMuted }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { fontSize: 16, margin: 0, fontWeight: 500, color: COLORS.textMain }, children: "No reminders yet" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { fontSize: 14, marginTop: 6, color: COLORS.textMuted }, children: "Type above to create your first one!" })
-    ] }) : filtered.map((r, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
-      padding: "16px 20px",
-      borderBottom: i < filtered.length - 1 ? `1px solid ${COLORS.border}` : "none",
-      backgroundColor: r.completed ? COLORS.cardAlt : COLORS.card,
-      opacity: r.completed ? 0.7 : 1
-    }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 14 }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-        "button",
-        {
-          onClick: () => r.completed ? uncomplete(r) : complete(r),
-          style: {
-            width: 28,
-            height: 28,
-            borderRadius: "50%",
-            border: `2px solid ${r.completed ? COLORS.success : COLORS.border}`,
-            backgroundColor: r.completed ? COLORS.success : "transparent",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0
-          },
-          children: r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { size: 14, color: "#fff" })
-        }
-      ),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CategoryIcon, { cat: r.category, size: 40 }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 15, fontWeight: 500, color: COLORS.textMain, textDecoration: r.completed ? "line-through" : "none" }, children: r.title }),
-          isOverdue(r) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { padding: "3px 10px", borderRadius: 50, fontSize: 11, fontWeight: 500, backgroundColor: `${COLORS.danger}15`, color: COLORS.danger }, children: "Overdue" }),
-          r.recurrence !== "none" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { style: { display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", borderRadius: 50, fontSize: 11, backgroundColor: COLORS.iconBg, color: COLORS.primary }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Repeat, { size: 11 }),
-            " ",
-            formatRecurrence(r)
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { fontSize: 16, margin: 0, fontWeight: 500, color: COLORS.textMain }, children: quickFilter === "all" ? "No reminders yet" : `No ${quickFilter} reminders` }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { fontSize: 14, marginTop: 6, color: COLORS.textMuted }, children: quickFilter === "all" ? "Type above to create your first one!" : "Try a different filter" })
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { display: "flex", flexDirection: "column", gap: 12 }, children: sectionOrder.map((sectionKey) => {
+      const sectionReminders = groupedByTime[sectionKey];
+      if (sectionReminders.length === 0) return null;
+      const config = SECTION_CONFIG[sectionKey];
+      const isCollapsed = collapsedSections.has(sectionKey);
+      return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: cardRadius, boxShadow: cardShadow, overflow: "hidden" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "button",
+          {
+            onClick: () => {
+              setCollapsedSections((prev) => {
+                const next = new Set(prev);
+                if (next.has(sectionKey)) next.delete(sectionKey);
+                else next.add(sectionKey);
+                return next;
+              });
+            },
+            style: {
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "12px 16px",
+              backgroundColor: sectionKey === "overdue" ? `${config.color}10` : COLORS.cardAlt,
+              border: "none",
+              cursor: "pointer",
+              borderBottom: isCollapsed ? "none" : `1px solid ${COLORS.border}`
+            },
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 16 }, children: config.emoji }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 14, fontWeight: 600, color: config.color }, children: config.label }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: {
+                fontSize: 12,
+                backgroundColor: config.color,
+                color: "#fff",
+                padding: "2px 8px",
+                borderRadius: 50,
+                marginLeft: 4
+              }, children: sectionReminders.length }),
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                ChevronRight,
+                {
+                  size: 16,
+                  color: COLORS.textMuted,
+                  style: {
+                    marginLeft: "auto",
+                    transform: isCollapsed ? "rotate(0deg)" : "rotate(90deg)",
+                    transition: "transform 0.2s"
+                  }
+                }
+              )
+            ]
+          }
+        ),
+        !isCollapsed && sectionReminders.map((r, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
+          padding: "12px 16px",
+          borderBottom: i < sectionReminders.length - 1 ? `1px solid ${COLORS.border}` : "none",
+          backgroundColor: COLORS.card
+        }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 10 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "button",
+            {
+              onClick: () => complete(r),
+              style: {
+                width: 24,
+                height: 24,
+                borderRadius: "50%",
+                border: `2px solid ${COLORS.border}`,
+                backgroundColor: "transparent",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0
+              }
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 18 }, children: QUICK_FILTERS.find((f) => f.id === r.category)?.emoji || "\u{1F4CC}" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
+              fontSize: 14,
+              fontWeight: 500,
+              color: COLORS.textMain,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis"
+            }, children: r.title }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
+              fontSize: 12,
+              color: sectionKey === "overdue" ? COLORS.danger : COLORS.textMuted,
+              marginTop: 2,
+              display: "flex",
+              alignItems: "center",
+              gap: 6
+            }, children: [
+              r.dueTime && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: formatTime(r.dueTime) }),
+              r.priority !== "medium" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: {
+                padding: "1px 6px",
+                borderRadius: 50,
+                fontSize: 10,
+                backgroundColor: `${PRIORITY_COLORS[r.priority]}20`,
+                color: PRIORITY_COLORS[r.priority],
+                textTransform: "capitalize"
+              }, children: r.priority }),
+              r.recurrence !== "none" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { display: "inline-flex", alignItems: "center", gap: 2 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Repeat, { size: 10, color: COLORS.primary }) })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 4 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              "button",
+              {
+                onClick: () => setEditing(r),
+                style: {
+                  width: 28,
+                  height: 28,
+                  borderRadius: "50%",
+                  border: "none",
+                  backgroundColor: COLORS.inputBg,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center"
+                },
+                children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { size: 12, color: COLORS.textMuted })
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              "button",
+              {
+                onClick: () => del(r.id),
+                style: {
+                  width: 28,
+                  height: 28,
+                  borderRadius: "50%",
+                  border: "none",
+                  backgroundColor: `${COLORS.danger}10`,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center"
+                },
+                children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { size: 12, color: COLORS.danger })
+              }
+            )
           ] })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { fontSize: 13, color: isOverdue(r) ? COLORS.danger : COLORS.textMuted, marginTop: 4, display: "flex", alignItems: "center", gap: 8 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { size: 13 }),
-          " ",
-          formatDate(r.dueDate),
-          r.dueTime && ` at ${formatTime(r.dueTime)}`,
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { padding: "3px 10px", borderRadius: 50, fontSize: 11, backgroundColor: `${PRIORITY_COLORS[r.priority]}15`, color: PRIORITY_COLORS[r.priority], textTransform: "capitalize" }, children: r.priority })
-        ] })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8 }, children: [
-        !r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-          "button",
-          {
-            onClick: () => setSnoozePopup(r),
-            title: "Snooze",
-            style: {
-              width: 36,
-              height: 36,
-              borderRadius: "50%",
-              border: "none",
-              backgroundColor: COLORS.inputBg,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center"
-            },
-            children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 16 }, children: "\u{1F4A4}" })
-          }
-        ),
-        !r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-          "button",
-          {
-            onClick: () => setEditing(r),
-            title: "Edit",
-            style: {
-              width: 36,
-              height: 36,
-              borderRadius: "50%",
-              border: "none",
-              backgroundColor: COLORS.inputBg,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center"
-            },
-            children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { size: 16, color: COLORS.textMuted })
-          }
-        ),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-          "button",
-          {
-            onClick: () => del(r.id),
-            title: "Delete",
-            style: {
-              width: 36,
-              height: 36,
-              borderRadius: "50%",
-              border: "none",
-              backgroundColor: `${COLORS.danger}10`,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center"
-            },
-            children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { size: 16, color: COLORS.danger })
-          }
-        )
-      ] })
-    ] }) }, r.id)) }),
+        ] }) }, r.id))
+      ] }, sectionKey);
+    }) }),
     snoozePopup && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 24, width: "100%", maxWidth: 320, padding: 28, textAlign: "center", boxShadow: "0 16px 48px rgba(0,0,0,0.15)" }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
         width: 64,
@@ -27010,14 +27145,6 @@ lucide-react/dist/esm/icons/calendar.js:
    *)
 
 lucide-react/dist/esm/icons/camera.js:
-  (**
-   * @license lucide-react v0.554.0 - ISC
-   *
-   * This source code is licensed under the ISC license.
-   * See the LICENSE file in the root directory of this source tree.
-   *)
-
-lucide-react/dist/esm/icons/check.js:
   (**
    * @license lucide-react v0.554.0 - ISC
    *
