@@ -222,25 +222,16 @@ const detectCategory = (text: string): Category => {
   return "other";
 };
 
-// Smart priority detection
+// Priority detection - ONLY from explicit user keywords, never auto-inferred
 const detectPriority = (text: string, dueDate?: string): Priority => {
   const lower = text.toLowerCase();
   
-  // Explicit priority keywords
+  // Only set priority if user explicitly states it
   if (/\b(urgent|asap|immediately|critical|emergency)\b/.test(lower)) return "urgent";
   if (/\b(important|high priority|crucial|must)\b/.test(lower)) return "high";
   if (/\b(low priority|whenever|no rush|eventually)\b/.test(lower)) return "low";
   
-  // Infer from due date proximity
-  if (dueDate) {
-    const due = new Date(dueDate);
-    const today = new Date();
-    const diffDays = Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    if (diffDays <= 0) return "urgent";
-    if (diffDays <= 1) return "high";
-    if (diffDays <= 3) return "medium";
-  }
-  
+  // Default to medium - user can change in settings
   return "medium";
 };
 

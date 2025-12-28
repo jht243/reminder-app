@@ -24915,14 +24915,6 @@ var detectPriority = (text, dueDate) => {
   if (/\b(urgent|asap|immediately|critical|emergency)\b/.test(lower)) return "urgent";
   if (/\b(important|high priority|crucial|must)\b/.test(lower)) return "high";
   if (/\b(low priority|whenever|no rush|eventually)\b/.test(lower)) return "low";
-  if (dueDate) {
-    const due = new Date(dueDate);
-    const today = /* @__PURE__ */ new Date();
-    const diffDays = Math.ceil((due.getTime() - today.getTime()) / (1e3 * 60 * 60 * 24));
-    if (diffDays <= 0) return "urgent";
-    if (diffDays <= 1) return "high";
-    if (diffDays <= 3) return "medium";
-  }
   return "medium";
 };
 var parseICS = (content) => {
