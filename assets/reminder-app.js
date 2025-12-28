@@ -24565,19 +24565,23 @@ var __iconNode4 = [
 ];
 var Camera = createLucideIcon("camera", __iconNode4);
 
+// node_modules/lucide-react/dist/esm/icons/check.js
+var __iconNode5 = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
+var Check = createLucideIcon("check", __iconNode5);
+
 // node_modules/lucide-react/dist/esm/icons/chevron-right.js
-var __iconNode5 = [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]];
-var ChevronRight = createLucideIcon("chevron-right", __iconNode5);
+var __iconNode6 = [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]];
+var ChevronRight = createLucideIcon("chevron-right", __iconNode6);
 
 // node_modules/lucide-react/dist/esm/icons/clock.js
-var __iconNode6 = [
+var __iconNode7 = [
   ["path", { d: "M12 6v6l4 2", key: "mmk7yg" }],
   ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }]
 ];
-var Clock = createLucideIcon("clock", __iconNode6);
+var Clock = createLucideIcon("clock", __iconNode7);
 
 // node_modules/lucide-react/dist/esm/icons/crown.js
-var __iconNode7 = [
+var __iconNode8 = [
   [
     "path",
     {
@@ -24587,10 +24591,10 @@ var __iconNode7 = [
   ],
   ["path", { d: "M5 21h14", key: "11awu3" }]
 ];
-var Crown = createLucideIcon("crown", __iconNode7);
+var Crown = createLucideIcon("crown", __iconNode8);
 
 // node_modules/lucide-react/dist/esm/icons/flame.js
-var __iconNode8 = [
+var __iconNode9 = [
   [
     "path",
     {
@@ -24599,10 +24603,10 @@ var __iconNode8 = [
     }
   ]
 ];
-var Flame = createLucideIcon("flame", __iconNode8);
+var Flame = createLucideIcon("flame", __iconNode9);
 
 // node_modules/lucide-react/dist/esm/icons/graduation-cap.js
-var __iconNode9 = [
+var __iconNode10 = [
   [
     "path",
     {
@@ -24613,10 +24617,10 @@ var __iconNode9 = [
   ["path", { d: "M22 10v6", key: "1lu8f3" }],
   ["path", { d: "M6 12.5V16a6 3 0 0 0 12 0v-3.5", key: "1r8lef" }]
 ];
-var GraduationCap = createLucideIcon("graduation-cap", __iconNode9);
+var GraduationCap = createLucideIcon("graduation-cap", __iconNode10);
 
 // node_modules/lucide-react/dist/esm/icons/heart.js
-var __iconNode10 = [
+var __iconNode11 = [
   [
     "path",
     {
@@ -24625,10 +24629,10 @@ var __iconNode10 = [
     }
   ]
 ];
-var Heart = createLucideIcon("heart", __iconNode10);
+var Heart = createLucideIcon("heart", __iconNode11);
 
 // node_modules/lucide-react/dist/esm/icons/house.js
-var __iconNode11 = [
+var __iconNode12 = [
   ["path", { d: "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8", key: "5wwlr5" }],
   [
     "path",
@@ -24638,10 +24642,10 @@ var __iconNode11 = [
     }
   ]
 ];
-var House = createLucideIcon("house", __iconNode11);
+var House = createLucideIcon("house", __iconNode12);
 
 // node_modules/lucide-react/dist/esm/icons/pen.js
-var __iconNode12 = [
+var __iconNode13 = [
   [
     "path",
     {
@@ -24650,10 +24654,10 @@ var __iconNode12 = [
     }
   ]
 ];
-var Pen = createLucideIcon("pen", __iconNode12);
+var Pen = createLucideIcon("pen", __iconNode13);
 
 // node_modules/lucide-react/dist/esm/icons/plane.js
-var __iconNode13 = [
+var __iconNode14 = [
   [
     "path",
     {
@@ -24662,33 +24666,33 @@ var __iconNode13 = [
     }
   ]
 ];
-var Plane = createLucideIcon("plane", __iconNode13);
+var Plane = createLucideIcon("plane", __iconNode14);
 
 // node_modules/lucide-react/dist/esm/icons/plus.js
-var __iconNode14 = [
+var __iconNode15 = [
   ["path", { d: "M5 12h14", key: "1ays0h" }],
   ["path", { d: "M12 5v14", key: "s699le" }]
 ];
-var Plus = createLucideIcon("plus", __iconNode14);
+var Plus = createLucideIcon("plus", __iconNode15);
 
 // node_modules/lucide-react/dist/esm/icons/repeat.js
-var __iconNode15 = [
+var __iconNode16 = [
   ["path", { d: "m17 2 4 4-4 4", key: "nntrym" }],
   ["path", { d: "M3 11v-1a4 4 0 0 1 4-4h14", key: "84bu3i" }],
   ["path", { d: "m7 22-4-4 4-4", key: "1wqhfi" }],
   ["path", { d: "M21 13v1a4 4 0 0 1-4 4H3", key: "1rx37r" }]
 ];
-var Repeat = createLucideIcon("repeat", __iconNode15);
+var Repeat = createLucideIcon("repeat", __iconNode16);
 
 // node_modules/lucide-react/dist/esm/icons/search.js
-var __iconNode16 = [
+var __iconNode17 = [
   ["path", { d: "m21 21-4.34-4.34", key: "14j7rj" }],
   ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }]
 ];
-var Search = createLucideIcon("search", __iconNode16);
+var Search = createLucideIcon("search", __iconNode17);
 
 // node_modules/lucide-react/dist/esm/icons/shopping-cart.js
-var __iconNode17 = [
+var __iconNode18 = [
   ["circle", { cx: "8", cy: "21", r: "1", key: "jimo8o" }],
   ["circle", { cx: "19", cy: "21", r: "1", key: "13723u" }],
   [
@@ -24699,10 +24703,10 @@ var __iconNode17 = [
     }
   ]
 ];
-var ShoppingCart = createLucideIcon("shopping-cart", __iconNode17);
+var ShoppingCart = createLucideIcon("shopping-cart", __iconNode18);
 
 // node_modules/lucide-react/dist/esm/icons/star.js
-var __iconNode18 = [
+var __iconNode19 = [
   [
     "path",
     {
@@ -24711,47 +24715,47 @@ var __iconNode18 = [
     }
   ]
 ];
-var Star = createLucideIcon("star", __iconNode18);
+var Star = createLucideIcon("star", __iconNode19);
 
 // node_modules/lucide-react/dist/esm/icons/stethoscope.js
-var __iconNode19 = [
+var __iconNode20 = [
   ["path", { d: "M11 2v2", key: "1539x4" }],
   ["path", { d: "M5 2v2", key: "1yf1q8" }],
   ["path", { d: "M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1", key: "rb5t3r" }],
   ["path", { d: "M8 15a6 6 0 0 0 12 0v-3", key: "x18d4x" }],
   ["circle", { cx: "20", cy: "10", r: "2", key: "ts1r5v" }]
 ];
-var Stethoscope = createLucideIcon("stethoscope", __iconNode19);
+var Stethoscope = createLucideIcon("stethoscope", __iconNode20);
 
 // node_modules/lucide-react/dist/esm/icons/trash-2.js
-var __iconNode20 = [
+var __iconNode21 = [
   ["path", { d: "M10 11v6", key: "nco0om" }],
   ["path", { d: "M14 11v6", key: "outv1u" }],
   ["path", { d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6", key: "miytrc" }],
   ["path", { d: "M3 6h18", key: "d0wm0j" }],
   ["path", { d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2", key: "e791ji" }]
 ];
-var Trash2 = createLucideIcon("trash-2", __iconNode20);
+var Trash2 = createLucideIcon("trash-2", __iconNode21);
 
 // node_modules/lucide-react/dist/esm/icons/upload.js
-var __iconNode21 = [
+var __iconNode22 = [
   ["path", { d: "M12 3v12", key: "1x0j5s" }],
   ["path", { d: "m17 8-5-5-5 5", key: "7q97r8" }],
   ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", key: "ih7n3h" }]
 ];
-var Upload = createLucideIcon("upload", __iconNode21);
+var Upload = createLucideIcon("upload", __iconNode22);
 
 // node_modules/lucide-react/dist/esm/icons/users.js
-var __iconNode22 = [
+var __iconNode23 = [
   ["path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", key: "1yyitq" }],
   ["path", { d: "M16 3.128a4 4 0 0 1 0 7.744", key: "16gr8j" }],
   ["path", { d: "M22 21v-2a4 4 0 0 0-3-3.87", key: "kshegd" }],
   ["circle", { cx: "9", cy: "7", r: "4", key: "nufk8" }]
 ];
-var Users = createLucideIcon("users", __iconNode22);
+var Users = createLucideIcon("users", __iconNode23);
 
 // node_modules/lucide-react/dist/esm/icons/wand-sparkles.js
-var __iconNode23 = [
+var __iconNode24 = [
   [
     "path",
     {
@@ -24767,14 +24771,14 @@ var __iconNode23 = [
   ["path", { d: "M21 16h-4", key: "1cnmox" }],
   ["path", { d: "M11 3H9", key: "1obp7u" }]
 ];
-var WandSparkles = createLucideIcon("wand-sparkles", __iconNode23);
+var WandSparkles = createLucideIcon("wand-sparkles", __iconNode24);
 
 // node_modules/lucide-react/dist/esm/icons/x.js
-var __iconNode24 = [
+var __iconNode25 = [
   ["path", { d: "M18 6 6 18", key: "1bl5f8" }],
   ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
 ];
-var X = createLucideIcon("x", __iconNode24);
+var X = createLucideIcon("x", __iconNode25);
 
 // src/ReminderApp.tsx
 var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
@@ -24836,6 +24840,7 @@ var QUICK_FILTERS = [
   { id: "urgent", label: "Urgent", emoji: "\u{1F525}", color: "#C97070", bg: "#F5E8E8" },
   { id: "today", label: "Today", emoji: "\u{1F4C5}", color: "#D4A574", bg: "#F5F0E8" },
   { id: "overdue", label: "Overdue", emoji: "\u26A0\uFE0F", color: "#C97070", bg: "#F5E8E8" },
+  { id: "completed", label: "Done", emoji: "\u2705", color: "#3D7A5A", bg: "#E8F5E8" },
   { id: "work", label: "Work", emoji: "\u{1F4BC}", color: "#4A7C59", bg: "#E8F0E8" },
   { id: "family", label: "Family", emoji: "\u{1F468}\u200D\u{1F469}\u200D\u{1F467}", color: "#B87A9E", bg: "#F5E8F0" },
   { id: "health", label: "Health", emoji: "\u{1F4AA}", color: "#5A9B7A", bg: "#E8F5F0" },
@@ -24846,6 +24851,12 @@ var QUICK_FILTERS = [
   { id: "travel", label: "Travel", emoji: "\u2708\uFE0F", color: "#6B7A9B", bg: "#E8ECF5" },
   { id: "home", label: "Home", emoji: "\u{1F3E0}", color: "#7A9B6B", bg: "#ECF5E8" }
 ];
+var isRecentlyCompleted = (r) => {
+  if (!r.completed || !r.completedAt) return false;
+  const completedTime = new Date(r.completedAt).getTime();
+  const now = Date.now();
+  return now - completedTime < 6e4;
+};
 var generateId = () => `rem_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 var formatDate = (dateStr) => {
   const date = new Date(dateStr);
@@ -25513,6 +25524,8 @@ function ReminderApp({ initialData: initialData2 }) {
         f = f.filter((r) => !r.completed && r.dueDate === (/* @__PURE__ */ new Date()).toISOString().split("T")[0]);
       } else if (quickFilter === "overdue") {
         f = f.filter((r) => isOverdue(r));
+      } else if (quickFilter === "completed") {
+        f = f.filter((r) => r.completed && !isRecentlyCompleted(r));
       } else {
         f = f.filter((r) => !r.completed && r.category === quickFilter);
       }
@@ -25536,7 +25549,7 @@ function ReminderApp({ initialData: initialData2 }) {
       thisWeek: [],
       later: []
     };
-    filtered.filter((r) => !r.completed).forEach((r) => {
+    filtered.filter((r) => !r.completed || isRecentlyCompleted(r)).forEach((r) => {
       const section = getTimeSection(r);
       groups[section].push(r);
     });
@@ -26324,7 +26337,7 @@ function ReminderApp({ initialData: initialData2 }) {
           },
           children: QUICK_FILTERS.map((filter) => {
             const isActive = quickFilter === filter.id;
-            const count = filter.id === "all" ? reminders.filter((r) => !r.completed).length : filter.id === "urgent" ? reminders.filter((r) => !r.completed && r.priority === "urgent").length : filter.id === "today" ? todayCount : filter.id === "overdue" ? overdueCount : reminders.filter((r) => !r.completed && r.category === filter.id).length;
+            const count = filter.id === "all" ? reminders.filter((r) => !r.completed).length : filter.id === "urgent" ? reminders.filter((r) => !r.completed && r.priority === "urgent").length : filter.id === "today" ? todayCount : filter.id === "overdue" ? overdueCount : filter.id === "completed" ? reminders.filter((r) => r.completed).length : reminders.filter((r) => !r.completed && r.category === filter.id).length;
             return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
               "button",
               {
@@ -26457,35 +26470,38 @@ function ReminderApp({ initialData: initialData2 }) {
         !isCollapsed && sectionReminders.map((r, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
           padding: "12px 16px",
           borderBottom: i < sectionReminders.length - 1 ? `1px solid ${COLORS.border}` : "none",
-          backgroundColor: COLORS.card
+          backgroundColor: r.completed ? COLORS.cardAlt : COLORS.card,
+          opacity: r.completed ? 0.7 : 1
         }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 10 }, children: [
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
             "button",
             {
-              onClick: () => complete(r),
+              onClick: () => r.completed ? uncomplete(r) : complete(r),
               style: {
                 width: 24,
                 height: 24,
                 borderRadius: "50%",
-                border: `2px solid ${COLORS.border}`,
-                backgroundColor: "transparent",
+                border: `2px solid ${r.completed ? COLORS.success : COLORS.border}`,
+                backgroundColor: r.completed ? COLORS.success : "transparent",
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 flexShrink: 0
-              }
+              },
+              children: r.completed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { size: 12, color: "#fff" })
             }
           ),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 18 }, children: QUICK_FILTERS.find((f) => f.id === r.category)?.emoji || "\u{1F4CC}" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 18, opacity: r.completed ? 0.5 : 1 }, children: QUICK_FILTERS.find((f) => f.id === r.category)?.emoji || "\u{1F4CC}" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { flex: 1, minWidth: 0 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
               fontSize: 14,
               fontWeight: 500,
-              color: COLORS.textMain,
+              color: r.completed ? COLORS.textMuted : COLORS.textMain,
               whiteSpace: "nowrap",
               overflow: "hidden",
-              textOverflow: "ellipsis"
+              textOverflow: "ellipsis",
+              textDecoration: r.completed ? "line-through" : "none"
             }, children: r.title }),
             /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
               fontSize: 12,
@@ -27333,6 +27349,14 @@ lucide-react/dist/esm/icons/calendar.js:
    *)
 
 lucide-react/dist/esm/icons/camera.js:
+  (**
+   * @license lucide-react v0.554.0 - ISC
+   *
+   * This source code is licensed under the ISC license.
+   * See the LICENSE file in the root directory of this source tree.
+   *)
+
+lucide-react/dist/esm/icons/check.js:
   (**
    * @license lucide-react v0.554.0 - ISC
    *

@@ -123,6 +123,7 @@ const QUICK_FILTERS: { id: string; label: string; emoji: string; color: string; 
   { id: "urgent", label: "Urgent", emoji: "🔥", color: "#C97070", bg: "#F5E8E8" },
   { id: "today", label: "Today", emoji: "📅", color: "#D4A574", bg: "#F5F0E8" },
   { id: "overdue", label: "Overdue", emoji: "⚠️", color: "#C97070", bg: "#F5E8E8" },
+  { id: "completed", label: "Done", emoji: "✅", color: "#3D7A5A", bg: "#E8F5E8" },
   { id: "work", label: "Work", emoji: "💼", color: "#4A7C59", bg: "#E8F0E8" },
   { id: "family", label: "Family", emoji: "👨‍👩‍👧", color: "#B87A9E", bg: "#F5E8F0" },
   { id: "health", label: "Health", emoji: "💪", color: "#5A9B7A", bg: "#E8F5F0" },
@@ -133,6 +134,14 @@ const QUICK_FILTERS: { id: string; label: string; emoji: string; color: string; 
   { id: "travel", label: "Travel", emoji: "✈️", color: "#6B7A9B", bg: "#E8ECF5" },
   { id: "home", label: "Home", emoji: "🏠", color: "#7A9B6B", bg: "#ECF5E8" },
 ];
+
+// Check if a reminder was recently completed (within 1 minute)
+const isRecentlyCompleted = (r: Reminder): boolean => {
+  if (!r.completed || !r.completedAt) return false;
+  const completedTime = new Date(r.completedAt).getTime();
+  const now = Date.now();
+  return (now - completedTime) < 60000; // 1 minute = 60000ms
+};
 
 const generateId = () => `rem_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
@@ -811,7 +820,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const [sortAsc, setSortAsc] = useState(true);
   
   // Modern quick filter - single active chip
-  const [quickFilter, setQuickFilter] = useState<"all" | "urgent" | "today" | "overdue" | Category>("all");
+  const [quickFilter, setQuickFilter] = useState<"all" | "urgent" | "today" | "overdue" | "completed" | Category>("all");
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
   
   const [toast, setToast] = useState<string | null>(null);
@@ -921,6 +930,9 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
         f = f.filter(r => !r.completed && r.dueDate === new Date().toISOString().split("T")[0]);
       } else if (quickFilter === "overdue") {
         f = f.filter(r => isOverdue(r));
+      } else if (quickFilter === "completed") {
+        // Show all completed items (not recently completed - those are in their original sections)
+        f = f.filter(r => r.completed && !isRecentlyCompleted(r));
       } else {
         // Category filter
         f = f.filter(r => !r.completed && r.category === quickFilter);
@@ -944,6 +956,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   }, [reminders, search, quickFilter]);
   
   // Group reminders by time section for smart display
+  // Include recently completed items in their original sections (crossed out)
   const groupedByTime = useMemo(() => {
     const groups: Record<string, Reminder[]> = {
       overdue: [],
@@ -952,7 +965,8 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       thisWeek: [],
       later: []
     };
-    filtered.filter(r => !r.completed).forEach(r => {
+    // Include pending items AND recently completed items (within 1 minute)
+    filtered.filter(r => !r.completed || isRecentlyCompleted(r)).forEach(r => {
       const section = getTimeSection(r);
       groups[section].push(r);
     });
@@ -1743,6 +1757,8 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
                 ? todayCount
               : filter.id === "overdue"
                 ? overdueCount
+              : filter.id === "completed"
+                ? reminders.filter(r => r.completed).length
               : reminders.filter(r => !r.completed && r.category === filter.id).length;
             
             return (
@@ -1883,22 +1899,25 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
                   <div key={r.id} style={{ 
                     padding: "12px 16px", 
                     borderBottom: i < sectionReminders.length - 1 ? `1px solid ${COLORS.border}` : "none",
-                    backgroundColor: COLORS.card
+                    backgroundColor: r.completed ? COLORS.cardAlt : COLORS.card,
+                    opacity: r.completed ? 0.7 : 1
                   }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       {/* Compact checkbox */}
                       <button 
-                        onClick={() => complete(r)} 
+                        onClick={() => r.completed ? uncomplete(r) : complete(r)} 
                         style={{ 
                           width: 24, height: 24, borderRadius: "50%", 
-                          border: `2px solid ${COLORS.border}`, 
-                          backgroundColor: "transparent", 
+                          border: `2px solid ${r.completed ? COLORS.success : COLORS.border}`, 
+                          backgroundColor: r.completed ? COLORS.success : "transparent", 
                           cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 
                         }}
-                      />
+                      >
+                        {r.completed && <Check size={12} color="#fff" />}
+                      </button>
                       
                       {/* Category emoji instead of icon for compactness */}
-                      <span style={{ fontSize: 18 }}>
+                      <span style={{ fontSize: 18, opacity: r.completed ? 0.5 : 1 }}>
                         {QUICK_FILTERS.find(f => f.id === r.category)?.emoji || "📌"}
                       </span>
                       
@@ -1906,10 +1925,11 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
                         <div style={{ 
                           fontSize: 14, 
                           fontWeight: 500, 
-                          color: COLORS.textMain,
+                          color: r.completed ? COLORS.textMuted : COLORS.textMain,
                           whiteSpace: "nowrap",
                           overflow: "hidden",
-                          textOverflow: "ellipsis"
+                          textOverflow: "ellipsis",
+                          textDecoration: r.completed ? "line-through" : "none"
                         }}>
                           {r.title}
                         </div>
