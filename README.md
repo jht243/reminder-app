@@ -1,4 +1,4 @@
-# Smart Reminders - ChatGPT MCP Connector
+# Create Reminders App - ChatGPT MCP Connector
 
 A Model Context Protocol (MCP) server that provides an AI-powered reminder app widget for ChatGPT. Features natural language processing, gamification, and smart notifications.
 

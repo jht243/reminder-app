@@ -1681,7 +1681,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
             }}>
               <Bell size={18} />
             </div>
-            <span style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.3px" }}>Smart Reminders</span>
+            <span style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.3px" }}>Create Reminders</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
             <div style={{ 

@@ -250,13 +250,13 @@ function widgetMeta(widget: ReminderWidget, bustCache: boolean = false) {
 
 const widgets: ReminderWidget[] = [
   {
-    id: "smart-reminders",
-    title: "Smart Reminders — AI-powered reminder app with gamification",
+    id: "create-reminders-app",
+    title: "Create Reminders App — AI-powered reminder app with gamification",
     templateUri: `ui://widget/reminder-app.html?v=${VERSION}`,
     invoking:
-      "Opening Smart Reminders...",
+      "Opening Create Reminders App...",
     invoked:
-      "Here is Smart Reminders. Create reminders using natural language, track your progress, and earn points for staying organized!",
+      "Here is Create Reminders App. Create reminders using natural language, track your progress, and earn points for staying organized!",
     html: readWidgetHtml("reminder-app"),
   },
 ];
@@ -396,7 +396,7 @@ const resources: Resource[] = widgets.map((widget) => ({
   uri: widget.templateUri,
   name: widget.title,
   description:
-    "HTML template for the Smart Reminders widget - an AI-powered reminder app.",
+    "HTML template for Create Reminders App - an AI-powered reminder app.",
   mimeType: "text/html+skybridge",
   _meta: widgetMeta(widget),
 }));
@@ -405,7 +405,7 @@ const resourceTemplates: ResourceTemplate[] = widgets.map((widget) => ({
   uriTemplate: widget.templateUri,
   name: widget.title,
   description:
-    "Template descriptor for the Smart Reminders widget.",
+    "Template descriptor for Create Reminders App.",
   mimeType: "text/html+skybridge",
   _meta: widgetMeta(widget),
 }));
@@ -416,7 +416,7 @@ function createReminderAppServer(): Server {
       name: "reminder-app",
       version: "0.1.0",
       description:
-        "Smart Reminders - an AI-powered reminder app with natural language processing, gamification, and smart notifications.",
+        "Create Reminders App - an AI-powered reminder app with natural language processing, gamification, and smart notifications.",
     },
     {
       capabilities: {
@@ -602,7 +602,7 @@ function createReminderAppServer(): Server {
         logAnalytics("tool_call_success", {
           toolName: request.params.name,
           params: args,
-          inferredQuery: inferredQuery.length > 0 ? inferredQuery.join(", ") : "Smart Reminders",
+          inferredQuery: inferredQuery.length > 0 ? inferredQuery.join(", ") : "Create Reminders App",
           responseTime,
 
           device: deviceCategory,

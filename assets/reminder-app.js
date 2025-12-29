@@ -27467,7 +27467,7 @@ function ReminderApp({ initialData: initialData2 }) {
           alignItems: "center",
           justifyContent: "center"
         }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { size: 18 }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 18, fontWeight: 600, letterSpacing: "-0.3px" }, children: "Smart Reminders" })
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 18, fontWeight: 600, letterSpacing: "-0.3px" }, children: "Create Reminders" })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 8, fontSize: 13 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {

@@ -1,9 +1,9 @@
 {
-  "name": "smart-reminders-mcp",
+  "name": "create-reminders-app",
   "version": "0.1.0",
   "type": "module",
   "private": true,
-  "description": "Smart Reminders — AI-powered reminder app with natural language, gamification, and notifications.",
+  "description": "Create Reminders App — AI-powered reminder app with natural language, gamification, and notifications.",
   "keywords": [
     "reminders",
     "todo",
