@@ -448,8 +448,6 @@ function createReminderAppServer(): Server {
         throw new Error(`Unknown resource: ${request.params.uri}`);
       }
 
-      // Inject current FRED rate into HTML before sending to ChatGPT
-      // (Logic removed for yield optimizer)
       const htmlToSend = widget.html;
 
       return {
@@ -820,7 +818,7 @@ function evaluateAlerts(logs: AnalyticsEvent[]): AlertEntry[] {
     });
   }
 
-  // 3. Empty Result Sets (or equivalent for calculator - e.g. missing inputs)
+  // 3. Empty Result Sets (e.g. missing reminder inputs)
   const successCalls = logs.filter(
     (l) => l.event === "tool_call_success" && new Date(l.timestamp).getTime() >= weekAgo
   );
@@ -1600,7 +1598,7 @@ const httpServer = createServer(
     }
 
     // Serve alias for legacy loader path -> our main widget HTML
-    if (req.method === "GET" && (url.pathname === "/assets/reminder-app.html" || url.pathname === "/assets/travel-checklist.html" || url.pathname === "/assets/crypto-portfolio-optimizer.html")) {
+    if (req.method === "GET" && url.pathname === "/assets/reminder-app.html") {
       const mainAssetPath = path.join(ASSETS_DIR, "reminder-app.html");
       console.log(`[Debug Legacy] Request: ${url.pathname}, Main Path: ${mainAssetPath}, Exists: ${fs.existsSync(mainAssetPath)}`);
       if (fs.existsSync(mainAssetPath) && fs.statSync(mainAssetPath).isFile()) {

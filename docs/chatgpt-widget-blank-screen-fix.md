@@ -17,14 +17,14 @@ The issue was with **how the external React JavaScript bundle was being loaded**
 
 1. **Relative Script Paths**
    ```html
-   <script type="module" src="/assets/crypto-portfolio-optimizer.js"></script>
+   <script type="module" src="/assets/reminder-app.js"></script>
    ```
    - Failed because ChatGPT inlines the HTML without a base URL context
    - Relative paths don't resolve correctly
 
 2. **Absolute Script URLs with Regular src Attribute**
    ```html
-   <script type="module" src="https://crypto-portfolio-optimizer-jn05.onrender.com/assets/crypto-portfolio-optimizer.js"></script>
+   <script type="module" src="https://reminder-app-3pz5.onrender.com/assets/reminder-app.js"></script>
    ```
    - Failed even with proper CSP `script_src_domains` configured
    - ChatGPT's HTML inlining process may interfere with external script loading via `src` attribute
@@ -38,16 +38,16 @@ The issue was with **how the external React JavaScript bundle was being loaded**
 Use **dynamic `import()` within an inline `<script>` tag** to load the external React bundle:
 
 ```html
-<div id="crypto-portfolio-optimizer-root"></div>
+<div id="reminder-app-root"></div>
 <!-- 
   Load script via import() to avoid HTML parser issues with inline code
 -->
 <script type="module">
-  import('https://crypto-portfolio-optimizer-jn05.onrender.com/assets/crypto-portfolio-optimizer.js')
+  import('https://reminder-app-3pz5.onrender.com/assets/reminder-app.js')
     .catch(err => {
-      console.error('[Crypto Portfolio Optimizer] Failed to load script:', err);
-      document.getElementById('crypto-portfolio-optimizer-root').innerHTML = 
-        '<div style="padding:20px;text-align:center;font-family:sans-serif;color:#DC2626"><h3>Failed to load calculator</h3><p>Please refresh the page or try again later.</p></div>';
+      console.error('[Create Reminders App] Failed to load script:', err);
+      document.getElementById('reminder-app-root').innerHTML = 
+        '<div style="padding:20px;text-align:center;font-family:sans-serif;color:#DC2626"><h3>Failed to load app</h3><p>Please refresh the page or try again later.</p></div>';
     });
 </script>
 ```
@@ -66,10 +66,10 @@ Ensure your MCP server's CSP includes:
 ```typescript
 "openai/widgetCSP": {
   connect_domains: [
-    "https://crypto-portfolio-optimizer-jn05.onrender.com"
+    "https://reminder-app-3pz5.onrender.com"
   ],
   script_src_domains: [
-    "https://crypto-portfolio-optimizer-jn05.onrender.com"
+    "https://reminder-app-3pz5.onrender.com"
   ],
   resource_domains: [],
 }
@@ -77,7 +77,7 @@ Ensure your MCP server's CSP includes:
 
 ## Alternative Approach (Vanilla JS)
 
-If you examine OpenAI's reference MCP widget projects (mortgage calculator, rental calculator, auto calculator), you'll notice they use **vanilla JavaScript inlined directly in the HTML**, not external React bundles. This is the most reliable approach for ChatGPT widgets:
+If you examine OpenAI's reference MCP widget projects, you'll notice they use **vanilla JavaScript inlined directly in the HTML**, not external React bundles. This is the most reliable approach for ChatGPT widgets:
 
 - All logic is self-contained in one HTML file
 - No external script loading concerns

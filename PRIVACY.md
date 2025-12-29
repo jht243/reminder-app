@@ -1,11 +1,11 @@
 # Privacy Policy
 
-**Crypto Yield Optimizer**  
+**Create Reminders App**  
 *Last Updated: December 2024*
 
 ## Overview
 
-Crypto Yield Optimizer is an educational DeFi yield optimization tool that runs entirely in your browser within ChatGPT. We are committed to protecting your privacy and being transparent about our data practices.
+Create Reminders App is an AI-powered reminder and task management tool that runs entirely in your browser within ChatGPT. We are committed to protecting your privacy and being transparent about our data practices.
 
 ## Data Collection
 
@@ -24,14 +24,14 @@ Crypto Yield Optimizer is an educational DeFi yield optimization tool that runs 
 
 ## Data Processing
 
-All portfolio calculations and simulations are performed:
+All reminder management is performed:
 - **Client-side**: In your browser within the ChatGPT sandbox
-- **Locally**: Your allocation inputs are processed locally and not stored on our servers
-- **Ephemerally**: Session data is not persisted beyond the active session
+- **Locally**: Your reminders are processed locally and stored in browser localStorage
+- **Ephemerally**: Session data is not persisted on our servers beyond the active session
 
 ## Data Storage
 
-- **Browser LocalStorage**: Your portfolio inputs may be cached in your browser's localStorage for convenience (30-day expiration). This data never leaves your device.
+- **Browser LocalStorage**: Your reminders and stats are cached in your browser's localStorage. This data never leaves your device. You can clear it anytime with the Reset button.
 - **Server Logs**: Anonymous analytics are logged for up to 30 days for service improvement.
 
 ## Third-Party Sharing
