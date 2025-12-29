@@ -9,9 +9,17 @@ import ReminderApp from "./ReminderApp";
    return Math.round(now - __WIDGET_START_MS);
  };
  const __log = (...args: any[]) => console.log(`[t+${__sinceStartMs()}ms]`, ...args);
+ const __getBaseUrl = () => {
+   try {
+     return (window as any).openai?.serverUrl || "";
+   } catch {
+     return "";
+   }
+ };
  const __report = async (event: string, data: Record<string, any>) => {
    try {
-     await fetch("/api/track", {
+     const baseUrl = __getBaseUrl();
+     await fetch(`${baseUrl}/api/track`, {
        method: "POST",
        headers: { "Content-Type": "application/json" },
        body: JSON.stringify({ event, data }),
@@ -75,7 +83,8 @@ class ErrorBoundary extends React.Component<
     console.error("Widget Error Boundary caught error:", error, errorInfo);
     // Log to server
     try {
-        fetch("/api/track", {
+        const baseUrl = __getBaseUrl();
+        fetch(`${baseUrl}/api/track`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

@@ -28877,9 +28877,17 @@ var __sinceStartMs = () => {
   return Math.round(now - __WIDGET_START_MS);
 };
 var __log = (...args) => console.log(`[t+${__sinceStartMs()}ms]`, ...args);
+var __getBaseUrl = () => {
+  try {
+    return window.openai?.serverUrl || "";
+  } catch {
+    return "";
+  }
+};
 var __report = async (event, data) => {
   try {
-    await fetch("/api/track", {
+    const baseUrl = __getBaseUrl();
+    await fetch(`${baseUrl}/api/track`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ event, data })
@@ -28931,7 +28939,8 @@ var ErrorBoundary = class extends import_react4.default.Component {
   componentDidCatch(error, errorInfo) {
     console.error("Widget Error Boundary caught error:", error, errorInfo);
     try {
-      fetch("/api/track", {
+      const baseUrl = __getBaseUrl();
+      fetch(`${baseUrl}/api/track`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
