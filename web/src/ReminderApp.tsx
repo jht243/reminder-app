@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import Tesseract from "tesseract.js";
 import {
   Bell, Plus, Check, X, Clock, Calendar, Search, Filter, Trash2,
   Edit2, Repeat, Trophy, Flame, Star, Award, Crown, Send,
@@ -1617,7 +1616,8 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       setScreenshotModal({ open: true, imageData: base64, analyzing: true, progress: 0 });
       
       try {
-        // Run OCR with Tesseract.js
+        // Run OCR with Tesseract.js (lazy-load to avoid crashing widget on startup)
+        const { default: Tesseract } = await import("tesseract.js");
         const result = await Tesseract.recognize(base64, "eng", {
           logger: (m) => {
             if (m.status === "recognizing text") {
