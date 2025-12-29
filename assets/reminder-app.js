@@ -25555,8 +25555,14 @@ function ReminderApp({ initialData: initialData2 }) {
   const [achievement, setAchievement] = (0, import_react3.useState)(null);
   const [importOpen, setImportOpen] = (0, import_react3.useState)(false);
   const [dragActive, setDragActive] = (0, import_react3.useState)(false);
-  const [screenshotModalOpen, setScreenshotModalOpen] = (0, import_react3.useState)(false);
-  const [screenshotText, setScreenshotText] = (0, import_react3.useState)("");
+  const [screenshotModal, setScreenshotModal] = (0, import_react3.useState)({ open: false, imageData: null, analyzing: false, extractedText: "" });
+  const [aiApiKey, setAiApiKey] = (0, import_react3.useState)(() => {
+    try {
+      return localStorage.getItem("REMINDER_APP_AI_KEY") || "";
+    } catch {
+      return "";
+    }
+  });
   const handleFileUpload = (e) => {
     e.preventDefault();
     setDragActive(false);
@@ -26001,24 +26007,99 @@ function ReminderApp({ initialData: initialData2 }) {
     setToast(`Generated ${newReminders.length} sample reminders!`);
   };
   const handleScreenshotUpload = async (e) => {
-    const file = e.target.files?.[0];
+    let file = null;
+    if (e instanceof File) {
+      file = e;
+    } else if ("dataTransfer" in e) {
+      e.preventDefault();
+      file = e.dataTransfer.files?.[0] || null;
+    } else {
+      file = e.target.files?.[0] || null;
+      e.target.value = "";
+    }
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       setToast("Please upload an image file");
       return;
     }
-    setScreenshotText("");
-    setScreenshotModalOpen(true);
-    e.target.value = "";
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const base64 = event.target?.result;
+      setScreenshotModal({ open: true, imageData: base64, analyzing: false, extractedText: "" });
+      if (aiApiKey) {
+        analyzeScreenshotWithAI(base64);
+      }
+    };
+    reader.readAsDataURL(file);
   };
-  const processScreenshotText = () => {
-    if (!screenshotText.trim()) {
-      setToast("Please enter some text");
+  const analyzeScreenshotWithAI = async (imageData) => {
+    if (!aiApiKey) {
+      setToast("Please add your OpenAI API key in settings");
       return;
     }
-    const lines = screenshotText.split(/[,\n]/).map((s) => s.trim()).filter((s) => s.length > 2);
+    setScreenshotModal((prev) => ({ ...prev, analyzing: true }));
+    try {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${aiApiKey}`
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: `Extract all tasks, reminders, to-dos, or action items from this image. For each item, output it on a new line in this format:
+- [task description] [optional: time like "at 5pm"] [optional: date like "tomorrow" or "next monday"]
+
+Examples:
+- Buy groceries tomorrow at 3pm
+- Call mom
+- Submit report next friday
+
+Only output the task list, nothing else. If no tasks are found, output "NO_TASKS_FOUND".`
+                },
+                {
+                  type: "image_url",
+                  image_url: { url: imageData }
+                }
+              ]
+            }
+          ],
+          max_tokens: 1e3
+        })
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error?.message || "API request failed");
+      }
+      const data = await response.json();
+      const extractedText = data.choices?.[0]?.message?.content || "";
+      if (extractedText === "NO_TASKS_FOUND" || !extractedText.trim()) {
+        setScreenshotModal((prev) => ({ ...prev, analyzing: false, extractedText: "" }));
+        setToast("No tasks found in screenshot");
+        return;
+      }
+      setScreenshotModal((prev) => ({ ...prev, analyzing: false, extractedText }));
+    } catch (error) {
+      setScreenshotModal((prev) => ({ ...prev, analyzing: false }));
+      setToast(`AI Error: ${error.message}`);
+    }
+  };
+  const importScreenshotTasks = () => {
+    const text = screenshotModal.extractedText;
+    if (!text.trim()) {
+      setToast("No tasks to import");
+      return;
+    }
+    const lines = text.split(/\r\n|\n|\r/).filter((l) => l.trim().length > 2);
     const newReminders = lines.map((line) => {
-      const parsed2 = parseNaturalLanguage(line.replace(/^[-*•]\s*/, ""));
+      const cleanLine = line.replace(/^[-*•]\s*/, "").trim();
+      const parsed2 = parseNaturalLanguage(cleanLine);
       return {
         id: generateId(),
         title: parsed2.title,
@@ -26036,9 +26117,8 @@ function ReminderApp({ initialData: initialData2 }) {
     });
     if (newReminders.length > 0) {
       setReminders((prev) => [...prev, ...newReminders]);
-      setToast(`Imported ${newReminders.length} reminders!`);
-      setScreenshotModalOpen(false);
-      setScreenshotText("");
+      setScreenshotModal({ open: false, imageData: null, analyzing: false, extractedText: "" });
+      setToast(`Imported ${newReminders.length} reminders from screenshot!`);
     } else {
       setToast("No valid reminders found");
     }
@@ -27073,98 +27153,243 @@ OR just paste a list:
         }
       )
     ] }) }),
-    screenshotModalOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
-      position: "fixed",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: "rgba(0,0,0,0.5)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      zIndex: 1e3,
-      padding: 20
-    }, onClick: () => setScreenshotModalOpen(false), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-      "div",
-      {
-        onClick: (e) => e.stopPropagation(),
-        style: {
-          backgroundColor: COLORS.card,
-          borderRadius: 20,
-          padding: 24,
-          maxWidth: 500,
-          width: "100%",
-          boxShadow: "0 20px 40px rgba(0,0,0,0.15)"
-        },
-        children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { style: { margin: 0, fontSize: 18, fontWeight: 600, color: COLORS.textMain }, children: "\u{1F4F8} Import Reminders" }),
-            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setScreenshotModalOpen(false), style: { background: "none", border: "none", cursor: "pointer", padding: 4 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 20, color: COLORS.textMuted }) })
-          ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { fontSize: 13, color: COLORS.textSecondary, marginBottom: 16 }, children: "Paste or type your reminders below. Each line or comma-separated item will become a reminder." }),
+    screenshotModal.open && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1100, padding: 16 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 24, width: "100%", maxWidth: 560, padding: 24, boxShadow: "0 16px 48px rgba(0,0,0,0.2)", maxHeight: "90vh", overflowY: "auto" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { style: { margin: 0, fontSize: 18, fontWeight: 600, color: COLORS.textMain }, children: "\u{1F4F8} AI Screenshot Import" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "button",
+          {
+            onClick: () => setScreenshotModal({ open: false, imageData: null, analyzing: false, extractedText: "" }),
+            style: { width: 36, height: 36, borderRadius: "50%", border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" },
+            children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 18, color: COLORS.textMuted })
+          }
+        )
+      ] }),
+      !screenshotModal.imageData ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+        "div",
+        {
+          onDragEnter: (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          },
+          onDragOver: (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          },
+          onDrop: (e) => {
+            e.preventDefault();
+            const file = e.dataTransfer.files?.[0];
+            if (file) handleScreenshotUpload(file);
+          },
+          style: {
+            border: `2px dashed ${COLORS.primary}`,
+            borderRadius: 16,
+            backgroundColor: `${COLORS.primary}08`,
+            padding: 40,
+            textAlign: "center",
+            cursor: "pointer",
+            transition: "all 0.2s"
+          },
+          onClick: () => document.getElementById("screenshot-file-input")?.click(),
+          children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 48, marginBottom: 12 }, children: "\u{1F4F7}" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 15, fontWeight: 600, color: COLORS.textMain, marginBottom: 8 }, children: "Drop screenshot here" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 13, color: COLORS.textSecondary }, children: "or click to browse" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              "input",
+              {
+                id: "screenshot-file-input",
+                type: "file",
+                accept: "image/*",
+                onChange: handleScreenshotUpload,
+                style: { display: "none" }
+              }
+            )
+          ]
+        }
+      ) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { marginBottom: 16, borderRadius: 12, overflow: "hidden", border: `1px solid ${COLORS.border}` }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "img",
+          {
+            src: screenshotModal.imageData,
+            alt: "Screenshot preview",
+            style: { width: "100%", maxHeight: 200, objectFit: "contain", backgroundColor: COLORS.cardAlt }
+          }
+        ) }),
+        screenshotModal.analyzing ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { textAlign: "center", padding: 20, backgroundColor: COLORS.primaryBg, borderRadius: 12 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 24, marginBottom: 8 }, children: "\u{1F916}" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 14, fontWeight: 500, color: COLORS.primary }, children: "AI is analyzing your screenshot..." })
+        ] }) : !aiApiKey ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { padding: 16, backgroundColor: COLORS.cardAlt, borderRadius: 12, marginBottom: 16 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 14, fontWeight: 600, color: COLORS.textMain, marginBottom: 8 }, children: "\u{1F511} OpenAI API Key Required" }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 13, color: COLORS.textSecondary, marginBottom: 12 }, children: "Enter your OpenAI API key to enable AI-powered text extraction." }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "input",
+            {
+              type: "password",
+              placeholder: "sk-...",
+              value: aiApiKey,
+              onChange: (e) => {
+                const key = e.target.value;
+                setAiApiKey(key);
+                try {
+                  localStorage.setItem("REMINDER_APP_AI_KEY", key);
+                } catch {
+                }
+              },
+              style: {
+                width: "100%",
+                padding: "10px 14px",
+                borderRadius: 8,
+                border: `1px solid ${COLORS.border}`,
+                backgroundColor: COLORS.inputBg,
+                fontSize: 13,
+                marginBottom: 12,
+                ...inputStyle
+              }
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "button",
+            {
+              onClick: () => screenshotModal.imageData && analyzeScreenshotWithAI(screenshotModal.imageData),
+              disabled: !aiApiKey,
+              style: {
+                width: "100%",
+                padding: "10px 16px",
+                borderRadius: 8,
+                backgroundColor: aiApiKey ? COLORS.primary : COLORS.border,
+                color: "#fff",
+                border: "none",
+                cursor: aiApiKey ? "pointer" : "not-allowed",
+                fontSize: 13,
+                fontWeight: 600
+              },
+              children: "Analyze with AI"
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 11, color: COLORS.textMuted, marginTop: 8, textAlign: "center" }, children: "Your key is stored locally and never sent to our servers" })
+        ] }) : screenshotModal.extractedText ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textMain, marginBottom: 8 }, children: "\u2705 Tasks Found:" }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
             "textarea",
             {
-              value: screenshotText,
-              onChange: (e) => setScreenshotText(e.target.value),
-              placeholder: "Example:\nBuy groceries tomorrow at 5pm\nCall mom on Monday\nDoctor appointment next week",
+              value: screenshotModal.extractedText,
+              onChange: (e) => setScreenshotModal((prev) => ({ ...prev, extractedText: e.target.value })),
               style: {
                 width: "100%",
-                minHeight: 150,
+                height: 120,
                 padding: 12,
-                borderRadius: 12,
+                borderRadius: 8,
                 border: `1px solid ${COLORS.border}`,
-                backgroundColor: COLORS.cardAlt,
-                fontSize: 14,
-                color: COLORS.textMain,
+                backgroundColor: COLORS.inputBg,
+                fontSize: 13,
+                fontFamily: "inherit",
                 resize: "vertical",
-                fontFamily: "inherit"
-              },
-              autoFocus: true
+                marginBottom: 12,
+                ...inputStyle
+              }
             }
           ),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 12, marginTop: 16 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 10 }, children: [
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
               "button",
               {
-                onClick: () => setScreenshotModalOpen(false),
+                onClick: () => screenshotModal.imageData && analyzeScreenshotWithAI(screenshotModal.imageData),
                 style: {
                   flex: 1,
-                  padding: "12px 20px",
-                  borderRadius: 50,
-                  border: `1px solid ${COLORS.border}`,
+                  padding: "10px 16px",
+                  borderRadius: 8,
                   backgroundColor: COLORS.cardAlt,
                   color: COLORS.textMain,
-                  fontSize: 14,
-                  fontWeight: 500,
-                  cursor: "pointer"
+                  border: `1px solid ${COLORS.border}`,
+                  cursor: "pointer",
+                  fontSize: 13,
+                  fontWeight: 500
                 },
-                children: "Cancel"
+                children: "Re-analyze"
               }
             ),
             /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
               "button",
               {
-                onClick: processScreenshotText,
+                onClick: importScreenshotTasks,
                 style: {
-                  flex: 1,
-                  padding: "12px 20px",
-                  borderRadius: 50,
-                  border: "none",
+                  flex: 2,
+                  padding: "10px 16px",
+                  borderRadius: 8,
                   backgroundColor: COLORS.primary,
                   color: "#fff",
-                  fontSize: 14,
-                  fontWeight: 600,
-                  cursor: "pointer"
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: 13,
+                  fontWeight: 600
                 },
-                children: "Import Reminders"
+                children: "Import Tasks"
               }
             )
           ] })
-        ]
-      }
-    ) }),
+        ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 10 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "button",
+            {
+              onClick: () => setScreenshotModal((prev) => ({ ...prev, imageData: null })),
+              style: {
+                flex: 1,
+                padding: "10px 16px",
+                borderRadius: 8,
+                backgroundColor: COLORS.cardAlt,
+                color: COLORS.textMain,
+                border: `1px solid ${COLORS.border}`,
+                cursor: "pointer",
+                fontSize: 13,
+                fontWeight: 500
+              },
+              children: "Choose Different Image"
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "button",
+            {
+              onClick: () => screenshotModal.imageData && analyzeScreenshotWithAI(screenshotModal.imageData),
+              style: {
+                flex: 2,
+                padding: "10px 16px",
+                borderRadius: 8,
+                backgroundColor: COLORS.primary,
+                color: "#fff",
+                border: "none",
+                cursor: "pointer",
+                fontSize: 13,
+                fontWeight: 600
+              },
+              children: "\u{1F916} Analyze with AI"
+            }
+          )
+        ] })
+      ] }),
+      screenshotModal.imageData && !screenshotModal.extractedText && !screenshotModal.analyzing && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { marginTop: 16, paddingTop: 16, borderTop: `1px solid ${COLORS.border}` }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 12, color: COLORS.textMuted, marginBottom: 8 }, children: "Or type tasks manually:" }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+          "textarea",
+          {
+            placeholder: "- Buy groceries tomorrow\n- Call mom at 5pm\n- Submit report next friday",
+            onChange: (e) => setScreenshotModal((prev) => ({ ...prev, extractedText: e.target.value })),
+            style: {
+              width: "100%",
+              height: 80,
+              padding: 12,
+              borderRadius: 8,
+              border: `1px solid ${COLORS.border}`,
+              backgroundColor: COLORS.inputBg,
+              fontSize: 13,
+              fontFamily: "inherit",
+              resize: "none",
+              ...inputStyle
+            }
+          }
+        )
+      ] })
+    ] }) }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
       marginTop: 24,
       padding: 20,
@@ -27177,10 +27402,7 @@ OR just paste a list:
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
           "button",
           {
-            onClick: () => {
-              setScreenshotText("");
-              setScreenshotModalOpen(true);
-            },
+            onClick: () => setScreenshotModal({ open: true, imageData: null, analyzing: false, extractedText: "" }),
             style: {
               display: "flex",
               alignItems: "center",
@@ -27197,7 +27419,7 @@ OR just paste a list:
             },
             children: [
               /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Camera, { size: 16, color: COLORS.primary }),
-              "Bulk Import"
+              "\u{1F4F8} AI Screenshot Import"
             ]
           }
         ),
@@ -27226,7 +27448,7 @@ OR just paste a list:
           }
         )
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 11, color: COLORS.textMuted, marginTop: 10 }, children: "\u{1F4DD} Paste multiple reminders at once or generate sample data" })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 11, color: COLORS.textMuted, marginTop: 10 }, children: "\u{1F4F8} Upload a screenshot of your existing reminders to import them instantly" })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
       marginTop: 16,
