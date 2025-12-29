@@ -312,7 +312,14 @@ const userRemindersStore: Map<string, { reminders: any[], stats: any, savedAt: n
 const saveRemindersSchema = {
   type: "object",
   properties: {
-    reminders: { type: "array", description: "Array of reminder objects to save." },
+    reminders: {
+      type: "array",
+      description: "Array of reminder objects to save.",
+      items: {
+        type: "object",
+        additionalProperties: true,
+      },
+    },
     stats: { type: "object", description: "User stats object." },
     savedAt: { type: "number", description: "Timestamp when saved." },
   },
