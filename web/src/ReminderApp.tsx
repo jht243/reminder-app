@@ -2581,48 +2581,10 @@ OR just paste a list:
               />
             </div>
             
-            {/* Task Input Area */}
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.textMain, marginBottom: 8 }}>
-                Paste tasks from ChatGPT:
-              </div>
-              <textarea
-                value={screenshotModal.extractedText}
-                onChange={(e) => setScreenshotModal(prev => ({ ...prev, extractedText: e.target.value }))}
-                placeholder="- Buy groceries tomorrow at 3pm&#10;- Call mom&#10;- Submit report next friday&#10;- Pick up dry cleaning"
-                style={{
-                  width: "100%",
-                  height: 120,
-                  padding: 12,
-                  borderRadius: 12,
-                  border: `1px solid ${COLORS.border}`,
-                  backgroundColor: COLORS.inputBg,
-                  fontSize: 13,
-                  fontFamily: "inherit",
-                  resize: "vertical",
-                  ...inputStyle
-                }}
-              />
+            {/* Info text */}
+            <div style={{ fontSize: 12, color: COLORS.textMuted, textAlign: "center" }}>
+              ChatGPT can see this image - just ask it to add the tasks!
             </div>
-            
-            {/* Import Button */}
-            <button
-              onClick={importScreenshotTasks}
-              disabled={!screenshotModal.extractedText.trim()}
-              style={{
-                width: "100%",
-                padding: "14px 20px",
-                borderRadius: 12,
-                backgroundColor: screenshotModal.extractedText.trim() ? COLORS.primary : COLORS.border,
-                color: "#fff",
-                border: "none",
-                cursor: screenshotModal.extractedText.trim() ? "pointer" : "not-allowed",
-                fontSize: 14,
-                fontWeight: 600
-              }}
-            >
-              Import Tasks
-            </button>
           </div>
         </div>
       )}
