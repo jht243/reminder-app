@@ -1685,7 +1685,38 @@ const httpServer = createServer(
 );
 
 httpServer.on("clientError", (err: Error, socket) => {
-  console.error("HTTP client error", err);
+  const anyErr = err as any;
+  const code = anyErr?.code as string | undefined;
+  const now = Date.now();
+
+  const shouldLog = (() => {
+    if (code === "ERR_HTTP_REQUEST_TIMEOUT") {
+      return now - (httpServer as any).__lastTimeoutLogMs > 60_000;
+    }
+    return true;
+  })();
+
+  if (code === "ERR_HTTP_REQUEST_TIMEOUT") {
+    (httpServer as any).__suppressedTimeoutLogs =
+      ((httpServer as any).__suppressedTimeoutLogs ?? 0) + (shouldLog ? 0 : 1);
+
+    if (shouldLog) {
+      const suppressed = (httpServer as any).__suppressedTimeoutLogs ?? 0;
+      (httpServer as any).__lastTimeoutLogMs = now;
+      (httpServer as any).__suppressedTimeoutLogs = 0;
+      console.error(
+        "HTTP client error (request timeout)",
+        JSON.stringify({ code, suppressedLastMinute: suppressed })
+      );
+    }
+
+    socket.end("HTTP/1.1 408 Request Timeout\r\n\r\n");
+    return;
+  }
+
+  if (shouldLog) {
+    console.error("HTTP client error", err);
+  }
   socket.end("HTTP/1.1 400 Bad Request\r\n\r\n");
 });
 
