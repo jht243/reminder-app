@@ -24855,7 +24855,9 @@ var isRecentlyCompleted = (r) => {
   if (!r.completed || !r.completedAt) return false;
   const completedTime = new Date(r.completedAt).getTime();
   const now = Date.now();
-  return now - completedTime < 6e4;
+  const diff = now - completedTime;
+  const isRecent = diff < 6e4;
+  return isRecent;
 };
 var generateId = () => `rem_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 var formatDate = (dateStr) => {
@@ -25636,10 +25638,18 @@ function ReminderApp({ initialData: initialData2 }) {
       f = f.filter((r) => r.title.toLowerCase().includes(q) || r.category.includes(q));
     }
     if (quickFilter !== "all") {
+      const now = /* @__PURE__ */ new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+      console.log(`[Filter] Filtering. QuickFilter: ${quickFilter}, TodayStr: ${todayStr}`);
       if (quickFilter === "urgent") {
         f = f.filter((r) => (!r.completed || isRecentlyCompleted(r)) && r.priority === "urgent");
       } else if (quickFilter === "today") {
-        f = f.filter((r) => (!r.completed || isRecentlyCompleted(r)) && r.dueDate === (/* @__PURE__ */ new Date()).toISOString().split("T")[0]);
+        f = f.filter((r) => {
+          const keep = (!r.completed || isRecentlyCompleted(r)) && r.dueDate === todayStr;
+          if (r.completed && keep) console.log(`[Filter] KEEPING completed today item: ${r.title}`);
+          if (r.completed && !keep && r.dueDate === todayStr) console.log(`[Filter] DROPPING completed today item: ${r.title}. IsRecent: ${isRecentlyCompleted(r)}`);
+          return keep;
+        });
       } else if (quickFilter === "overdue") {
         f = f.filter((r) => isOverdue(r));
       } else if (quickFilter === "completed") {
@@ -25648,15 +25658,6 @@ function ReminderApp({ initialData: initialData2 }) {
         f = f.filter((r) => (!r.completed || isRecentlyCompleted(r)) && r.category === quickFilter);
       }
     }
-    f.sort((a, b) => {
-      const aOverdue = isOverdue(a) ? 0 : 1;
-      const bOverdue = isOverdue(b) ? 0 : 1;
-      if (aOverdue !== bOverdue) return aOverdue - bOverdue;
-      const dateCompare = new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-      if (dateCompare !== 0) return dateCompare;
-      const order = { urgent: 0, high: 1, medium: 2, low: 3 };
-      return order[a.priority] - order[b.priority];
-    });
     return f;
   }, [reminders, search, quickFilter, tick]);
   const groupedByTime = (0, import_react3.useMemo)(() => {
@@ -25669,6 +25670,7 @@ function ReminderApp({ initialData: initialData2 }) {
     };
     filtered.filter((r) => !r.completed || isRecentlyCompleted(r)).forEach((r) => {
       const section = getTimeSection(r);
+      if (r.completed) console.log(`[Grouping] Item ${r.title} assigned to section: ${section}`);
       groups[section].push(r);
     });
     return groups;
@@ -26465,7 +26467,9 @@ function ReminderApp({ initialData: initialData2 }) {
           },
           children: QUICK_FILTERS.map((filter) => {
             const isActive = quickFilter === filter.id;
-            const count = filter.id === "all" ? reminders.filter((r) => !r.completed).length : filter.id === "urgent" ? reminders.filter((r) => !r.completed && r.priority === "urgent").length : filter.id === "today" ? todayCount : filter.id === "overdue" ? overdueCount : filter.id === "completed" ? reminders.filter((r) => r.completed).length : reminders.filter((r) => !r.completed && r.category === filter.id).length;
+            const now = /* @__PURE__ */ new Date();
+            const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+            const count = filter.id === "all" ? reminders.filter((r) => !r.completed || isRecentlyCompleted(r)).length : filter.id === "urgent" ? reminders.filter((r) => (!r.completed || isRecentlyCompleted(r)) && r.priority === "urgent").length : filter.id === "today" ? reminders.filter((r) => (!r.completed || isRecentlyCompleted(r)) && r.dueDate === todayStr).length : filter.id === "overdue" ? reminders.filter((r) => isOverdue(r)).length : filter.id === "completed" ? reminders.filter((r) => r.completed && !isRecentlyCompleted(r)).length : reminders.filter((r) => (!r.completed || isRecentlyCompleted(r)) && r.category === filter.id).length;
             return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
               "button",
               {

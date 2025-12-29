@@ -142,7 +142,10 @@ const isRecentlyCompleted = (r: Reminder): boolean => {
   if (!r.completed || !r.completedAt) return false;
   const completedTime = new Date(r.completedAt).getTime();
   const now = Date.now();
-  return (now - completedTime) < 60000; // 1 minute = 60000ms
+  const diff = now - completedTime;
+  const isRecent = diff < 60000;
+  // console.log(`[Debug] isRecentlyCompleted: ${r.title}, Diff: ${diff}ms, Result: ${isRecent}`);
+  return isRecent;
 };
 
 const generateId = () => `rem_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -1072,39 +1075,34 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     
     // Apply quick filter
     if (quickFilter !== "all") {
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      
+      // DEBUG LOGGING
+      console.log(`[Filter] Filtering. QuickFilter: ${quickFilter}, TodayStr: ${todayStr}`);
+      
       if (quickFilter === "urgent") {
         f = f.filter(r => (!r.completed || isRecentlyCompleted(r)) && r.priority === "urgent");
       } else if (quickFilter === "today") {
-        f = f.filter(r => (!r.completed || isRecentlyCompleted(r)) && r.dueDate === new Date().toISOString().split("T")[0]);
+        f = f.filter(r => {
+          const keep = (!r.completed || isRecentlyCompleted(r)) && r.dueDate === todayStr;
+          if (r.completed && keep) console.log(`[Filter] KEEPING completed today item: ${r.title}`);
+          if (r.completed && !keep && r.dueDate === todayStr) console.log(`[Filter] DROPPING completed today item: ${r.title}. IsRecent: ${isRecentlyCompleted(r)}`);
+          return keep;
+        });
       } else if (quickFilter === "overdue") {
         f = f.filter(r => isOverdue(r));
       } else if (quickFilter === "completed") {
-        // Show all completed items (not recently completed - those are in their original sections)
         f = f.filter(r => r.completed && !isRecentlyCompleted(r));
       } else {
-        // Category filter
         f = f.filter(r => (!r.completed || isRecentlyCompleted(r)) && r.category === quickFilter);
       }
     }
     
-    // Sort by date and priority
-    f.sort((a, b) => {
-      // Overdue first, then by date, then by priority
-      const aOverdue = isOverdue(a) ? 0 : 1;
-      const bOverdue = isOverdue(b) ? 0 : 1;
-      if (aOverdue !== bOverdue) return aOverdue - bOverdue;
-      
-      const dateCompare = new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-      if (dateCompare !== 0) return dateCompare;
-      
-      const order = { urgent: 0, high: 1, medium: 2, low: 3 };
-      return order[a.priority] - order[b.priority];
-    });
     return f;
   }, [reminders, search, quickFilter, tick]);
   
   // Group reminders by time section for smart display
-  // Include recently completed items in their original sections (crossed out)
   const groupedByTime = useMemo(() => {
     const groups: Record<string, Reminder[]> = {
       overdue: [],
@@ -1113,9 +1111,10 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       thisWeek: [],
       later: []
     };
-    // Include pending items AND recently completed items (within 1 minute)
+    
     filtered.filter(r => !r.completed || isRecentlyCompleted(r)).forEach(r => {
       const section = getTimeSection(r);
+      if (r.completed) console.log(`[Grouping] Item ${r.title} assigned to section: ${section}`);
       groups[section].push(r);
     });
     return groups;
@@ -1910,17 +1909,19 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
             {/* Quick filter chips */}
           {QUICK_FILTERS.map(filter => {
             const isActive = quickFilter === filter.id;
+            const now = new Date();
+            const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
             const count = filter.id === "all" 
-              ? reminders.filter(r => !r.completed).length
+              ? reminders.filter(r => !r.completed || isRecentlyCompleted(r)).length
               : filter.id === "urgent" 
-                ? reminders.filter(r => !r.completed && r.priority === "urgent").length
+                ? reminders.filter(r => (!r.completed || isRecentlyCompleted(r)) && r.priority === "urgent").length
               : filter.id === "today"
-                ? todayCount
+                ? reminders.filter(r => (!r.completed || isRecentlyCompleted(r)) && r.dueDate === todayStr).length
               : filter.id === "overdue"
-                ? overdueCount
+                ? reminders.filter(r => isOverdue(r)).length
               : filter.id === "completed"
-                ? reminders.filter(r => r.completed).length
-              : reminders.filter(r => !r.completed && r.category === filter.id).length;
+                ? reminders.filter(r => r.completed && !isRecentlyCompleted(r)).length
+              : reminders.filter(r => (!r.completed || isRecentlyCompleted(r)) && r.category === filter.id).length;
             
             return (
               <button
