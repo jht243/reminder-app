@@ -26102,6 +26102,18 @@ var X = createLucideIcon("x", __iconNode25);
 
 // src/ReminderApp.tsx
 var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
+var trackEvent = (event, data = {}) => {
+  try {
+    const baseUrl = window.openai?.serverUrl || "";
+    fetch(`${baseUrl}/api/track`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ event, data })
+    }).catch(() => {
+    });
+  } catch (e) {
+  }
+};
 var COLORS = {
   // Primary sage green palette
   primary: "#2D5A3D",
@@ -26926,6 +26938,9 @@ function ReminderApp({ initialData: initialData2 }) {
     reader.readAsText(file);
   };
   (0, import_react3.useEffect)(() => {
+    trackEvent("load", { reminderCount: reminders.length, hasStats: !!stats.totalPoints });
+  }, []);
+  (0, import_react3.useEffect)(() => {
     persistState(reminders, stats);
   }, [reminders, stats]);
   (0, import_react3.useEffect)(() => {
@@ -27146,6 +27161,7 @@ function ReminderApp({ initialData: initialData2 }) {
     setToast("Updated!");
   };
   const complete = (r) => {
+    trackEvent("complete_task", { category: r.category, priority: r.priority, isRecurring: r.recurrence !== "none" });
     const early = /* @__PURE__ */ new Date(`${r.dueDate}T${r.dueTime || "23:59"}`) > /* @__PURE__ */ new Date();
     let pts = 10 + (early ? 5 : 0) + (r.priority === "urgent" ? 15 : 0) + stats.currentStreak * 2;
     setRecentlyCompletedIds((prev) => ({ ...prev, [r.id]: Date.now() + 6e4 }));
@@ -27251,10 +27267,12 @@ function ReminderApp({ initialData: initialData2 }) {
     setSnoozePopup(null);
   };
   const del = (id) => {
+    trackEvent("delete_reminder", { id });
     setReminders((prev) => prev.filter((r) => r.id !== id));
     setToast("Deleted");
   };
   const resetProgress = () => {
+    trackEvent("reset_progress", { reminderCount: reminders.length, totalPoints: stats.totalPoints });
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(STATS_KEY);
     processedTasksRef.current.clear();
@@ -27337,6 +27355,7 @@ function ReminderApp({ initialData: initialData2 }) {
     setToast(`Generated ${newReminders.length} sample reminders!`);
   };
   const handleScreenshotUpload = async (e) => {
+    trackEvent("screenshot_import", { method: "upload" });
     let file = null;
     if (e instanceof File) {
       file = e;

@@ -7,6 +7,21 @@ import {
   Stethoscope, GraduationCap, Plane, Home, Sparkles, ChevronRight, Upload, FileText, Download, Camera, Wand2
 } from "lucide-react";
 
+// Analytics tracking helper - sends events to server
+const trackEvent = (event: string, data: Record<string, any> = {}) => {
+  try {
+    // Get the server URL from window.openai or fallback to relative path
+    const baseUrl = (window as any).openai?.serverUrl || "";
+    fetch(`${baseUrl}/api/track`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ event, data }),
+    }).catch(() => {}); // Silent fail - don't block UI
+  } catch (e) {
+    // Silent fail
+  }
+};
+
 type Priority = "low" | "medium" | "high" | "urgent";
 type RecurrenceType = "none" | "daily" | "weekly" | "monthly" | "yearly" | "custom";
 type Category = "work" | "family" | "health" | "errands" | "finance" | "social" | "learning" | "travel" | "home" | "other";
@@ -1058,6 +1073,11 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     reader.readAsText(file);
   };
 
+  // Track widget load on mount
+  useEffect(() => {
+    trackEvent("load", { reminderCount: reminders.length, hasStats: !!stats.totalPoints });
+  }, []); // Only on mount
+  
   // Persist whenever reminders or stats change
   useEffect(() => {
     persistState(reminders, stats);
@@ -1326,6 +1346,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   };
   
   const complete = (r: Reminder) => {
+    trackEvent("complete_task", { category: r.category, priority: r.priority, isRecurring: r.recurrence !== "none" });
     const early = new Date(`${r.dueDate}T${r.dueTime || "23:59"}`) > new Date();
     let pts = 10 + (early ? 5 : 0) + (r.priority === "urgent" ? 15 : 0) + stats.currentStreak * 2;
     
@@ -1439,10 +1460,15 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     setSnoozePopup(null);
   };
   
-  const del = (id: string) => { setReminders(prev => prev.filter(r => r.id !== id)); setToast("Deleted"); };
+  const del = (id: string) => { 
+    trackEvent("delete_reminder", { id });
+    setReminders(prev => prev.filter(r => r.id !== id)); 
+    setToast("Deleted"); 
+  };
   
   // Reset all progress (for debugging/fresh start)
   const resetProgress = () => {
+    trackEvent("reset_progress", { reminderCount: reminders.length, totalPoints: stats.totalPoints });
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(STATS_KEY);
     processedTasksRef.current.clear();
@@ -1526,6 +1552,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
 
   // Screenshot handler - auto-analyzes with OCR and adds tasks
   const handleScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent | File) => {
+    trackEvent("screenshot_import", { method: "upload" });
     let file: File | null = null;
     
     if (e instanceof File) {

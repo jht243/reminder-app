@@ -742,19 +742,30 @@ function checkAnalyticsAuth(req: IncomingMessage): boolean {
 
 function humanizeEventName(event: string): string {
   const eventMap: Record<string, string> = {
+    // Core analytics events
     tool_call_success: "Tool Call Success",
     tool_call_error: "Tool Call Error",
+    tool_call_empty: "Tool Call Empty",
     parameter_parse_error: "Parameter Parse Error",
-    widget_carousel_prev: "Carousel Previous",
-    widget_carousel_next: "Carousel Next",
-    widget_filter_age_change: "Filter: Age Change",
-    widget_filter_state_change: "Filter: State Change",
-    widget_filter_sort_change: "Filter: Sort Change",
-    widget_filter_category_change: "Filter: Category Change",
+    // Reminder-specific widget events
+    widget_create_reminder: "Create Reminder",
+    widget_complete_task: "Complete Task",
+    widget_uncomplete_task: "Uncomplete Task",
+    widget_delete_reminder: "Delete Reminder",
+    widget_edit_reminder: "Edit Reminder",
+    widget_filter_change: "Filter Change",
+    widget_category_change: "Category Change",
+    widget_search: "Search",
+    widget_screenshot_import: "Screenshot Import",
+    widget_reset_progress: "Reset Progress",
+    // General widget events
     widget_user_feedback: "User Feedback",
     widget_test_event: "Test Event",
     widget_followup_click: "Follow-up Click",
     widget_crash: "Widget Crash",
+    widget_load: "Widget Load",
+    widget_hydration_success: "Hydration Success",
+    widget_hydration_error: "Hydration Error",
   };
   return eventMap[event] || event;
 }
