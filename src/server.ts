@@ -196,7 +196,7 @@ function widgetMeta(widget: ReminderWidget, bustCache: boolean = false) {
   return {
     "openai/outputTemplate": templateUri,
     "openai/widgetDescription":
-      "Create Reminders App - An AI-powered reminder app with natural language input. Type tasks like 'Call mom tomorrow at 5pm' and they're automatically parsed. Features gamification with points, streaks, and achievements. Supports recurring reminders, categories, and priority levels.",
+      "Create Reminders App - An AI-powered reminder app with natural language input. No input is required to open the app: prompts like 'create a reminder', 'open the reminder app', or 'show my reminders' should open the widget immediately. If you do provide details (e.g. 'Call mom tomorrow at 5pm'), they'll be parsed automatically. Features gamification with points, streaks, and achievements. Supports recurring reminders, categories, and priority levels.",
     "openai/componentDescriptions": {
       "task-input": "Natural language input for creating reminders - just type what you need to remember.",
       "reminder-list": "Organized display of reminders with category filters, search, and sorting.",
@@ -219,13 +219,16 @@ function widgetMeta(widget: ReminderWidget, bustCache: boolean = false) {
       "snooze"
     ],
     "openai/sampleConversations": [
+      { "user": "Create a reminder", "assistant": "Opening Create Reminders App." },
+      { "user": "Open the reminder app", "assistant": "Opening Create Reminders App." },
       { "user": "Remind me to call mom tomorrow at 3pm", "assistant": "Opening Create Reminders App. I've added 'Call mom' for tomorrow at 3pm." },
       { "user": "I need to buy groceries, pay rent on Friday, and schedule a dentist appointment", "assistant": "Opening Create Reminders App. I've added 3 reminders for you." },
       { "user": "Set a daily reminder to take vitamins at 9am", "assistant": "Done! I've created a daily recurring reminder for vitamins at 9am." },
       { "user": "What tasks do I have this week?", "assistant": "Here are your reminders for this week in Create Reminders App." },
-      { "user": "Help me stay organized", "assistant": "Opening Create Reminders App - add your tasks using natural language!" },
     ],
     "openai/starterPrompts": [
+      "Create a reminder",
+      "Open the reminder app",
       "Remind me to call mom tomorrow at 5pm",
       "Add: Buy groceries, Pay bills Friday, Call dentist",
       "Set a daily reminder to take vitamins",
@@ -258,7 +261,7 @@ const widgets: ReminderWidget[] = [
     invoking:
       "Opening Create Reminders App...",
     invoked:
-      "Here is Create Reminders App. Create reminders using natural language, track your progress, and earn points for staying organized!",
+      "Here is Create Reminders App. No input is required to open — add reminders using natural language when you're ready.",
     html: readWidgetHtml("reminder-app"),
   },
 ];
@@ -356,7 +359,7 @@ const tools: Tool[] = [
   ...widgets.map((widget) => ({
   name: widget.id,
   description:
-    "Use this to manage reminders with natural language input, organized displays, search/filter, recurring reminders, snooze, and gamification. Call this tool to create, view, or manage reminders. Supports natural language like 'remind me to call mom tomorrow at 3pm'.",
+    "Open Create Reminders App. No input is required: prompts like 'create a reminder', 'open the reminder app', or 'show my reminders' should open the widget immediately. If the user provides reminder details (e.g. 'Call mom tomorrow at 3pm'), they will be parsed and pre-filled. Use this tool to create, view, and manage reminders (search/filter, recurring, snooze, gamification).",
   inputSchema: toolInputSchema,
   outputSchema: {
     type: "object",
