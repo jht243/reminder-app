@@ -1080,10 +1080,11 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   
   // Process hydration action from ChatGPT prompt
   useEffect(() => {
-    if (!initialData?.action) return;
+    if (!initialData?.action || initialData.action === "open") return;
     
-    const action = initialData.action;
-    console.log("[Hydration] Processing action:", action, initialData);
+    try {
+      const action = initialData.action;
+      console.log("[Hydration] Processing action:", action, initialData);
     
     if (action === "create" && initialData.title) {
       // Create a new reminder from prompt
@@ -1195,11 +1196,12 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
               }
             : r
         ));
-        const duration = initialData.snoozeMinutes >= 1440 
-          ? `${Math.floor(initialData.snoozeMinutes / 1440)} day(s)` 
-          : initialData.snoozeMinutes >= 60 
-            ? `${Math.floor(initialData.snoozeMinutes / 60)} hour(s)`
-            : `${initialData.snoozeMinutes} min`;
+        const mins = initialData.snoozeMinutes || 60;
+        const duration = mins >= 1440 
+          ? `${Math.floor(mins / 1440)} day(s)` 
+          : mins >= 60 
+            ? `${Math.floor(mins / 60)} hour(s)`
+            : `${mins} min`;
         setToast(`💤 Snoozed "${toSnooze.title}" for ${duration}`);
         trackEvent("snooze_reminder", { source: "hydration", title: toSnooze.title, minutes: initialData.snoozeMinutes });
       } else {
@@ -1253,6 +1255,9 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       setQuickFilter(newFilter);
       setToast(`📋 Showing: ${initialData.filterType} reminders`);
       trackEvent("filter_change", { source: "hydration", filter: newFilter });
+    }
+    } catch (err) {
+      console.error("[Hydration] Error processing action:", err);
     }
   }, [initialData?.action]); // Only run when action changes
   

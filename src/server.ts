@@ -196,7 +196,7 @@ function widgetMeta(widget: ReminderWidget, bustCache: boolean = false) {
   return {
     "openai/outputTemplate": templateUri,
     "openai/widgetDescription":
-      "Create Reminders App - An AI-powered reminder app with natural language input. Type tasks like 'Call mom tomorrow at 5pm' and they're automatically parsed. Features gamification with points, streaks, and achievements. Supports recurring reminders, categories, and priority levels.",
+      "Create Reminders App - An AI-powered reminder app with natural language input. Works with general prompts too — if the user says something like 'create a reminder' or 'show my reminders' with no specific details, the app opens ready to use with an empty input field. Type tasks like 'Call mom tomorrow at 5pm' and they're automatically parsed. Features gamification with points, streaks, and achievements. Supports recurring reminders, categories, and priority levels.",
     "openai/componentDescriptions": {
       "task-input": "Natural language input for creating reminders - just type what you need to remember.",
       "reminder-list": "Organized display of reminders with category filters, search, and sorting.",
@@ -288,6 +288,7 @@ const toolInputSchema = {
   },
   required: [],
   additionalProperties: false,
+  $schema: "http://json-schema.org/draft-07/schema#",
 } as const;
 
 const toolInputParser = z.object({
@@ -325,49 +326,21 @@ const saveRemindersSchema = {
           priority: { type: "string" },
           category: { type: "string" },
           recurrence: { type: "string" },
-          recurrenceInterval: { type: "number" },
-          recurrenceUnit: { type: "string" },
-          recurrenceDays: { type: "array", items: { type: "number" } },
           completed: { type: "boolean" },
-          completedAt: { type: ["string", "null"] },
-          createdAt: { type: "string" },
-          pointsAwarded: { type: "number" },
         },
         additionalProperties: true,
-        required: ["id", "title"],
       },
     },
     stats: { 
       type: "object", 
       description: "User stats object.",
-      properties: {
-        totalPoints: { type: "number" },
-        currentStreak: { type: "number" },
-        longestStreak: { type: "number" },
-        lastActiveDate: { type: ["string", "null"] },
-        completedAllTime: { type: "number" },
-        level: { type: "number" },
-        achievements: { 
-          type: "array",
-          items: {
-            type: "object",
-            properties: {
-              id: { type: "string" },
-              name: { type: "string" },
-              icon: { type: "string" },
-              unlocked: { type: "boolean" },
-            },
-            additionalProperties: true,
-          },
-        },
-        completedTasks: { type: "array", items: { type: "string" } },
-      },
       additionalProperties: true,
     },
     savedAt: { type: "number", description: "Timestamp when saved." },
   },
   required: ["reminders"],
   additionalProperties: true,
+  $schema: "http://json-schema.org/draft-07/schema#",
 } as const;
 
 // Create the save_reminders tool
@@ -398,7 +371,7 @@ const tools: Tool[] = [
   ...widgets.map((widget) => ({
   name: widget.id,
   description:
-    "Use this to manage reminders with natural language input, organized displays, search/filter, recurring reminders, snooze, and gamification. Call this tool to create, view, or manage reminders. Supports natural language like 'remind me to call mom tomorrow at 3pm'.",
+    "Use this to manage reminders with natural language input. NO INPUT IS REQUIRED to open this tool - simple prompts like 'create a reminder', 'show my reminders', or 'open the reminder app' will open the widget ready to use. Optionally accepts natural language like 'remind me to call mom tomorrow at 3pm' to pre-populate a reminder. Features organized displays, search/filter, recurring reminders, snooze, and gamification.",
   inputSchema: toolInputSchema,
   outputSchema: {
     type: "object",
