@@ -288,7 +288,6 @@ const toolInputSchema = {
   },
   required: [],
   additionalProperties: false,
-  $schema: "http://json-schema.org/draft-07/schema#",
 } as const;
 
 const toolInputParser = z.object({
@@ -330,11 +329,12 @@ const saveRemindersSchema = {
           recurrenceUnit: { type: "string" },
           recurrenceDays: { type: "array", items: { type: "number" } },
           completed: { type: "boolean" },
-          completedAt: { type: "string" },
+          completedAt: { type: ["string", "null"] },
           createdAt: { type: "string" },
           pointsAwarded: { type: "number" },
         },
         additionalProperties: true,
+        required: ["id", "title"],
       },
     },
     stats: { 
@@ -368,7 +368,6 @@ const saveRemindersSchema = {
   },
   required: ["reminders"],
   additionalProperties: true,
-  $schema: "http://json-schema.org/draft-07/schema#",
 } as const;
 
 // Create the save_reminders tool
