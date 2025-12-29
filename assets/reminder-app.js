@@ -26809,6 +26809,7 @@ var loadInitialState = (initialData2) => {
     totalPoints: 0,
     currentStreak: 0,
     longestStreak: 0,
+    lastActiveDate: null,
     completedAllTime: 0,
     level: 1,
     achievements: [...DEFAULT_ACHIEVEMENTS],
@@ -26876,6 +26877,7 @@ function ReminderApp({ initialData: initialData2 }) {
   const [importOpen, setImportOpen] = (0, import_react3.useState)(false);
   const [dragActive, setDragActive] = (0, import_react3.useState)(false);
   const [screenshotModal, setScreenshotModal] = (0, import_react3.useState)({ open: false, imageData: null, analyzing: false, progress: 0 });
+  const [celebrationDismissed, setCelebrationDismissed] = (0, import_react3.useState)(false);
   const handleFileUpload = (e) => {
     e.preventDefault();
     setDragActive(false);
@@ -27173,7 +27175,21 @@ function ReminderApp({ initialData: initialData2 }) {
     } else {
       setReminders((prev) => prev.map((x) => x.id === r.id ? updated : x));
     }
-    const newStats = { ...stats, totalPoints: stats.totalPoints + pts, completedAllTime: stats.completedAllTime + 1, currentStreak: stats.currentStreak + 1 };
+    const today = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
+    let newStreak = stats.currentStreak;
+    if (stats.lastActiveDate !== today) {
+      const yesterday = /* @__PURE__ */ new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split("T")[0];
+      if (stats.lastActiveDate === yesterdayStr) {
+        newStreak = stats.currentStreak + 1;
+      } else if (!stats.lastActiveDate) {
+        newStreak = 1;
+      } else {
+        newStreak = 1;
+      }
+    }
+    const newStats = { ...stats, totalPoints: stats.totalPoints + pts, completedAllTime: stats.completedAllTime + 1, currentStreak: newStreak, lastActiveDate: today };
     if (newStats.currentStreak > newStats.longestStreak) newStats.longestStreak = newStats.currentStreak;
     newStats.level = calcLevel(newStats.totalPoints).level;
     if (!newStats.achievements[0].unlocked && newStats.completedAllTime >= 1) {
@@ -27247,6 +27263,7 @@ function ReminderApp({ initialData: initialData2 }) {
       totalPoints: 0,
       currentStreak: 0,
       longestStreak: 0,
+      lastActiveDate: null,
       completedAllTime: 0,
       level: 1,
       achievements: [...DEFAULT_ACHIEVEMENTS],
@@ -27453,30 +27470,6 @@ function ReminderApp({ initialData: initialData2 }) {
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 18, fontWeight: 600, letterSpacing: "-0.3px" }, children: "Smart Reminders" })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 8, fontSize: 13 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
-          "button",
-          {
-            onClick: () => setImportOpen(true),
-            style: {
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "6px 12px",
-              borderRadius: 50,
-              backgroundColor: "rgba(255,255,255,0.15)",
-              color: "#fff",
-              border: "none",
-              cursor: "pointer",
-              fontSize: 13,
-              fontWeight: 500
-            },
-            title: "Import from Calendar/Excel",
-            children: [
-              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Upload, { size: 14 }),
-              " Import"
-            ]
-          }
-        ),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
           display: "flex",
           alignItems: "center",
@@ -27521,7 +27514,7 @@ function ReminderApp({ initialData: initialData2 }) {
         ] })
       ] })
     ] }) }),
-    hint && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
+    hint && completedTaskCount < totalTaskCount && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
       backgroundColor: COLORS.card,
       borderRadius: cardRadius,
       padding: "16px 20px",
@@ -27591,17 +27584,47 @@ function ReminderApp({ initialData: initialData2 }) {
         )
       ] })
     ] }),
-    completedTaskCount === totalTaskCount && totalTaskCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
+    completedTaskCount === totalTaskCount && totalTaskCount > 0 && !celebrationDismissed && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: "rgba(0,0,0,0.4)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 1200,
+      padding: 16
+    }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
       backgroundColor: COLORS.card,
-      borderRadius: cardRadius,
-      padding: "16px 20px",
-      marginBottom: 12,
+      borderRadius: 24,
+      padding: 32,
       textAlign: "center",
-      boxShadow: cardShadow
+      boxShadow: "0 16px 48px rgba(0,0,0,0.2)",
+      maxWidth: 360
     }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 24 }, children: "\u{1F3C6}" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { marginLeft: 10, fontSize: 15, fontWeight: 500, color: COLORS.textMain }, children: "All tasks complete! You're a reminder master!" })
-    ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 64, marginBottom: 16 }, children: "\u{1F3C6}" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 20, fontWeight: 700, color: COLORS.textMain, marginBottom: 8 }, children: "All Tasks Complete!" }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 14, color: COLORS.textSecondary, marginBottom: 24 }, children: "You're a reminder master! Keep up the great work." }),
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+        "button",
+        {
+          onClick: () => setCelebrationDismissed(true),
+          style: {
+            padding: "12px 32px",
+            borderRadius: 50,
+            backgroundColor: COLORS.primary,
+            color: "#fff",
+            border: "none",
+            cursor: "pointer",
+            fontSize: 14,
+            fontWeight: 600
+          },
+          children: "Continue"
+        }
+      )
+    ] }) }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
       backgroundColor: COLORS.card,
       borderRadius: cardRadius,

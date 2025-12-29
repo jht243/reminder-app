@@ -44,6 +44,7 @@ interface UserStats {
   totalPoints: number;
   currentStreak: number;
   longestStreak: number;
+  lastActiveDate: string | null; // Track last day user completed a task for proper streak
   completedAllTime: number;
   level: number;
   achievements: { id: string; name: string; icon: string; unlocked: boolean }[];
@@ -894,7 +895,7 @@ const persistState = (reminders: Reminder[], stats: UserStats) => {
 // Helper to load initial state
 const loadInitialState = (initialData: any): { reminders: Reminder[], stats: UserStats } => {
   const defaultStats: UserStats = {
-    totalPoints: 0, currentStreak: 0, longestStreak: 0,
+    totalPoints: 0, currentStreak: 0, longestStreak: 0, lastActiveDate: null,
     completedAllTime: 0, level: 1, achievements: [...DEFAULT_ACHIEVEMENTS],
     completedTasks: []
   };
@@ -994,6 +995,9 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     analyzing: boolean;
     progress: number;
   }>({ open: false, imageData: null, analyzing: false, progress: 0 });
+  
+  // Celebration popup - only show once per completion cycle
+  const [celebrationDismissed, setCelebrationDismissed] = useState(false);
 
   // File Upload Handler
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
@@ -1361,7 +1365,28 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       setReminders(prev => prev.map(x => x.id === r.id ? updated : x));
     }
     
-    const newStats = { ...stats, totalPoints: stats.totalPoints + pts, completedAllTime: stats.completedAllTime + 1, currentStreak: stats.currentStreak + 1 };
+    // Calculate streak properly based on actual days
+    const today = new Date().toISOString().split("T")[0];
+    let newStreak = stats.currentStreak;
+    if (stats.lastActiveDate !== today) {
+      // First completion of the day
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split("T")[0];
+      
+      if (stats.lastActiveDate === yesterdayStr) {
+        // Consecutive day - increase streak
+        newStreak = stats.currentStreak + 1;
+      } else if (!stats.lastActiveDate) {
+        // First ever completion
+        newStreak = 1;
+      } else {
+        // Streak broken - restart at 1
+        newStreak = 1;
+      }
+    }
+    
+    const newStats = { ...stats, totalPoints: stats.totalPoints + pts, completedAllTime: stats.completedAllTime + 1, currentStreak: newStreak, lastActiveDate: today };
     if (newStats.currentStreak > newStats.longestStreak) newStats.longestStreak = newStats.currentStreak;
     newStats.level = calcLevel(newStats.totalPoints).level;
     
@@ -1423,7 +1448,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     processedTasksRef.current.clear();
     setReminders([]);
     setStats({
-      totalPoints: 0, currentStreak: 0, longestStreak: 0,
+      totalPoints: 0, currentStreak: 0, longestStreak: 0, lastActiveDate: null,
       completedAllTime: 0, level: 1, achievements: [...DEFAULT_ACHIEVEMENTS],
       completedTasks: []
     });
@@ -1659,18 +1684,6 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
             <span style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.3px" }}>Smart Reminders</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
-            <button 
-              onClick={() => setImportOpen(true)}
-              style={{
-                display: "flex", alignItems: "center", gap: 6,
-                padding: "6px 12px", borderRadius: 50,
-                backgroundColor: "rgba(255,255,255,0.15)", color: "#fff",
-                border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500
-              }}
-              title="Import from Calendar/Excel"
-            >
-              <Upload size={14} /> Import
-            </button>
             <div style={{ 
               display: "flex", alignItems: "center", gap: 6, 
               backgroundColor: "rgba(255,255,255,0.12)", 
@@ -1699,8 +1712,8 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
         </div>
       </div>
       
-      {/* Gamification Hint/Guide - modern card style */}
-      {hint && (
+      {/* Gamification Hint/Guide - modern card style - hide when all complete */}
+      {hint && completedTaskCount < totalTaskCount && (
         <div style={{ 
           backgroundColor: COLORS.card, 
           borderRadius: cardRadius, 
@@ -1758,20 +1771,49 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
         </div>
       )}
       
-      {/* All tasks complete celebration */}
-      {completedTaskCount === totalTaskCount && totalTaskCount > 0 && (
+      {/* All tasks complete celebration popup - dismissible, shown once */}
+      {completedTaskCount === totalTaskCount && totalTaskCount > 0 && !celebrationDismissed && (
         <div style={{ 
-          backgroundColor: COLORS.card, 
-          borderRadius: cardRadius, 
-          padding: "16px 20px", 
-          marginBottom: 12, 
-          textAlign: "center",
-          boxShadow: cardShadow
+          position: "fixed", 
+          top: 0, left: 0, right: 0, bottom: 0, 
+          backgroundColor: "rgba(0,0,0,0.4)", 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center", 
+          zIndex: 1200, 
+          padding: 16 
         }}>
-          <span style={{ fontSize: 24 }}>🏆</span>
-          <span style={{ marginLeft: 10, fontSize: 15, fontWeight: 500, color: COLORS.textMain }}>
-            All tasks complete! You're a reminder master!
-          </span>
+          <div style={{ 
+            backgroundColor: COLORS.card, 
+            borderRadius: 24, 
+            padding: 32, 
+            textAlign: "center",
+            boxShadow: "0 16px 48px rgba(0,0,0,0.2)",
+            maxWidth: 360
+          }}>
+            <div style={{ fontSize: 64, marginBottom: 16 }}>🏆</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: COLORS.textMain, marginBottom: 8 }}>
+              All Tasks Complete!
+            </div>
+            <div style={{ fontSize: 14, color: COLORS.textSecondary, marginBottom: 24 }}>
+              You're a reminder master! Keep up the great work.
+            </div>
+            <button
+              onClick={() => setCelebrationDismissed(true)}
+              style={{
+                padding: "12px 32px",
+                borderRadius: 50,
+                backgroundColor: COLORS.primary,
+                color: "#fff",
+                border: "none",
+                cursor: "pointer",
+                fontSize: 14,
+                fontWeight: 600
+              }}
+            >
+              Continue
+            </button>
+          </div>
         </div>
       )}
       
