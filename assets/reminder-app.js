@@ -26843,10 +26843,8 @@ var loadInitialState = (initialData2) => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        const { data, timestamp } = JSON.parse(saved);
-        const now = (/* @__PURE__ */ new Date()).getTime();
-        const daysDiff = (now - timestamp) / (1e3 * 60 * 60 * 24);
-        if (daysDiff < 30 && data?.reminders) {
+        const { data } = JSON.parse(saved);
+        if (data?.reminders) {
           baseReminders = data.reminders;
           baseStats = data.stats || defaultStats;
           console.log("[Load] Using localStorage:", baseReminders.length, "reminders");

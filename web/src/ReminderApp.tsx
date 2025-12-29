@@ -930,17 +930,13 @@ const loadInitialState = (initialData: any): { reminders: Reminder[], stats: Use
     } catch (e) {}
   }
   
-  // Priority 3: localStorage fallback (following prior projects pattern)
+  // Priority 3: localStorage fallback (no expiration - persists until reset)
   if (baseReminders.length === 0) {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        const { data, timestamp } = JSON.parse(saved);
-        const now = new Date().getTime();
-        const daysDiff = (now - timestamp) / (1000 * 60 * 60 * 24);
-        
-        // Only use data if less than 30 days old
-        if (daysDiff < 30 && data?.reminders) {
+        const { data } = JSON.parse(saved);
+        if (data?.reminders) {
           baseReminders = data.reminders;
           baseStats = data.stats || defaultStats;
           console.log("[Load] Using localStorage:", baseReminders.length, "reminders");
