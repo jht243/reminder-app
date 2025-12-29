@@ -985,6 +985,10 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   // Import Modal State
   const [importOpen, setImportOpen] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  
+  // Screenshot import modal state
+  const [screenshotModalOpen, setScreenshotModalOpen] = useState(false);
+  const [screenshotText, setScreenshotText] = useState("");
 
   // File Upload Handler
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
@@ -1490,7 +1494,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     setToast(`Generated ${newReminders.length} sample reminders!`);
   };
 
-  // Screenshot OCR handler - extracts reminders from uploaded screenshot
+  // Screenshot OCR handler - opens modal for text input
   const handleScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -1501,63 +1505,49 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       return;
     }
 
-    setToast("Analyzing screenshot...");
-
-    // Convert to base64 for display and potential API use
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const base64 = event.target?.result as string;
-      
-      // For now, use a simple OCR approach via browser's built-in capabilities
-      // In production, this would call an AI vision API like GPT-4V or Google Vision
-      // Simulating extraction with common reminder patterns
-      
-      // Create a canvas to process the image
-      const img = new Image();
-      img.onload = () => {
-        // For demo purposes, we'll show a modal asking user to describe what they see
-        // In a real implementation, this would use an OCR/Vision API
-        const userInput = prompt(
-          "📸 Screenshot uploaded!\n\n" +
-          "Since browser-based OCR is limited, please paste the text from your screenshot here.\n\n" +
-          "Tip: You can also just type your reminders separated by commas or newlines."
-        );
-        
-        if (userInput && userInput.trim()) {
-          // Parse the user's input as bulk reminders
-          const lines = userInput.split(/[,\n]/).map(s => s.trim()).filter(s => s.length > 2);
-          const newReminders: Reminder[] = lines.map(line => {
-            const parsed = parseNaturalLanguage(line.replace(/^[-*•]\s*/, ""));
-            return {
-              id: generateId(),
-              title: parsed.title,
-              dueDate: parsed.dueDate,
-              dueTime: parsed.dueTime,
-              priority: parsed.priority,
-              category: parsed.category,
-              recurrence: parsed.recurrence,
-              recurrenceInterval: parsed.recurrenceInterval,
-              recurrenceUnit: parsed.recurrenceUnit,
-              completed: false,
-              createdAt: new Date().toISOString(),
-              pointsAwarded: 0
-            };
-          });
-          
-          if (newReminders.length > 0) {
-            setReminders(prev => [...prev, ...newReminders]);
-            setToast(`Imported ${newReminders.length} reminders from screenshot!`);
-          } else {
-            setToast("No reminders found in input");
-          }
-        }
-      };
-      img.src = base64;
-    };
-    reader.readAsDataURL(file);
+    // Open modal for user to paste/type the reminder text
+    setScreenshotText("");
+    setScreenshotModalOpen(true);
     
     // Reset the input so the same file can be uploaded again
     e.target.value = "";
+  };
+  
+  // Process screenshot text and create reminders
+  const processScreenshotText = () => {
+    if (!screenshotText.trim()) {
+      setToast("Please enter some text");
+      return;
+    }
+    
+    // Parse the user's input as bulk reminders
+    const lines = screenshotText.split(/[,\n]/).map(s => s.trim()).filter(s => s.length > 2);
+    const newReminders: Reminder[] = lines.map(line => {
+      const parsed = parseNaturalLanguage(line.replace(/^[-*•]\s*/, ""));
+      return {
+        id: generateId(),
+        title: parsed.title,
+        dueDate: parsed.dueDate,
+        dueTime: parsed.dueTime,
+        priority: parsed.priority,
+        category: parsed.category,
+        recurrence: parsed.recurrence,
+        recurrenceInterval: parsed.recurrenceInterval,
+        recurrenceUnit: parsed.recurrenceUnit,
+        completed: false,
+        createdAt: new Date().toISOString(),
+        pointsAwarded: 0
+      };
+    });
+    
+    if (newReminders.length > 0) {
+      setReminders(prev => [...prev, ...newReminders]);
+      setToast(`Imported ${newReminders.length} reminders!`);
+      setScreenshotModalOpen(false);
+      setScreenshotText("");
+    } else {
+      setToast("No valid reminders found");
+    }
   };
   
   // Round icon component for modern minimal style
@@ -2485,6 +2475,68 @@ OR just paste a list:
         </div>
       )}
 
+      {/* Screenshot Text Input Modal */}
+      {screenshotModalOpen && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 1000, padding: 20
+        }} onClick={() => setScreenshotModalOpen(false)}>
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: COLORS.card, borderRadius: 20, padding: 24, maxWidth: 500, width: "100%",
+              boxShadow: "0 20px 40px rgba(0,0,0,0.15)"
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: COLORS.textMain }}>📸 Import Reminders</h3>
+              <button onClick={() => setScreenshotModalOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", padding: 4 }}>
+                <X size={20} color={COLORS.textMuted} />
+              </button>
+            </div>
+            
+            <p style={{ fontSize: 13, color: COLORS.textSecondary, marginBottom: 16 }}>
+              Paste or type your reminders below. Each line or comma-separated item will become a reminder.
+            </p>
+            
+            <textarea
+              value={screenshotText}
+              onChange={(e) => setScreenshotText(e.target.value)}
+              placeholder="Example:&#10;Buy groceries tomorrow at 5pm&#10;Call mom on Monday&#10;Doctor appointment next week"
+              style={{
+                width: "100%", minHeight: 150, padding: 12, borderRadius: 12,
+                border: `1px solid ${COLORS.border}`, backgroundColor: COLORS.cardAlt,
+                fontSize: 14, color: COLORS.textMain, resize: "vertical",
+                fontFamily: "inherit"
+              }}
+              autoFocus
+            />
+            
+            <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+              <button
+                onClick={() => setScreenshotModalOpen(false)}
+                style={{
+                  flex: 1, padding: "12px 20px", borderRadius: 50, border: `1px solid ${COLORS.border}`,
+                  backgroundColor: COLORS.cardAlt, color: COLORS.textMain, fontSize: 14, fontWeight: 500, cursor: "pointer"
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={processScreenshotText}
+                style={{
+                  flex: 1, padding: "12px 20px", borderRadius: 50, border: "none",
+                  backgroundColor: COLORS.primary, color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer"
+                }}
+              >
+                Import Reminders
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Footer Actions */}
       <div style={{ 
         marginTop: 24, 
@@ -2495,25 +2547,21 @@ OR just paste a list:
       }}>
         <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.textMain, marginBottom: 12 }}>Quick Actions</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-          {/* Screenshot Upload */}
-          <label style={{
-            display: "flex", alignItems: "center", gap: 8,
-            padding: "10px 16px", borderRadius: 50,
-            backgroundColor: COLORS.cardAlt, color: COLORS.textMain,
-            fontSize: 13, fontWeight: 500, cursor: "pointer",
-            border: `1px solid ${COLORS.border}`,
-            transition: "all 0.2s"
-          }}>
+          {/* Bulk Import - opens modal directly */}
+          <button
+            onClick={() => { setScreenshotText(""); setScreenshotModalOpen(true); }}
+            style={{
+              display: "flex", alignItems: "center", gap: 8,
+              padding: "10px 16px", borderRadius: 50,
+              backgroundColor: COLORS.cardAlt, color: COLORS.textMain,
+              fontSize: 13, fontWeight: 500, cursor: "pointer",
+              border: `1px solid ${COLORS.border}`,
+              transition: "all 0.2s"
+            }}
+          >
             <Camera size={16} color={COLORS.primary} />
-            Import from Screenshot
-            <input 
-              type="file" 
-              accept="image/*" 
-              capture="environment"
-              onChange={handleScreenshotUpload}
-              style={{ display: "none" }}
-            />
-          </label>
+            Bulk Import
+          </button>
           
           {/* Generate 40 Reminders */}
           <button
@@ -2532,7 +2580,7 @@ OR just paste a list:
           </button>
         </div>
         <div style={{ fontSize: 11, color: COLORS.textMuted, marginTop: 10 }}>
-          📸 Upload a screenshot of your existing reminders to import them instantly
+          📝 Paste multiple reminders at once or generate sample data
         </div>
       </div>
 

@@ -25555,6 +25555,8 @@ function ReminderApp({ initialData: initialData2 }) {
   const [achievement, setAchievement] = (0, import_react3.useState)(null);
   const [importOpen, setImportOpen] = (0, import_react3.useState)(false);
   const [dragActive, setDragActive] = (0, import_react3.useState)(false);
+  const [screenshotModalOpen, setScreenshotModalOpen] = (0, import_react3.useState)(false);
+  const [screenshotText, setScreenshotText] = (0, import_react3.useState)("");
   const handleFileUpload = (e) => {
     e.preventDefault();
     setDragActive(false);
@@ -26005,46 +26007,41 @@ function ReminderApp({ initialData: initialData2 }) {
       setToast("Please upload an image file");
       return;
     }
-    setToast("Analyzing screenshot...");
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const base64 = event.target?.result;
-      const img = new Image();
-      img.onload = () => {
-        const userInput = prompt(
-          "\u{1F4F8} Screenshot uploaded!\n\nSince browser-based OCR is limited, please paste the text from your screenshot here.\n\nTip: You can also just type your reminders separated by commas or newlines."
-        );
-        if (userInput && userInput.trim()) {
-          const lines = userInput.split(/[,\n]/).map((s) => s.trim()).filter((s) => s.length > 2);
-          const newReminders = lines.map((line) => {
-            const parsed2 = parseNaturalLanguage(line.replace(/^[-*•]\s*/, ""));
-            return {
-              id: generateId(),
-              title: parsed2.title,
-              dueDate: parsed2.dueDate,
-              dueTime: parsed2.dueTime,
-              priority: parsed2.priority,
-              category: parsed2.category,
-              recurrence: parsed2.recurrence,
-              recurrenceInterval: parsed2.recurrenceInterval,
-              recurrenceUnit: parsed2.recurrenceUnit,
-              completed: false,
-              createdAt: (/* @__PURE__ */ new Date()).toISOString(),
-              pointsAwarded: 0
-            };
-          });
-          if (newReminders.length > 0) {
-            setReminders((prev) => [...prev, ...newReminders]);
-            setToast(`Imported ${newReminders.length} reminders from screenshot!`);
-          } else {
-            setToast("No reminders found in input");
-          }
-        }
-      };
-      img.src = base64;
-    };
-    reader.readAsDataURL(file);
+    setScreenshotText("");
+    setScreenshotModalOpen(true);
     e.target.value = "";
+  };
+  const processScreenshotText = () => {
+    if (!screenshotText.trim()) {
+      setToast("Please enter some text");
+      return;
+    }
+    const lines = screenshotText.split(/[,\n]/).map((s) => s.trim()).filter((s) => s.length > 2);
+    const newReminders = lines.map((line) => {
+      const parsed2 = parseNaturalLanguage(line.replace(/^[-*•]\s*/, ""));
+      return {
+        id: generateId(),
+        title: parsed2.title,
+        dueDate: parsed2.dueDate,
+        dueTime: parsed2.dueTime,
+        priority: parsed2.priority,
+        category: parsed2.category,
+        recurrence: parsed2.recurrence,
+        recurrenceInterval: parsed2.recurrenceInterval,
+        recurrenceUnit: parsed2.recurrenceUnit,
+        completed: false,
+        createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+        pointsAwarded: 0
+      };
+    });
+    if (newReminders.length > 0) {
+      setReminders((prev) => [...prev, ...newReminders]);
+      setToast(`Imported ${newReminders.length} reminders!`);
+      setScreenshotModalOpen(false);
+      setScreenshotText("");
+    } else {
+      setToast("No valid reminders found");
+    }
   };
   const CategoryIcon = ({ cat, size = 32 }) => {
     const config = CATEGORY_CONFIG[cat];
@@ -27076,6 +27073,98 @@ OR just paste a list:
         }
       )
     ] }) }),
+    screenshotModalOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: "rgba(0,0,0,0.5)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 1e3,
+      padding: 20
+    }, onClick: () => setScreenshotModalOpen(false), children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+      "div",
+      {
+        onClick: (e) => e.stopPropagation(),
+        style: {
+          backgroundColor: COLORS.card,
+          borderRadius: 20,
+          padding: 24,
+          maxWidth: 500,
+          width: "100%",
+          boxShadow: "0 20px 40px rgba(0,0,0,0.15)"
+        },
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", { style: { margin: 0, fontSize: 18, fontWeight: 600, color: COLORS.textMain }, children: "\u{1F4F8} Import Reminders" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setScreenshotModalOpen(false), style: { background: "none", border: "none", cursor: "pointer", padding: 4 }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 20, color: COLORS.textMuted }) })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { fontSize: 13, color: COLORS.textSecondary, marginBottom: 16 }, children: "Paste or type your reminders below. Each line or comma-separated item will become a reminder." }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "textarea",
+            {
+              value: screenshotText,
+              onChange: (e) => setScreenshotText(e.target.value),
+              placeholder: "Example:\nBuy groceries tomorrow at 5pm\nCall mom on Monday\nDoctor appointment next week",
+              style: {
+                width: "100%",
+                minHeight: 150,
+                padding: 12,
+                borderRadius: 12,
+                border: `1px solid ${COLORS.border}`,
+                backgroundColor: COLORS.cardAlt,
+                fontSize: 14,
+                color: COLORS.textMain,
+                resize: "vertical",
+                fontFamily: "inherit"
+              },
+              autoFocus: true
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 12, marginTop: 16 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              "button",
+              {
+                onClick: () => setScreenshotModalOpen(false),
+                style: {
+                  flex: 1,
+                  padding: "12px 20px",
+                  borderRadius: 50,
+                  border: `1px solid ${COLORS.border}`,
+                  backgroundColor: COLORS.cardAlt,
+                  color: COLORS.textMain,
+                  fontSize: 14,
+                  fontWeight: 500,
+                  cursor: "pointer"
+                },
+                children: "Cancel"
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              "button",
+              {
+                onClick: processScreenshotText,
+                style: {
+                  flex: 1,
+                  padding: "12px 20px",
+                  borderRadius: 50,
+                  border: "none",
+                  backgroundColor: COLORS.primary,
+                  color: "#fff",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: "pointer"
+                },
+                children: "Import Reminders"
+              }
+            )
+          ] })
+        ]
+      }
+    ) }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
       marginTop: 24,
       padding: 20,
@@ -27085,33 +27174,33 @@ OR just paste a list:
     }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 13, fontWeight: 600, color: COLORS.textMain, marginBottom: 12 }, children: "Quick Actions" }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", flexWrap: "wrap", gap: 10 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", { style: {
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          padding: "10px 16px",
-          borderRadius: 50,
-          backgroundColor: COLORS.cardAlt,
-          color: COLORS.textMain,
-          fontSize: 13,
-          fontWeight: 500,
-          cursor: "pointer",
-          border: `1px solid ${COLORS.border}`,
-          transition: "all 0.2s"
-        }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Camera, { size: 16, color: COLORS.primary }),
-          "Import from Screenshot",
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-            "input",
-            {
-              type: "file",
-              accept: "image/*",
-              capture: "environment",
-              onChange: handleScreenshotUpload,
-              style: { display: "none" }
-            }
-          )
-        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
+          "button",
+          {
+            onClick: () => {
+              setScreenshotText("");
+              setScreenshotModalOpen(true);
+            },
+            style: {
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "10px 16px",
+              borderRadius: 50,
+              backgroundColor: COLORS.cardAlt,
+              color: COLORS.textMain,
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: "pointer",
+              border: `1px solid ${COLORS.border}`,
+              transition: "all 0.2s"
+            },
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Camera, { size: 16, color: COLORS.primary }),
+              "Bulk Import"
+            ]
+          }
+        ),
         /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
           "button",
           {
@@ -27137,7 +27226,7 @@ OR just paste a list:
           }
         )
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 11, color: COLORS.textMuted, marginTop: 10 }, children: "\u{1F4F8} Upload a screenshot of your existing reminders to import them instantly" })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 11, color: COLORS.textMuted, marginTop: 10 }, children: "\u{1F4DD} Paste multiple reminders at once or generate sample data" })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
       marginTop: 16,
