@@ -18,6 +18,11 @@ const trackEvent = (event: string, data: Record<string, any> = {}) => {
     } catch {
       baseUrl = rawServerUrl;
     }
+    // In ChatGPT web-sandbox, openai.serverUrl may be missing; a relative /api/track will hit
+    // the sandbox origin (oaiusercontent.com) which returns 405. Force a safe fallback.
+    if (!baseUrl || /oaiusercontent\.com$/i.test(baseUrl)) {
+      baseUrl = "https://reminder-app-3pz5.onrender.com";
+    }
     fetch(`${baseUrl}/api/track`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -12,14 +12,21 @@ import ReminderApp from "./ReminderApp";
  const __getBaseUrl = () => {
    try {
      const raw = (window as any).openai?.serverUrl || "";
-     if (!raw) return "";
+     if (!raw) return "https://reminder-app-3pz5.onrender.com";
      try {
-       return new URL(raw).origin;
+       const origin = new URL(raw).origin;
+       if (/oaiusercontent\.com$/i.test(origin)) {
+         return "https://reminder-app-3pz5.onrender.com";
+       }
+       return origin;
      } catch {
+       if (/oaiusercontent\.com/i.test(raw)) {
+         return "https://reminder-app-3pz5.onrender.com";
+       }
        return raw;
      }
    } catch {
-     return "";
+     return "https://reminder-app-3pz5.onrender.com";
    }
  };
  const __report = async (event: string, data: Record<string, any>) => {

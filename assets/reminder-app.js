@@ -26111,6 +26111,9 @@ var trackEvent = (event, data = {}) => {
     } catch {
       baseUrl = rawServerUrl;
     }
+    if (!baseUrl || /oaiusercontent\.com$/i.test(baseUrl)) {
+      baseUrl = "https://reminder-app-3pz5.onrender.com";
+    }
     fetch(`${baseUrl}/api/track`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -28886,14 +28889,21 @@ var __log = (...args) => console.log(`[t+${__sinceStartMs()}ms]`, ...args);
 var __getBaseUrl = () => {
   try {
     const raw = window.openai?.serverUrl || "";
-    if (!raw) return "";
+    if (!raw) return "https://reminder-app-3pz5.onrender.com";
     try {
-      return new URL(raw).origin;
+      const origin = new URL(raw).origin;
+      if (/oaiusercontent\.com$/i.test(origin)) {
+        return "https://reminder-app-3pz5.onrender.com";
+      }
+      return origin;
     } catch {
+      if (/oaiusercontent\.com/i.test(raw)) {
+        return "https://reminder-app-3pz5.onrender.com";
+      }
       return raw;
     }
   } catch {
-    return "";
+    return "https://reminder-app-3pz5.onrender.com";
   }
 };
 var __report = async (event, data) => {
