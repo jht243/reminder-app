@@ -26817,6 +26817,7 @@ var persistState = (reminders, stats) => {
   }
 };
 var loadInitialState = (initialData2) => {
+  console.log("[Load] loadInitialState called with:", initialData2);
   const defaultStats = {
     totalPoints: 0,
     currentStreak: 0,
@@ -26827,39 +26828,78 @@ var loadInitialState = (initialData2) => {
     achievements: [...DEFAULT_ACHIEVEMENTS],
     completedTasks: []
   };
-  if (initialData2?.reminders && Array.isArray(initialData2.reminders)) {
-    console.log("[Load] Using initialData from server:", initialData2.reminders.length, "reminders");
-    return {
-      reminders: initialData2.reminders,
-      stats: initialData2.stats || defaultStats
-    };
-  }
-  try {
-    const widgetState = window.openai?.widgetState;
-    if (widgetState?.reminders && Array.isArray(widgetState.reminders)) {
-      console.log("[Load] Using widget state:", widgetState.reminders.length, "reminders");
-      return {
-        reminders: widgetState.reminders,
-        stats: widgetState.stats || defaultStats
-      };
+  let baseReminders = [];
+  let baseStats = defaultStats;
+  if (initialData2?.reminders && Array.isArray(initialData2.reminders) && initialData2.reminders.length > 0) {
+    console.log("[Load] Using initialData reminders from server:", initialData2.reminders.length);
+    baseReminders = initialData2.reminders;
+    baseStats = initialData2.stats || defaultStats;
+  } else {
+    try {
+      const widgetState = window.openai?.widgetState;
+      if (widgetState?.reminders && Array.isArray(widgetState.reminders)) {
+        console.log("[Load] Using widget state:", widgetState.reminders.length, "reminders");
+        baseReminders = widgetState.reminders;
+        baseStats = widgetState.stats || defaultStats;
+      }
+    } catch (e) {
     }
-  } catch (e) {
   }
-  try {
-    const savedReminders = localStorage.getItem(STORAGE_KEY);
-    const savedStats = localStorage.getItem(STATS_KEY);
-    if (savedReminders) {
-      const reminders = JSON.parse(savedReminders);
-      console.log("[Load] Using localStorage:", reminders.length, "reminders");
-      return {
-        reminders,
-        stats: savedStats ? JSON.parse(savedStats) : defaultStats
-      };
+  if (baseReminders.length === 0) {
+    try {
+      const savedReminders = localStorage.getItem(STORAGE_KEY);
+      const savedStats = localStorage.getItem(STATS_KEY);
+      if (savedReminders) {
+        baseReminders = JSON.parse(savedReminders);
+        console.log("[Load] Using localStorage:", baseReminders.length, "reminders");
+        baseStats = savedStats ? JSON.parse(savedStats) : defaultStats;
+      }
+    } catch (e) {
     }
-  } catch (e) {
   }
-  console.log("[Load] No saved data found, starting fresh");
-  return { reminders: [], stats: defaultStats };
+  let pendingReminder;
+  if (initialData2?.title) {
+    try {
+      console.log("[Load] Creating reminder from initialData title:", initialData2.title);
+      const today = /* @__PURE__ */ new Date();
+      let category = "other";
+      if (initialData2.tags && initialData2.tags.length > 0) {
+        const tagMap = {
+          work: "work",
+          family: "family",
+          health: "health",
+          errands: "errands",
+          finance: "finance",
+          social: "social",
+          learning: "learning",
+          travel: "travel",
+          home: "home"
+        };
+        category = tagMap[initialData2.tags[0]] || "other";
+      }
+      pendingReminder = {
+        id: `r-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        title: initialData2.title,
+        description: initialData2.description || "",
+        dueDate: initialData2.due_date || today.toISOString().split("T")[0],
+        dueTime: initialData2.due_time || void 0,
+        priority: initialData2.priority || "medium",
+        category,
+        recurrence: initialData2.recurrence || "none",
+        recurrenceInterval: 1,
+        recurrenceUnit: initialData2.recurrence === "weekly" ? "weeks" : initialData2.recurrence === "daily" ? "days" : "weeks",
+        recurrenceDays: initialData2.recurrenceDays,
+        completed: false,
+        createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+        pointsAwarded: 0
+      };
+      baseReminders = [...baseReminders, pendingReminder];
+    } catch (e) {
+      console.error("[Load] Failed to create reminder from initialData:", e);
+    }
+  }
+  console.log("[Load] Final state:", baseReminders.length, "reminders");
+  return { reminders: baseReminders, stats: baseStats, pendingReminder };
 };
 function ReminderApp({ initialData: initialData2 }) {
   const initial = (0, import_react3.useMemo)(() => loadInitialState(initialData2), []);
@@ -26940,159 +26980,6 @@ function ReminderApp({ initialData: initialData2 }) {
   (0, import_react3.useEffect)(() => {
     trackEvent("load", { reminderCount: reminders.length, hasStats: !!stats.totalPoints });
   }, []);
-  (0, import_react3.useEffect)(() => {
-    if (!initialData2?.action || initialData2.action === "open") return;
-    try {
-      const action = initialData2.action;
-      console.log("[Hydration] Processing action:", action, initialData2);
-      if (action === "create" && initialData2.title) {
-        const today = /* @__PURE__ */ new Date();
-        const nextFriday = new Date(today);
-        nextFriday.setDate(today.getDate() + ((5 - today.getDay() + 7) % 7 || 7));
-        let recurrenceDays = initialData2.recurrenceDays;
-        let category = "other";
-        if (initialData2.tags && initialData2.tags.length > 0) {
-          const tagMap = {
-            work: "work",
-            family: "family",
-            health: "health",
-            errands: "errands",
-            finance: "finance",
-            social: "social",
-            learning: "learning",
-            travel: "travel",
-            home: "home"
-          };
-          category = tagMap[initialData2.tags[0]] || "other";
-        }
-        const newReminder = {
-          id: `r-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          title: initialData2.title,
-          description: initialData2.description || "",
-          dueDate: initialData2.due_date || nextFriday.toISOString().split("T")[0],
-          dueTime: initialData2.due_time || void 0,
-          priority: initialData2.priority || "medium",
-          category,
-          recurrence: initialData2.recurrence || "none",
-          recurrenceInterval: 1,
-          recurrenceUnit: initialData2.recurrence === "weekly" ? "weeks" : initialData2.recurrence === "daily" ? "days" : "weeks",
-          recurrenceDays,
-          completed: false,
-          createdAt: (/* @__PURE__ */ new Date()).toISOString(),
-          pointsAwarded: 0
-        };
-        setReminders((prev) => [...prev, newReminder]);
-        setToast(`\u2705 Added: ${newReminder.title}`);
-        trackEvent("create_reminder", { source: "hydration", category, recurrence: newReminder.recurrence });
-      } else if (action === "complete" && initialData2.targetReminder) {
-        const target = initialData2.targetReminder.toLowerCase();
-        const toComplete = reminders.find(
-          (r) => !r.completed && r.title.toLowerCase().includes(target)
-        );
-        if (toComplete) {
-          setReminders((prev) => prev.map(
-            (r) => r.id === toComplete.id ? { ...r, completed: true, completedAt: (/* @__PURE__ */ new Date()).toISOString() } : r
-          ));
-          setToast(`\u2705 Completed: ${toComplete.title}`);
-          trackEvent("complete_task", { source: "hydration", title: toComplete.title });
-        } else {
-          setToast(`\u26A0\uFE0F Couldn't find reminder matching "${initialData2.targetReminder}"`);
-        }
-      } else if (action === "delete" && initialData2.targetReminder) {
-        const target = initialData2.targetReminder.toLowerCase();
-        const toDelete = reminders.find(
-          (r) => r.title.toLowerCase().includes(target)
-        );
-        if (toDelete) {
-          setReminders((prev) => prev.filter((r) => r.id !== toDelete.id));
-          setToast(`\u{1F5D1}\uFE0F Deleted: ${toDelete.title}`);
-          trackEvent("delete_reminder", { source: "hydration", title: toDelete.title });
-        } else {
-          setToast(`\u26A0\uFE0F Couldn't find reminder matching "${initialData2.targetReminder}"`);
-        }
-      } else if (action === "uncomplete" && initialData2.targetReminder) {
-        const target = initialData2.targetReminder.toLowerCase();
-        const toUncomplete = reminders.find(
-          (r) => r.completed && r.title.toLowerCase().includes(target)
-        );
-        if (toUncomplete) {
-          setReminders((prev) => prev.map(
-            (r) => r.id === toUncomplete.id ? { ...r, completed: false, completedAt: void 0 } : r
-          ));
-          setToast(`\u21A9\uFE0F Reopened: ${toUncomplete.title}`);
-          trackEvent("uncomplete_task", { source: "hydration", title: toUncomplete.title });
-        } else {
-          setToast(`\u26A0\uFE0F Couldn't find completed reminder matching "${initialData2.targetReminder}"`);
-        }
-      } else if (action === "snooze" && initialData2.targetReminder) {
-        const target = initialData2.targetReminder.toLowerCase();
-        const toSnooze = reminders.find(
-          (r) => !r.completed && r.title.toLowerCase().includes(target)
-        );
-        if (toSnooze) {
-          const snoozeMs = (initialData2.snoozeMinutes || 60) * 60 * 1e3;
-          const newDueDate = new Date(Date.now() + snoozeMs);
-          setReminders((prev) => prev.map(
-            (r) => r.id === toSnooze.id ? {
-              ...r,
-              dueDate: newDueDate.toISOString().split("T")[0],
-              dueTime: newDueDate.toTimeString().slice(0, 5)
-            } : r
-          ));
-          const mins = initialData2.snoozeMinutes || 60;
-          const duration = mins >= 1440 ? `${Math.floor(mins / 1440)} day(s)` : mins >= 60 ? `${Math.floor(mins / 60)} hour(s)` : `${mins} min`;
-          setToast(`\u{1F4A4} Snoozed "${toSnooze.title}" for ${duration}`);
-          trackEvent("snooze_reminder", { source: "hydration", title: toSnooze.title, minutes: initialData2.snoozeMinutes });
-        } else {
-          setToast(`\u26A0\uFE0F Couldn't find reminder matching "${initialData2.targetReminder}"`);
-        }
-      } else if (action === "edit" && initialData2.targetReminder) {
-        const target = initialData2.targetReminder.toLowerCase();
-        const toEdit = reminders.find((r) => r.title.toLowerCase().includes(target));
-        if (toEdit && initialData2.editField && initialData2.editValue) {
-          setReminders((prev) => prev.map(
-            (r) => r.id === toEdit.id ? { ...r, [initialData2.editField]: initialData2.editValue } : r
-          ));
-          setToast(`\u270F\uFE0F Updated ${initialData2.editField} of "${toEdit.title}"`);
-          trackEvent("edit_reminder", { source: "hydration", title: toEdit.title, field: initialData2.editField });
-        } else if (toEdit) {
-          setEditing(toEdit);
-          setToast(`\u270F\uFE0F Editing: ${toEdit.title}`);
-        } else {
-          setToast(`\u26A0\uFE0F Couldn't find reminder matching "${initialData2.targetReminder}"`);
-        }
-      } else if (action === "filter" && initialData2.filterType) {
-        const filterMap = {
-          today: "today",
-          tomorrow: "today",
-          // Show today view for tomorrow too
-          overdue: "overdue",
-          completed: "completed",
-          pending: "all",
-          urgent: "urgent",
-          all: "all",
-          week: "all",
-          month: "all",
-          // Category filters
-          work: "work",
-          family: "family",
-          health: "health",
-          errands: "errands",
-          finance: "finance",
-          social: "social",
-          learning: "learning",
-          travel: "travel",
-          home: "home"
-        };
-        const newFilter = filterMap[initialData2.filterType] || "all";
-        setQuickFilter(newFilter);
-        setToast(`\u{1F4CB} Showing: ${initialData2.filterType} reminders`);
-        trackEvent("filter_change", { source: "hydration", filter: newFilter });
-      }
-    } catch (err) {
-      console.error("[Hydration] Error processing action:", err);
-    }
-  }, [initialData2?.action]);
   (0, import_react3.useEffect)(() => {
     persistState(reminders, stats);
   }, [reminders, stats]);
