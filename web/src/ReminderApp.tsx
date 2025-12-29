@@ -1159,15 +1159,95 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
         setToast(`⚠️ Couldn't find reminder matching "${initialData.targetReminder}"`);
       }
     }
+    else if (action === "uncomplete" && initialData.targetReminder) {
+      // Uncomplete/reopen a reminder by title match
+      const target = initialData.targetReminder.toLowerCase();
+      const toUncomplete = reminders.find(r => 
+        r.completed && r.title.toLowerCase().includes(target)
+      );
+      if (toUncomplete) {
+        setReminders(prev => prev.map(r => 
+          r.id === toUncomplete.id 
+            ? { ...r, completed: false, completedAt: undefined }
+            : r
+        ));
+        setToast(`↩️ Reopened: ${toUncomplete.title}`);
+        trackEvent("uncomplete_task", { source: "hydration", title: toUncomplete.title });
+      } else {
+        setToast(`⚠️ Couldn't find completed reminder matching "${initialData.targetReminder}"`);
+      }
+    }
+    else if (action === "snooze" && initialData.targetReminder) {
+      // Snooze a reminder by title match
+      const target = initialData.targetReminder.toLowerCase();
+      const toSnooze = reminders.find(r => 
+        !r.completed && r.title.toLowerCase().includes(target)
+      );
+      if (toSnooze) {
+        const snoozeMs = (initialData.snoozeMinutes || 60) * 60 * 1000;
+        const newDueDate = new Date(Date.now() + snoozeMs);
+        setReminders(prev => prev.map(r => 
+          r.id === toSnooze.id 
+            ? { 
+                ...r, 
+                dueDate: newDueDate.toISOString().split("T")[0],
+                dueTime: newDueDate.toTimeString().slice(0, 5)
+              }
+            : r
+        ));
+        const duration = initialData.snoozeMinutes >= 1440 
+          ? `${Math.floor(initialData.snoozeMinutes / 1440)} day(s)` 
+          : initialData.snoozeMinutes >= 60 
+            ? `${Math.floor(initialData.snoozeMinutes / 60)} hour(s)`
+            : `${initialData.snoozeMinutes} min`;
+        setToast(`💤 Snoozed "${toSnooze.title}" for ${duration}`);
+        trackEvent("snooze_reminder", { source: "hydration", title: toSnooze.title, minutes: initialData.snoozeMinutes });
+      } else {
+        setToast(`⚠️ Couldn't find reminder matching "${initialData.targetReminder}"`);
+      }
+    }
+    else if (action === "edit" && initialData.targetReminder) {
+      // Edit a reminder by title match
+      const target = initialData.targetReminder.toLowerCase();
+      const toEdit = reminders.find(r => r.title.toLowerCase().includes(target));
+      if (toEdit && initialData.editField && initialData.editValue) {
+        setReminders(prev => prev.map(r => 
+          r.id === toEdit.id 
+            ? { ...r, [initialData.editField]: initialData.editValue }
+            : r
+        ));
+        setToast(`✏️ Updated ${initialData.editField} of "${toEdit.title}"`);
+        trackEvent("edit_reminder", { source: "hydration", title: toEdit.title, field: initialData.editField });
+      } else if (toEdit) {
+        // Open edit mode for the reminder
+        setEditing(toEdit);
+        setToast(`✏️ Editing: ${toEdit.title}`);
+      } else {
+        setToast(`⚠️ Couldn't find reminder matching "${initialData.targetReminder}"`);
+      }
+    }
     else if (action === "filter" && initialData.filterType) {
-      // Apply filter based on prompt
+      // Apply filter based on prompt - expanded categories
       const filterMap: Record<string, typeof quickFilter> = {
         today: "today",
+        tomorrow: "today", // Show today view for tomorrow too
         overdue: "overdue",
         completed: "completed",
+        pending: "all",
         urgent: "urgent",
         all: "all",
-        week: "all", // Show all for week view
+        week: "all",
+        month: "all",
+        // Category filters
+        work: "work",
+        family: "family",
+        health: "health",
+        errands: "errands",
+        finance: "finance",
+        social: "social",
+        learning: "learning",
+        travel: "travel",
+        home: "home",
       };
       const newFilter = filterMap[initialData.filterType] || "all";
       setQuickFilter(newFilter);

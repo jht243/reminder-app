@@ -27009,15 +27009,78 @@ function ReminderApp({ initialData: initialData2 }) {
       } else {
         setToast(`\u26A0\uFE0F Couldn't find reminder matching "${initialData2.targetReminder}"`);
       }
+    } else if (action === "uncomplete" && initialData2.targetReminder) {
+      const target = initialData2.targetReminder.toLowerCase();
+      const toUncomplete = reminders.find(
+        (r) => r.completed && r.title.toLowerCase().includes(target)
+      );
+      if (toUncomplete) {
+        setReminders((prev) => prev.map(
+          (r) => r.id === toUncomplete.id ? { ...r, completed: false, completedAt: void 0 } : r
+        ));
+        setToast(`\u21A9\uFE0F Reopened: ${toUncomplete.title}`);
+        trackEvent("uncomplete_task", { source: "hydration", title: toUncomplete.title });
+      } else {
+        setToast(`\u26A0\uFE0F Couldn't find completed reminder matching "${initialData2.targetReminder}"`);
+      }
+    } else if (action === "snooze" && initialData2.targetReminder) {
+      const target = initialData2.targetReminder.toLowerCase();
+      const toSnooze = reminders.find(
+        (r) => !r.completed && r.title.toLowerCase().includes(target)
+      );
+      if (toSnooze) {
+        const snoozeMs = (initialData2.snoozeMinutes || 60) * 60 * 1e3;
+        const newDueDate = new Date(Date.now() + snoozeMs);
+        setReminders((prev) => prev.map(
+          (r) => r.id === toSnooze.id ? {
+            ...r,
+            dueDate: newDueDate.toISOString().split("T")[0],
+            dueTime: newDueDate.toTimeString().slice(0, 5)
+          } : r
+        ));
+        const duration = initialData2.snoozeMinutes >= 1440 ? `${Math.floor(initialData2.snoozeMinutes / 1440)} day(s)` : initialData2.snoozeMinutes >= 60 ? `${Math.floor(initialData2.snoozeMinutes / 60)} hour(s)` : `${initialData2.snoozeMinutes} min`;
+        setToast(`\u{1F4A4} Snoozed "${toSnooze.title}" for ${duration}`);
+        trackEvent("snooze_reminder", { source: "hydration", title: toSnooze.title, minutes: initialData2.snoozeMinutes });
+      } else {
+        setToast(`\u26A0\uFE0F Couldn't find reminder matching "${initialData2.targetReminder}"`);
+      }
+    } else if (action === "edit" && initialData2.targetReminder) {
+      const target = initialData2.targetReminder.toLowerCase();
+      const toEdit = reminders.find((r) => r.title.toLowerCase().includes(target));
+      if (toEdit && initialData2.editField && initialData2.editValue) {
+        setReminders((prev) => prev.map(
+          (r) => r.id === toEdit.id ? { ...r, [initialData2.editField]: initialData2.editValue } : r
+        ));
+        setToast(`\u270F\uFE0F Updated ${initialData2.editField} of "${toEdit.title}"`);
+        trackEvent("edit_reminder", { source: "hydration", title: toEdit.title, field: initialData2.editField });
+      } else if (toEdit) {
+        setEditing(toEdit);
+        setToast(`\u270F\uFE0F Editing: ${toEdit.title}`);
+      } else {
+        setToast(`\u26A0\uFE0F Couldn't find reminder matching "${initialData2.targetReminder}"`);
+      }
     } else if (action === "filter" && initialData2.filterType) {
       const filterMap = {
         today: "today",
+        tomorrow: "today",
+        // Show today view for tomorrow too
         overdue: "overdue",
         completed: "completed",
+        pending: "all",
         urgent: "urgent",
         all: "all",
-        week: "all"
-        // Show all for week view
+        week: "all",
+        month: "all",
+        // Category filters
+        work: "work",
+        family: "family",
+        health: "health",
+        errands: "errands",
+        finance: "finance",
+        social: "social",
+        learning: "learning",
+        travel: "travel",
+        home: "home"
       };
       const newFilter = filterMap[initialData2.filterType] || "all";
       setQuickFilter(newFilter);
