@@ -26104,16 +26104,7 @@ var X = createLucideIcon("x", __iconNode25);
 var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
 var trackEvent = (event, data = {}) => {
   try {
-    const rawServerUrl = window.openai?.serverUrl || "";
-    let baseUrl = rawServerUrl;
-    try {
-      if (rawServerUrl) baseUrl = new URL(rawServerUrl).origin;
-    } catch {
-      baseUrl = rawServerUrl;
-    }
-    if (!baseUrl || /oaiusercontent\.com$/i.test(baseUrl)) {
-      baseUrl = "https://reminder-app-3pz5.onrender.com";
-    }
+    const baseUrl = window.openai?.serverUrl || "";
     fetch(`${baseUrl}/api/track`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -26175,6 +26166,7 @@ var CATEGORY_CONFIG = {
   other: { icon: Star, color: "#8A998A", bg: "#F0F0F0", label: "Other" }
 };
 var STORAGE_KEY = "REMINDER_APP_DATA";
+var STATS_KEY = "REMINDER_APP_STATS";
 var QUICK_FILTERS = [
   { id: "all", label: "All", emoji: "\u{1F4CB}", color: COLORS.primary, bg: COLORS.iconBg },
   { id: "urgent", label: "Urgent", emoji: "\u{1F525}", color: "#C97070", bg: "#F5E8E8" },
@@ -26810,17 +26802,21 @@ var persistState = (reminders, stats) => {
     }
   }
   try {
-    const dataToSave = {
-      data: { reminders, stats },
-      timestamp: (/* @__PURE__ */ new Date()).getTime()
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(reminders));
+    localStorage.setItem(STATS_KEY, JSON.stringify(stats));
   } catch (e) {
     console.error("[Persist] localStorage error:", e);
   }
+  if (window.openai?.callTool) {
+    try {
+      window.openai.callTool("save_reminders", state).catch((e) => {
+        console.log("[Persist] callTool not available or failed:", e);
+      });
+    } catch (e) {
+    }
+  }
 };
 var loadInitialState = (initialData2) => {
-  console.log("[Load] loadInitialState called with:", initialData2);
   const defaultStats = {
     totalPoints: 0,
     currentStreak: 0,
@@ -26831,86 +26827,39 @@ var loadInitialState = (initialData2) => {
     achievements: [...DEFAULT_ACHIEVEMENTS],
     completedTasks: []
   };
-  let baseReminders = [];
-  let baseStats = defaultStats;
-  if (initialData2?.reminders && Array.isArray(initialData2.reminders) && initialData2.reminders.length > 0) {
-    console.log("[Load] Using initialData reminders from server:", initialData2.reminders.length);
-    baseReminders = initialData2.reminders;
-    baseStats = initialData2.stats || defaultStats;
-  } else {
-    try {
-      const widgetState = window.openai?.widgetState;
-      if (widgetState?.reminders && Array.isArray(widgetState.reminders)) {
-        console.log("[Load] Using widget state:", widgetState.reminders.length, "reminders");
-        baseReminders = widgetState.reminders;
-        baseStats = widgetState.stats || defaultStats;
-      }
-    } catch (e) {
-    }
+  if (initialData2?.reminders && Array.isArray(initialData2.reminders)) {
+    console.log("[Load] Using initialData from server:", initialData2.reminders.length, "reminders");
+    return {
+      reminders: initialData2.reminders,
+      stats: initialData2.stats || defaultStats
+    };
   }
-  if (baseReminders.length === 0) {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        const data = parsed?.data ?? parsed;
-        if (Array.isArray(data)) {
-          baseReminders = data;
-          baseStats = defaultStats;
-          console.log("[Load] Using localStorage:", baseReminders.length, "reminders");
-        } else if (data?.reminders && Array.isArray(data.reminders)) {
-          baseReminders = data.reminders;
-          baseStats = data.stats || defaultStats;
-          console.log("[Load] Using localStorage:", baseReminders.length, "reminders");
-        }
-      }
-    } catch (e) {
-      console.error("[Load] localStorage error:", e);
-    }
-  }
-  let pendingReminder;
-  if (initialData2?.title) {
-    try {
-      console.log("[Load] Creating reminder from initialData title:", initialData2.title);
-      const today = /* @__PURE__ */ new Date();
-      let category = "other";
-      if (initialData2.tags && initialData2.tags.length > 0) {
-        const tagMap = {
-          work: "work",
-          family: "family",
-          health: "health",
-          errands: "errands",
-          finance: "finance",
-          social: "social",
-          learning: "learning",
-          travel: "travel",
-          home: "home"
-        };
-        category = tagMap[initialData2.tags[0]] || "other";
-      }
-      pendingReminder = {
-        id: `r-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        title: initialData2.title,
-        description: initialData2.description || "",
-        dueDate: initialData2.due_date || today.toISOString().split("T")[0],
-        dueTime: initialData2.due_time || void 0,
-        priority: initialData2.priority || "medium",
-        category,
-        recurrence: initialData2.recurrence || "none",
-        recurrenceInterval: 1,
-        recurrenceUnit: initialData2.recurrence === "weekly" ? "weeks" : initialData2.recurrence === "daily" ? "days" : "weeks",
-        recurrenceDays: initialData2.recurrenceDays,
-        completed: false,
-        createdAt: (/* @__PURE__ */ new Date()).toISOString(),
-        pointsAwarded: 0
+  try {
+    const widgetState = window.openai?.widgetState;
+    if (widgetState?.reminders && Array.isArray(widgetState.reminders)) {
+      console.log("[Load] Using widget state:", widgetState.reminders.length, "reminders");
+      return {
+        reminders: widgetState.reminders,
+        stats: widgetState.stats || defaultStats
       };
-      baseReminders = [...baseReminders, pendingReminder];
-    } catch (e) {
-      console.error("[Load] Failed to create reminder from initialData:", e);
     }
+  } catch (e) {
   }
-  console.log("[Load] Final state:", baseReminders.length, "reminders");
-  return { reminders: baseReminders, stats: baseStats, pendingReminder };
+  try {
+    const savedReminders = localStorage.getItem(STORAGE_KEY);
+    const savedStats = localStorage.getItem(STATS_KEY);
+    if (savedReminders) {
+      const reminders = JSON.parse(savedReminders);
+      console.log("[Load] Using localStorage:", reminders.length, "reminders");
+      return {
+        reminders,
+        stats: savedStats ? JSON.parse(savedStats) : defaultStats
+      };
+    }
+  } catch (e) {
+  }
+  console.log("[Load] No saved data found, starting fresh");
+  return { reminders: [], stats: defaultStats };
 };
 function ReminderApp({ initialData: initialData2 }) {
   const initial = (0, import_react3.useMemo)(() => loadInitialState(initialData2), []);
@@ -26992,15 +26941,7 @@ function ReminderApp({ initialData: initialData2 }) {
     trackEvent("load", { reminderCount: reminders.length, hasStats: !!stats.totalPoints });
   }, []);
   (0, import_react3.useEffect)(() => {
-    try {
-      persistState(reminders, stats);
-    } catch (e) {
-      console.error("[Persist] Unexpected error:", e);
-      trackEvent("client_persist_error", {
-        message: e?.message || String(e || ""),
-        stack: e?.stack
-      });
-    }
+    persistState(reminders, stats);
   }, [reminders, stats]);
   (0, import_react3.useEffect)(() => {
     if (toast) {
@@ -27021,6 +26962,19 @@ function ReminderApp({ initialData: initialData2 }) {
       setParsed(null);
     }
   }, [input]);
+  const [tick, setTick] = (0, import_react3.useState)(0);
+  (0, import_react3.useEffect)(() => {
+    const interval = setInterval(() => setTick((n) => n + 1), 5e3);
+    return () => clearInterval(interval);
+  }, []);
+  (0, import_react3.useEffect)(() => {
+    const notify = () => {
+      if (window.openai?.notifyIntrinsicHeight) window.openai.notifyIntrinsicHeight();
+    };
+    notify();
+    window.addEventListener("resize", notify);
+    return () => window.removeEventListener("resize", notify);
+  }, [reminders, parsed, editing]);
   const filtered = (0, import_react3.useMemo)(() => {
     let f = [...reminders];
     if (search) {
@@ -27043,7 +26997,7 @@ function ReminderApp({ initialData: initialData2 }) {
       }
     }
     return f;
-  }, [reminders, search, quickFilter, recentlyCompletedIds]);
+  }, [reminders, search, quickFilter, tick, recentlyCompletedIds]);
   const groupedByTime = (0, import_react3.useMemo)(() => {
     const groups = {
       overdue: [],
@@ -27057,58 +27011,42 @@ function ReminderApp({ initialData: initialData2 }) {
       groups[section].push(r);
     });
     return groups;
-  }, [filtered, recentlyCompletedIds]);
+  }, [filtered, tick, recentlyCompletedIds]);
   const sectionOrder = ["overdue", "today", "tomorrow", "thisWeek", "later"];
   const overdueCount = reminders.filter(isOverdue).length;
   const todayCount = reminders.filter((r) => !r.completed && r.dueDate === (/* @__PURE__ */ new Date()).toISOString().split("T")[0]).length;
   const levelInfo = calcLevel(stats.totalPoints);
   const processedTasksRef = (0, import_react3.useRef)(new Set(stats.completedTasks || []));
   (0, import_react3.useEffect)(() => {
-    try {
-      const currentCompleted = stats.completedTasks || [];
-      currentCompleted.forEach((id) => processedTasksRef.current.add(id));
-      console.log("[Progression] Checking tasks. Current completed:", currentCompleted);
-      console.log("[Progression] Reminders count:", reminders.length);
-      console.log("[Progression] Stats:", { completedAllTime: stats.completedAllTime, currentStreak: stats.currentStreak });
-      let nextTaskIndex = 0;
-      for (let i = 0; i < PROGRESSION_TASKS.length; i++) {
-        if (!processedTasksRef.current.has(PROGRESSION_TASKS[i].id)) {
-          nextTaskIndex = i;
-          break;
-        }
+    const currentCompleted = stats.completedTasks || [];
+    currentCompleted.forEach((id) => processedTasksRef.current.add(id));
+    console.log("[Progression] Checking tasks. Current completed:", currentCompleted);
+    console.log("[Progression] Reminders count:", reminders.length);
+    console.log("[Progression] Stats:", { completedAllTime: stats.completedAllTime, currentStreak: stats.currentStreak });
+    let nextTaskIndex = 0;
+    for (let i = 0; i < PROGRESSION_TASKS.length; i++) {
+      if (!processedTasksRef.current.has(PROGRESSION_TASKS[i].id)) {
+        nextTaskIndex = i;
+        break;
       }
-      const nextTask = PROGRESSION_TASKS[nextTaskIndex];
-      if (!nextTask || processedTasksRef.current.has(nextTask.id)) {
-        console.log("[Progression] All tasks completed or no next task");
-        return;
-      }
-      console.log(`[Progression] Next task to complete: "${nextTask.id}"`);
-      const isComplete = nextTask.check(reminders, stats);
-      console.log(`[Progression] Task "${nextTask.id}": check=${isComplete}`);
-      if (isComplete) {
-        processedTasksRef.current.add(nextTask.id);
-        console.log(`[Progression] Task "${nextTask.id}" COMPLETED! +${nextTask.points} pts`);
-        setStats((prev) => ({
-          ...prev,
-          totalPoints: prev.totalPoints + nextTask.points,
-          completedTasks: [.../* @__PURE__ */ new Set([...prev.completedTasks || [], nextTask.id])]
-        }));
-        setToast(`\u{1F389} "${nextTask.name}" complete! +${nextTask.points} pts`);
-      }
-    } catch (e) {
-      console.error("[Progression] Error evaluating progression:", e);
-      trackEvent("client_progression_error", {
-        message: e?.message || String(e || ""),
-        stack: e?.stack,
-        reminders_count: reminders.length,
-        stats: {
-          completedAllTime: stats.completedAllTime,
-          currentStreak: stats.currentStreak,
-          longestStreak: stats.longestStreak,
-          totalPoints: stats.totalPoints,
-          completedTasksCount: (stats.completedTasks || []).length
-        }
-      });
+    }
+    const nextTask = PROGRESSION_TASKS[nextTaskIndex];
+    if (!nextTask || processedTasksRef.current.has(nextTask.id)) {
+      console.log("[Progression] All tasks completed or no next task");
+      return;
+    }
+    console.log(`[Progression] Next task to complete: "${nextTask.id}"`);
+    const isComplete = nextTask.check(reminders, stats);
+    console.log(`[Progression] Task "${nextTask.id}": check=${isComplete}`);
+    if (isComplete) {
+      processedTasksRef.current.add(nextTask.id);
+      console.log(`[Progression] Task "${nextTask.id}" COMPLETED! +${nextTask.points} pts`);
+      setStats((prev) => ({
+        ...prev,
+        totalPoints: prev.totalPoints + nextTask.points,
+        completedTasks: [.../* @__PURE__ */ new Set([...prev.completedTasks || [], nextTask.id])]
+      }));
+      setToast(`\u{1F389} "${nextTask.name}" complete! +${nextTask.points} pts`);
     }
   }, [reminders.length, stats.completedAllTime, stats.currentStreak, stats.longestStreak]);
   const getCurrentProgressionTask = () => {
@@ -27336,6 +27274,7 @@ function ReminderApp({ initialData: initialData2 }) {
   const resetProgress = () => {
     trackEvent("reset_progress", { reminderCount: reminders.length, totalPoints: stats.totalPoints });
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(STATS_KEY);
     processedTasksRef.current.clear();
     setReminders([]);
     setStats({
@@ -28880,76 +28819,6 @@ OR just paste a list:
 
 // src/main.tsx
 var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
-var __WIDGET_START_MS = typeof performance !== "undefined" && performance.now ? performance.now() : Date.now();
-var __sinceStartMs = () => {
-  const now = typeof performance !== "undefined" && performance.now ? performance.now() : Date.now();
-  return Math.round(now - __WIDGET_START_MS);
-};
-var __log = (...args) => console.log(`[t+${__sinceStartMs()}ms]`, ...args);
-var __getBaseUrl = () => {
-  try {
-    const raw = window.openai?.serverUrl || "";
-    if (!raw) return "https://reminder-app-3pz5.onrender.com";
-    try {
-      const origin = new URL(raw).origin;
-      if (/oaiusercontent\.com$/i.test(origin)) {
-        return "https://reminder-app-3pz5.onrender.com";
-      }
-      return origin;
-    } catch {
-      if (/oaiusercontent\.com/i.test(raw)) {
-        return "https://reminder-app-3pz5.onrender.com";
-      }
-      return raw;
-    }
-  } catch {
-    return "https://reminder-app-3pz5.onrender.com";
-  }
-};
-var __report = async (event, data) => {
-  try {
-    const baseUrl = __getBaseUrl();
-    await fetch(`${baseUrl}/api/track`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ event, data })
-    });
-  } catch {
-  }
-};
-window.addEventListener(
-  "error",
-  (ev) => {
-    const err = ev?.error;
-    __log("[GlobalError]", ev?.message, err);
-    __report("widget_global_error", {
-      t_ms: __sinceStartMs(),
-      message: ev?.message,
-      filename: ev?.filename,
-      lineno: ev?.lineno,
-      colno: ev?.colno,
-      error: err?.message || String(err || ""),
-      stack: err?.stack
-    });
-  },
-  true
-);
-window.addEventListener(
-  "unhandledrejection",
-  (ev) => {
-    const reason = ev?.reason;
-    __log("[UnhandledRejection]", reason);
-    __report("widget_unhandled_rejection", {
-      t_ms: __sinceStartMs(),
-      reason: reason?.message || String(reason || ""),
-      stack: reason?.stack
-    });
-  },
-  true
-);
-window.setTimeout(() => __log("[Heartbeat] alive @3s"), 3e3);
-window.setTimeout(() => __log("[Heartbeat] alive @5s"), 5e3);
-window.setTimeout(() => __log("[Heartbeat] alive @7s"), 7e3);
 var ErrorBoundary = class extends import_react4.default.Component {
   constructor(props) {
     super(props);
@@ -28961,8 +28830,7 @@ var ErrorBoundary = class extends import_react4.default.Component {
   componentDidCatch(error, errorInfo) {
     console.error("Widget Error Boundary caught error:", error, errorInfo);
     try {
-      const baseUrl = __getBaseUrl();
-      fetch(`${baseUrl}/api/track`, {
+      fetch("/api/track", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

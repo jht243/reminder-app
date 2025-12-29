@@ -11,18 +11,7 @@ import {
 const trackEvent = (event: string, data: Record<string, any> = {}) => {
   try {
     // Get the server URL from window.openai or fallback to relative path
-    const rawServerUrl = (window as any).openai?.serverUrl || "";
-    let baseUrl = rawServerUrl;
-    try {
-      if (rawServerUrl) baseUrl = new URL(rawServerUrl).origin;
-    } catch {
-      baseUrl = rawServerUrl;
-    }
-    // In ChatGPT web-sandbox, openai.serverUrl may be missing; a relative /api/track will hit
-    // the sandbox origin (oaiusercontent.com) which returns 405. Force a safe fallback.
-    if (!baseUrl || /oaiusercontent\.com$/i.test(baseUrl)) {
-      baseUrl = "https://reminder-app-3pz5.onrender.com";
-    }
+    const baseUrl = (window as any).openai?.serverUrl || "";
     fetch(`${baseUrl}/api/track`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -898,121 +887,71 @@ const persistState = (reminders: Reminder[], stats: UserStats) => {
     }
   }
   
-  // Save to localStorage (following prior projects pattern)
+  // 2. Also save to localStorage as fallback
   try {
-    const dataToSave = {
-      data: { reminders, stats },
-      timestamp: new Date().getTime()
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(reminders));
+    localStorage.setItem(STATS_KEY, JSON.stringify(stats));
   } catch (e) {
     console.error("[Persist] localStorage error:", e);
+  }
+  
+  // 3. Call save tool if available (for cross-session persistence)
+  if ((window as any).openai?.callTool) {
+    try {
+      (window as any).openai.callTool("save_reminders", state).catch((e: any) => {
+        console.log("[Persist] callTool not available or failed:", e);
+      });
+    } catch (e) {
+      // Tool may not exist, that's ok
+    }
   }
 };
 
 // Helper to load initial state
-const loadInitialState = (initialData: any): { reminders: Reminder[], stats: UserStats, pendingReminder?: Reminder } => {
-  console.log("[Load] loadInitialState called with:", initialData);
-  
+const loadInitialState = (initialData: any): { reminders: Reminder[], stats: UserStats } => {
   const defaultStats: UserStats = {
     totalPoints: 0, currentStreak: 0, longestStreak: 0, lastActiveDate: null,
     completedAllTime: 0, level: 1, achievements: [...DEFAULT_ACHIEVEMENTS],
     completedTasks: []
   };
   
-  let baseReminders: Reminder[] = [];
-  let baseStats = defaultStats;
-  
-  // Priority 1: initialData from server (hydration) - saved reminders
-  if (initialData?.reminders && Array.isArray(initialData.reminders) && initialData.reminders.length > 0) {
-    console.log("[Load] Using initialData reminders from server:", initialData.reminders.length);
-    baseReminders = initialData.reminders;
-    baseStats = initialData.stats || defaultStats;
+  // Priority 1: initialData from server (hydration)
+  if (initialData?.reminders && Array.isArray(initialData.reminders)) {
+    console.log("[Load] Using initialData from server:", initialData.reminders.length, "reminders");
+    return {
+      reminders: initialData.reminders,
+      stats: initialData.stats || defaultStats
+    };
   }
+  
   // Priority 2: Check window.openai widget state
-  else {
-    try {
-      const widgetState = (window as any).openai?.widgetState;
-      if (widgetState?.reminders && Array.isArray(widgetState.reminders)) {
-        console.log("[Load] Using widget state:", widgetState.reminders.length, "reminders");
-        baseReminders = widgetState.reminders;
-        baseStats = widgetState.stats || defaultStats;
-      }
-    } catch (e) {}
-  }
-  
-  // Priority 3: localStorage fallback (following prior projects pattern)
-  if (baseReminders.length === 0) {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        // No expiration: persist until reset.
-        // Backward compatible with older shapes:
-        // - { data: { reminders, stats }, timestamp }
-        // - { reminders, stats }
-        // - reminders[] (legacy)
-        const data = parsed?.data ?? parsed;
-        if (Array.isArray(data)) {
-          baseReminders = data;
-          baseStats = defaultStats;
-          console.log("[Load] Using localStorage:", baseReminders.length, "reminders");
-        } else if (data?.reminders && Array.isArray(data.reminders)) {
-          baseReminders = data.reminders;
-          baseStats = data.stats || defaultStats;
-          console.log("[Load] Using localStorage:", baseReminders.length, "reminders");
-        }
-      }
-    } catch (e) {
-      console.error("[Load] localStorage error:", e);
-    }
-  }
-  
-  // If initialData has a title (from prompt like "remind me to call mom"), create a pending reminder
-  // This follows the pattern from prior projects - apply initialData during state init
-  let pendingReminder: Reminder | undefined;
-  if (initialData?.title) {
-    try {
-      console.log("[Load] Creating reminder from initialData title:", initialData.title);
-      const today = new Date();
-      
-      // Infer category from tags
-      let category: Category = "other";
-      if (initialData.tags && initialData.tags.length > 0) {
-        const tagMap: Record<string, Category> = {
-          work: "work", family: "family", health: "health", 
-          errands: "errands", finance: "finance", social: "social",
-          learning: "learning", travel: "travel", home: "home"
-        };
-        category = tagMap[initialData.tags[0]] || "other";
-      }
-      
-      pendingReminder = {
-        id: `r-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        title: initialData.title,
-        description: initialData.description || "",
-        dueDate: initialData.due_date || today.toISOString().split("T")[0],
-        dueTime: initialData.due_time || undefined,
-        priority: initialData.priority || "medium",
-        category,
-        recurrence: initialData.recurrence || "none",
-        recurrenceInterval: 1,
-        recurrenceUnit: initialData.recurrence === "weekly" ? "weeks" : initialData.recurrence === "daily" ? "days" : "weeks",
-        recurrenceDays: initialData.recurrenceDays,
-        completed: false,
-        createdAt: new Date().toISOString(),
-        pointsAwarded: 0
+  try {
+    const widgetState = (window as any).openai?.widgetState;
+    if (widgetState?.reminders && Array.isArray(widgetState.reminders)) {
+      console.log("[Load] Using widget state:", widgetState.reminders.length, "reminders");
+      return {
+        reminders: widgetState.reminders,
+        stats: widgetState.stats || defaultStats
       };
-      
-      // Add to base reminders
-      baseReminders = [...baseReminders, pendingReminder];
-    } catch (e) {
-      console.error("[Load] Failed to create reminder from initialData:", e);
     }
-  }
+  } catch (e) {}
   
-  console.log("[Load] Final state:", baseReminders.length, "reminders");
-  return { reminders: baseReminders, stats: baseStats, pendingReminder };
+  // Priority 3: localStorage fallback
+  try {
+    const savedReminders = localStorage.getItem(STORAGE_KEY);
+    const savedStats = localStorage.getItem(STATS_KEY);
+    if (savedReminders) {
+      const reminders = JSON.parse(savedReminders);
+      console.log("[Load] Using localStorage:", reminders.length, "reminders");
+      return {
+        reminders,
+        stats: savedStats ? JSON.parse(savedStats) : defaultStats
+      };
+    }
+  } catch (e) {}
+  
+  console.log("[Load] No saved data found, starting fresh");
+  return { reminders: [], stats: defaultStats };
 };
 
 export default function ReminderApp({ initialData }: { initialData?: any }) {
@@ -1141,15 +1080,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   
   // Persist whenever reminders or stats change
   useEffect(() => {
-    try {
-      persistState(reminders, stats);
-    } catch (e: any) {
-      console.error("[Persist] Unexpected error:", e);
-      trackEvent("client_persist_error", {
-        message: e?.message || String(e || ""),
-        stack: e?.stack,
-      });
-    }
+    persistState(reminders, stats);
   }, [reminders, stats]);
   useEffect(() => { if (toast) { const t = setTimeout(() => setToast(null), 3000); return () => clearTimeout(t); }}, [toast]);
   useEffect(() => { if (achievement) { const t = setTimeout(() => setAchievement(null), 4000); return () => clearTimeout(t); }}, [achievement]);
@@ -1162,6 +1093,20 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       setParsed(null);
     }
   }, [input]);
+  
+  // Force re-render every 5 seconds to update recently completed items visibility
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => setTick(n => n + 1), 5000);
+    return () => clearInterval(interval);
+  }, []);
+  
+  // Notify height changes
+  useEffect(() => {
+    const notify = () => { if ((window as any).openai?.notifyIntrinsicHeight) (window as any).openai.notifyIntrinsicHeight(); };
+    notify(); window.addEventListener("resize", notify);
+    return () => window.removeEventListener("resize", notify);
+  }, [reminders, parsed, editing]);
   
   // Filter and sort reminders with quick filter support
   const filtered = useMemo(() => {
@@ -1192,7 +1137,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     }
     
     return f;
-  }, [reminders, search, quickFilter, recentlyCompletedIds]);
+  }, [reminders, search, quickFilter, tick, recentlyCompletedIds]);
   
   // Group reminders by time section for smart display
   const groupedByTime = useMemo(() => {
@@ -1209,7 +1154,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       groups[section].push(r);
     });
     return groups;
-  }, [filtered, recentlyCompletedIds]);
+  }, [filtered, tick, recentlyCompletedIds]);
   
   // Section order for display
   const sectionOrder = ["overdue", "today", "tomorrow", "thisWeek", "later"] as const;
@@ -1224,62 +1169,46 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   // Check for newly completed progression tasks and award points
   // IMPORTANT: Tasks must be completed in SEQUENTIAL order
   useEffect(() => {
-    try {
-      const currentCompleted = stats.completedTasks || [];
-      
-      // Sync ref with current state
-      currentCompleted.forEach(id => processedTasksRef.current.add(id));
-      
-      console.log("[Progression] Checking tasks. Current completed:", currentCompleted);
-      console.log("[Progression] Reminders count:", reminders.length);
-      console.log("[Progression] Stats:", { completedAllTime: stats.completedAllTime, currentStreak: stats.currentStreak });
-      
-      // Find the NEXT task in sequence (first one not completed)
-      let nextTaskIndex = 0;
-      for (let i = 0; i < PROGRESSION_TASKS.length; i++) {
-        if (!processedTasksRef.current.has(PROGRESSION_TASKS[i].id)) {
-          nextTaskIndex = i;
-          break;
-        }
+    const currentCompleted = stats.completedTasks || [];
+    
+    // Sync ref with current state
+    currentCompleted.forEach(id => processedTasksRef.current.add(id));
+    
+    console.log("[Progression] Checking tasks. Current completed:", currentCompleted);
+    console.log("[Progression] Reminders count:", reminders.length);
+    console.log("[Progression] Stats:", { completedAllTime: stats.completedAllTime, currentStreak: stats.currentStreak });
+    
+    // Find the NEXT task in sequence (first one not completed)
+    let nextTaskIndex = 0;
+    for (let i = 0; i < PROGRESSION_TASKS.length; i++) {
+      if (!processedTasksRef.current.has(PROGRESSION_TASKS[i].id)) {
+        nextTaskIndex = i;
+        break;
       }
+    }
+    
+    const nextTask = PROGRESSION_TASKS[nextTaskIndex];
+    if (!nextTask || processedTasksRef.current.has(nextTask.id)) {
+      console.log("[Progression] All tasks completed or no next task");
+      return;
+    }
+    
+    console.log(`[Progression] Next task to complete: "${nextTask.id}"`);
+    
+    // Check if the next task's condition is met
+    const isComplete = nextTask.check(reminders, stats);
+    console.log(`[Progression] Task "${nextTask.id}": check=${isComplete}`);
+    
+    if (isComplete) {
+      processedTasksRef.current.add(nextTask.id); // Mark as processed immediately
+      console.log(`[Progression] Task "${nextTask.id}" COMPLETED! +${nextTask.points} pts`);
       
-      const nextTask = PROGRESSION_TASKS[nextTaskIndex];
-      if (!nextTask || processedTasksRef.current.has(nextTask.id)) {
-        console.log("[Progression] All tasks completed or no next task");
-        return;
-      }
-      
-      console.log(`[Progression] Next task to complete: "${nextTask.id}"`);
-      
-      // Check if the next task's condition is met
-      const isComplete = nextTask.check(reminders, stats);
-      console.log(`[Progression] Task "${nextTask.id}": check=${isComplete}`);
-      
-      if (isComplete) {
-        processedTasksRef.current.add(nextTask.id); // Mark as processed immediately
-        console.log(`[Progression] Task "${nextTask.id}" COMPLETED! +${nextTask.points} pts`);
-        
-        setStats(prev => ({
-          ...prev,
-          totalPoints: prev.totalPoints + nextTask.points,
-          completedTasks: [...new Set([...(prev.completedTasks || []), nextTask.id])]
-        }));
-        setToast(`🎉 "${nextTask.name}" complete! +${nextTask.points} pts`);
-      }
-    } catch (e: any) {
-      console.error("[Progression] Error evaluating progression:", e);
-      trackEvent("client_progression_error", {
-        message: e?.message || String(e || ""),
-        stack: e?.stack,
-        reminders_count: reminders.length,
-        stats: {
-          completedAllTime: stats.completedAllTime,
-          currentStreak: stats.currentStreak,
-          longestStreak: stats.longestStreak,
-          totalPoints: stats.totalPoints,
-          completedTasksCount: (stats.completedTasks || []).length,
-        },
-      });
+      setStats(prev => ({
+        ...prev,
+        totalPoints: prev.totalPoints + nextTask.points,
+        completedTasks: [...new Set([...(prev.completedTasks || []), nextTask.id])]
+      }));
+      setToast(`🎉 "${nextTask.name}" complete! +${nextTask.points} pts`);
     }
   }, [reminders.length, stats.completedAllTime, stats.currentStreak, stats.longestStreak]);
   
@@ -1541,6 +1470,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const resetProgress = () => {
     trackEvent("reset_progress", { reminderCount: reminders.length, totalPoints: stats.totalPoints });
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(STATS_KEY);
     processedTasksRef.current.clear();
     setReminders([]);
     setStats({
