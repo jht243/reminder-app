@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
+import Tesseract from "tesseract.js";
 import {
   Bell, Plus, Check, X, Clock, Calendar, Search, Filter, Trash2,
   Edit2, Repeat, Trophy, Flame, Star, Award, Crown, Send,
@@ -990,8 +991,9 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const [screenshotModal, setScreenshotModal] = useState<{
     open: boolean;
     imageData: string | null;
-    extractedText: string;
-  }>({ open: false, imageData: null, extractedText: "" });
+    analyzing: boolean;
+    progress: number;
+  }>({ open: false, imageData: null, analyzing: false, progress: 0 });
 
   // File Upload Handler
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
@@ -1497,7 +1499,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     setToast(`Generated ${newReminders.length} sample reminders!`);
   };
 
-  // Screenshot handler - opens modal with image preview
+  // Screenshot handler - auto-analyzes with OCR and adds tasks
   const handleScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent | File) => {
     let file: File | null = null;
     
@@ -1519,50 +1521,63 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       return;
     }
 
-    // Convert to base64 and open modal
+    // Convert to base64 and show modal with analyzing state
     const reader = new FileReader();
     reader.onload = async (event) => {
       const base64 = event.target?.result as string;
-      setScreenshotModal({ open: true, imageData: base64, extractedText: "" });
+      setScreenshotModal({ open: true, imageData: base64, analyzing: true, progress: 0 });
+      
+      try {
+        // Run OCR with Tesseract.js
+        const result = await Tesseract.recognize(base64, "eng", {
+          logger: (m) => {
+            if (m.status === "recognizing text") {
+              setScreenshotModal(prev => ({ ...prev, progress: Math.round(m.progress * 100) }));
+            }
+          }
+        });
+        
+        const extractedText = result.data.text;
+        
+        // Parse extracted text into tasks
+        const lines = extractedText.split(/\r\n|\n|\r/).filter((l: string) => l.trim().length > 3);
+        const newReminders: Reminder[] = [];
+        
+        for (const line of lines) {
+          const cleanLine = line.replace(/^[-*•☐☑✓✔□■●◯○\[\]]\s*/g, "").trim();
+          if (cleanLine.length < 3) continue;
+          
+          const parsed = parseNaturalLanguage(cleanLine);
+          newReminders.push({
+            id: generateId(),
+            title: parsed.title,
+            dueDate: parsed.dueDate,
+            dueTime: parsed.dueTime,
+            priority: parsed.priority,
+            category: parsed.category,
+            recurrence: parsed.recurrence,
+            recurrenceInterval: parsed.recurrenceInterval,
+            recurrenceUnit: parsed.recurrenceUnit,
+            completed: false,
+            createdAt: new Date().toISOString(),
+            pointsAwarded: 0
+          });
+        }
+        
+        if (newReminders.length > 0) {
+          setReminders(prev => [...prev, ...newReminders]);
+          setScreenshotModal({ open: false, imageData: null, analyzing: false, progress: 0 });
+          setToast(`✅ Added ${newReminders.length} tasks from screenshot!`);
+        } else {
+          setScreenshotModal(prev => ({ ...prev, analyzing: false }));
+          setToast("No tasks found in screenshot. Try a clearer image.");
+        }
+      } catch (error) {
+        setScreenshotModal(prev => ({ ...prev, analyzing: false }));
+        setToast("Failed to analyze screenshot");
+      }
     };
     reader.readAsDataURL(file);
-  };
-  
-  // Import extracted tasks from screenshot
-  const importScreenshotTasks = () => {
-    const text = screenshotModal.extractedText;
-    if (!text.trim()) {
-      setToast("No tasks to import");
-      return;
-    }
-    
-    const lines = text.split(/\r\n|\n|\r/).filter(l => l.trim().length > 2);
-    const newReminders: Reminder[] = lines.map(line => {
-      const cleanLine = line.replace(/^[-*•]\s*/, "").trim();
-      const parsed = parseNaturalLanguage(cleanLine);
-      return {
-        id: generateId(),
-        title: parsed.title,
-        dueDate: parsed.dueDate,
-        dueTime: parsed.dueTime,
-        priority: parsed.priority,
-        category: parsed.category,
-        recurrence: parsed.recurrence,
-        recurrenceInterval: parsed.recurrenceInterval,
-        recurrenceUnit: parsed.recurrenceUnit,
-        completed: false,
-        createdAt: new Date().toISOString(),
-        pointsAwarded: 0
-      };
-    });
-    
-    if (newReminders.length > 0) {
-      setReminders(prev => [...prev, ...newReminders]);
-      setScreenshotModal({ open: false, imageData: null, extractedText: "" });
-      setToast(`Imported ${newReminders.length} reminders from screenshot!`);
-    } else {
-      setToast("No valid reminders found");
-    }
   };
   
   // Round icon component for modern minimal style
@@ -2499,92 +2514,93 @@ OR just paste a list:
                 📸 Import from Screenshot
               </h2>
               <button 
-                onClick={() => setScreenshotModal({ open: false, imageData: null, extractedText: "" })} 
+                onClick={() => setScreenshotModal({ open: false, imageData: null, analyzing: false, progress: 0 })} 
                 style={{ width: 36, height: 36, borderRadius: "50%", border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
               >
                 <X size={18} color={COLORS.textMuted} />
               </button>
             </div>
             
-            {/* Instructions */}
-            <div style={{ padding: 16, backgroundColor: COLORS.primaryBg, borderRadius: 12, marginBottom: 20 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.primary, marginBottom: 8 }}>
-                💡 How it works
-              </div>
-              <ol style={{ margin: 0, paddingLeft: 20, fontSize: 13, color: COLORS.textSecondary, lineHeight: 1.6 }}>
-                <li>Drop or upload your screenshot below</li>
-                <li>Ask ChatGPT: <em>"Extract the tasks from this image"</em></li>
-                <li>Paste ChatGPT's response in the text box</li>
-                <li>Click Import!</li>
-              </ol>
-            </div>
-            
-            {/* Drag & Drop Zone */}
-            <div
-              onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); }}
-              onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-              onDrop={(e) => {
-                e.preventDefault();
-                const file = e.dataTransfer.files?.[0];
-                if (file) handleScreenshotUpload(file);
-              }}
-              style={{
-                border: `2px dashed ${screenshotModal.imageData ? COLORS.primary : COLORS.border}`,
-                borderRadius: 16,
-                backgroundColor: screenshotModal.imageData ? `${COLORS.primary}08` : COLORS.cardAlt,
-                padding: screenshotModal.imageData ? 0 : 32,
-                textAlign: "center",
-                cursor: "pointer",
-                transition: "all 0.2s",
-                overflow: "hidden",
-                marginBottom: 16
-              }}
-              onClick={() => !screenshotModal.imageData && document.getElementById("screenshot-file-input")?.click()}
-            >
-              {screenshotModal.imageData ? (
-                <div style={{ position: "relative" }}>
-                  <img 
-                    src={screenshotModal.imageData} 
-                    alt="Screenshot preview" 
-                    style={{ width: "100%", maxHeight: 180, objectFit: "contain", backgroundColor: COLORS.cardAlt }} 
-                  />
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setScreenshotModal(prev => ({ ...prev, imageData: null })); }}
-                    style={{
-                      position: "absolute", top: 8, right: 8,
-                      width: 28, height: 28, borderRadius: "50%",
-                      backgroundColor: "rgba(0,0,0,0.6)", color: "#fff",
-                      border: "none", cursor: "pointer",
-                      display: "flex", alignItems: "center", justifyContent: "center"
-                    }}
-                  >
-                    <X size={14} />
-                  </button>
+            {/* Analyzing State */}
+            {screenshotModal.analyzing ? (
+              <div style={{ textAlign: "center", padding: 40 }}>
+                <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
+                <div style={{ fontSize: 16, fontWeight: 600, color: COLORS.textMain, marginBottom: 12 }}>
+                  Analyzing screenshot...
                 </div>
-              ) : (
-                <>
-                  <div style={{ fontSize: 40, marginBottom: 8 }}>📷</div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.textMain, marginBottom: 4 }}>
+                <div style={{ 
+                  width: "100%", 
+                  height: 8, 
+                  backgroundColor: COLORS.border, 
+                  borderRadius: 4,
+                  overflow: "hidden",
+                  marginBottom: 8
+                }}>
+                  <div style={{
+                    width: `${screenshotModal.progress}%`,
+                    height: "100%",
+                    backgroundColor: COLORS.primary,
+                    transition: "width 0.3s ease"
+                  }} />
+                </div>
+                <div style={{ fontSize: 13, color: COLORS.textMuted }}>
+                  {screenshotModal.progress}% complete
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Drag & Drop Zone */}
+                <div
+                  onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                  onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const file = e.dataTransfer.files?.[0];
+                    if (file) handleScreenshotUpload(file);
+                  }}
+                  style={{
+                    border: `2px dashed ${COLORS.primary}`,
+                    borderRadius: 16,
+                    backgroundColor: `${COLORS.primary}08`,
+                    padding: 40,
+                    textAlign: "center",
+                    cursor: "pointer",
+                    transition: "all 0.2s"
+                  }}
+                  onClick={() => document.getElementById("screenshot-file-input")?.click()}
+                >
+                  <div style={{ fontSize: 48, marginBottom: 12 }}>📷</div>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: COLORS.textMain, marginBottom: 8 }}>
                     Drop screenshot here
                   </div>
-                  <div style={{ fontSize: 12, color: COLORS.textMuted }}>
+                  <div style={{ fontSize: 13, color: COLORS.textSecondary, marginBottom: 16 }}>
                     or click to browse
                   </div>
-                </>
-              )}
-              <input
-                id="screenshot-file-input"
-                type="file"
-                accept="image/*"
-                onChange={handleScreenshotUpload}
-                style={{ display: "none" }}
-              />
-            </div>
-            
-            {/* Info text */}
-            <div style={{ fontSize: 12, color: COLORS.textMuted, textAlign: "center" }}>
-              ChatGPT can see this image - just ask it to add the tasks!
-            </div>
+                  <div style={{ 
+                    display: "inline-block",
+                    padding: "10px 20px", 
+                    backgroundColor: COLORS.primary, 
+                    color: "#fff", 
+                    borderRadius: 8,
+                    fontSize: 14,
+                    fontWeight: 600
+                  }}>
+                    Upload Screenshot
+                  </div>
+                  <input
+                    id="screenshot-file-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleScreenshotUpload}
+                    style={{ display: "none" }}
+                  />
+                </div>
+                
+                <div style={{ fontSize: 12, color: COLORS.textMuted, textAlign: "center", marginTop: 16 }}>
+                  Tasks will be automatically extracted and added to your list
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -2601,7 +2617,7 @@ OR just paste a list:
         <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
           {/* Screenshot Upload - Opens Modal */}
           <button
-            onClick={() => setScreenshotModal({ open: true, imageData: null, extractedText: "" })}
+            onClick={() => setScreenshotModal({ open: true, imageData: null, analyzing: false, progress: 0 })}
             style={{
               display: "flex", alignItems: "center", gap: 8,
               padding: "10px 16px", borderRadius: 50,
