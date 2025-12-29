@@ -967,6 +967,18 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   // Track when tasks were first viewed (for glow effect)
   const [viewedTasks, setViewedTasks] = useState<Record<string, number>>({});
   
+  // Track recently completed tasks to keep them visible for 1 minute
+  // Map of reminderId -> timestamp when it should disappear
+  // This is NOT persisted, so completed items disappear on refresh
+  const [recentlyCompletedIds, setRecentlyCompletedIds] = useState<Record<string, number>>({});
+  
+  // Helper to check if a reminder should stay visible (state-based, not persisted)
+  const isVisibleCompleted = (r: Reminder): boolean => {
+    if (!r.completed) return false;
+    const expiresAt = recentlyCompletedIds[r.id];
+    return expiresAt !== undefined && Date.now() < expiresAt;
+  };
+  
   const [toast, setToast] = useState<string | null>(null);
   const [achievement, setAchievement] = useState<{ name: string; icon: string } | null>(null);
   
@@ -1078,29 +1090,21 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       const now = new Date();
       const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
       
-      // DEBUG LOGGING
-      console.log(`[Filter] Filtering. QuickFilter: ${quickFilter}, TodayStr: ${todayStr}`);
-      
       if (quickFilter === "urgent") {
-        f = f.filter(r => (!r.completed || isRecentlyCompleted(r)) && r.priority === "urgent");
+        f = f.filter(r => (!r.completed || isVisibleCompleted(r)) && r.priority === "urgent");
       } else if (quickFilter === "today") {
-        f = f.filter(r => {
-          const keep = (!r.completed || isRecentlyCompleted(r)) && r.dueDate === todayStr;
-          if (r.completed && keep) console.log(`[Filter] KEEPING completed today item: ${r.title}`);
-          if (r.completed && !keep && r.dueDate === todayStr) console.log(`[Filter] DROPPING completed today item: ${r.title}. IsRecent: ${isRecentlyCompleted(r)}`);
-          return keep;
-        });
+        f = f.filter(r => (!r.completed || isVisibleCompleted(r)) && r.dueDate === todayStr);
       } else if (quickFilter === "overdue") {
         f = f.filter(r => isOverdue(r));
       } else if (quickFilter === "completed") {
-        f = f.filter(r => r.completed && !isRecentlyCompleted(r));
+        f = f.filter(r => r.completed && !isVisibleCompleted(r));
       } else {
-        f = f.filter(r => (!r.completed || isRecentlyCompleted(r)) && r.category === quickFilter);
+        f = f.filter(r => (!r.completed || isVisibleCompleted(r)) && r.category === quickFilter);
       }
     }
     
     return f;
-  }, [reminders, search, quickFilter, tick]);
+  }, [reminders, search, quickFilter, tick, recentlyCompletedIds]);
   
   // Group reminders by time section for smart display
   const groupedByTime = useMemo(() => {
@@ -1112,13 +1116,12 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       later: []
     };
     
-    filtered.filter(r => !r.completed || isRecentlyCompleted(r)).forEach(r => {
+    filtered.filter(r => !r.completed || isVisibleCompleted(r)).forEach(r => {
       const section = getTimeSection(r);
-      if (r.completed) console.log(`[Grouping] Item ${r.title} assigned to section: ${section}`);
       groups[section].push(r);
     });
     return groups;
-  }, [filtered, tick]);
+  }, [filtered, tick, recentlyCompletedIds]);
   
   // Section order for display
   const sectionOrder = ["overdue", "today", "tomorrow", "thisWeek", "later"] as const;
@@ -1313,6 +1316,10 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     const early = new Date(`${r.dueDate}T${r.dueTime || "23:59"}`) > new Date();
     let pts = 10 + (early ? 5 : 0) + (r.priority === "urgent" ? 15 : 0) + stats.currentStreak * 2;
     
+    // Add to recently completed to keep visible for 1 minute
+    // Use state-based tracking which is more reliable than deriving from completedAt
+    setRecentlyCompletedIds(prev => ({ ...prev, [r.id]: Date.now() + 60000 }));
+    
     const updated = { ...r, completed: true, completedAt: new Date().toISOString(), pointsAwarded: pts };
     
     if (r.recurrence !== "none") {
@@ -1359,6 +1366,13 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   };
   
   const uncomplete = (r: Reminder) => {
+    // Remove from recently completed tracking
+    setRecentlyCompletedIds(prev => {
+      const next = { ...prev };
+      delete next[r.id];
+      return next;
+    });
+    
     setReminders(prev => prev.map(x => x.id === r.id ? { ...r, completed: false, completedAt: undefined } : x));
     setStats(s => ({ ...s, totalPoints: Math.max(0, s.totalPoints - r.pointsAwarded), completedAllTime: Math.max(0, s.completedAllTime - 1) }));
   };
@@ -1912,16 +1926,16 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
             const now = new Date();
             const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
             const count = filter.id === "all" 
-              ? reminders.filter(r => !r.completed || isRecentlyCompleted(r)).length
+              ? reminders.filter(r => !r.completed || isVisibleCompleted(r)).length
               : filter.id === "urgent" 
-                ? reminders.filter(r => (!r.completed || isRecentlyCompleted(r)) && r.priority === "urgent").length
+                ? reminders.filter(r => (!r.completed || isVisibleCompleted(r)) && r.priority === "urgent").length
               : filter.id === "today"
-                ? reminders.filter(r => (!r.completed || isRecentlyCompleted(r)) && r.dueDate === todayStr).length
+                ? reminders.filter(r => (!r.completed || isVisibleCompleted(r)) && r.dueDate === todayStr).length
               : filter.id === "overdue"
                 ? reminders.filter(r => isOverdue(r)).length
               : filter.id === "completed"
-                ? reminders.filter(r => r.completed && !isRecentlyCompleted(r)).length
-              : reminders.filter(r => (!r.completed || isRecentlyCompleted(r)) && r.category === filter.id).length;
+                ? reminders.filter(r => r.completed && !isVisibleCompleted(r)).length
+              : reminders.filter(r => (!r.completed || isVisibleCompleted(r)) && r.category === filter.id).length;
             
             return (
               <button
@@ -2051,7 +2065,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
             ))}
           </div>
         )
-      ) : filtered.filter(r => !r.completed || isRecentlyCompleted(r)).length === 0 ? (
+      ) : filtered.filter(r => !r.completed || isVisibleCompleted(r)).length === 0 ? (
         <div style={{ backgroundColor: COLORS.card, borderRadius: cardRadius, boxShadow: cardShadow, textAlign: "center", padding: 48, color: COLORS.textMuted }}>
           <div style={{ 
             width: 64, height: 64, borderRadius: "50%", 
@@ -2126,8 +2140,8 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
                 
                 {/* Section Items */}
                 {!isCollapsed && sectionReminders.map((r, i) => {
-                  // Check if task is new and should highlight (10 seconds after creation)
-                  const shouldHighlight = r.createdAt && (Date.now() - new Date(r.createdAt).getTime()) < 10000;
+                  // Check if task is new and should highlight (5 seconds after creation)
+                  const shouldHighlight = r.createdAt && (Date.now() - new Date(r.createdAt).getTime()) < 5000;
                   
                   return (
                   <div 
