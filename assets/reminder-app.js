@@ -26941,6 +26941,91 @@ function ReminderApp({ initialData: initialData2 }) {
     trackEvent("load", { reminderCount: reminders.length, hasStats: !!stats.totalPoints });
   }, []);
   (0, import_react3.useEffect)(() => {
+    if (!initialData2?.action) return;
+    const action = initialData2.action;
+    console.log("[Hydration] Processing action:", action, initialData2);
+    if (action === "create" && initialData2.title) {
+      const today = /* @__PURE__ */ new Date();
+      const nextFriday = new Date(today);
+      nextFriday.setDate(today.getDate() + ((5 - today.getDay() + 7) % 7 || 7));
+      let recurrenceDays = initialData2.recurrenceDays;
+      let category = "other";
+      if (initialData2.tags && initialData2.tags.length > 0) {
+        const tagMap = {
+          work: "work",
+          family: "family",
+          health: "health",
+          errands: "errands",
+          finance: "finance",
+          social: "social",
+          learning: "learning",
+          travel: "travel",
+          home: "home"
+        };
+        category = tagMap[initialData2.tags[0]] || "other";
+      }
+      const newReminder = {
+        id: `r-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        title: initialData2.title,
+        description: initialData2.description || "",
+        dueDate: initialData2.due_date || nextFriday.toISOString().split("T")[0],
+        dueTime: initialData2.due_time || void 0,
+        priority: initialData2.priority || "medium",
+        category,
+        recurrence: initialData2.recurrence || "none",
+        recurrenceInterval: 1,
+        recurrenceUnit: initialData2.recurrence === "weekly" ? "weeks" : initialData2.recurrence === "daily" ? "days" : "weeks",
+        recurrenceDays,
+        completed: false,
+        createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+        pointsAwarded: 0
+      };
+      setReminders((prev) => [...prev, newReminder]);
+      setToast(`\u2705 Added: ${newReminder.title}`);
+      trackEvent("create_reminder", { source: "hydration", category, recurrence: newReminder.recurrence });
+    } else if (action === "complete" && initialData2.targetReminder) {
+      const target = initialData2.targetReminder.toLowerCase();
+      const toComplete = reminders.find(
+        (r) => !r.completed && r.title.toLowerCase().includes(target)
+      );
+      if (toComplete) {
+        setReminders((prev) => prev.map(
+          (r) => r.id === toComplete.id ? { ...r, completed: true, completedAt: (/* @__PURE__ */ new Date()).toISOString() } : r
+        ));
+        setToast(`\u2705 Completed: ${toComplete.title}`);
+        trackEvent("complete_task", { source: "hydration", title: toComplete.title });
+      } else {
+        setToast(`\u26A0\uFE0F Couldn't find reminder matching "${initialData2.targetReminder}"`);
+      }
+    } else if (action === "delete" && initialData2.targetReminder) {
+      const target = initialData2.targetReminder.toLowerCase();
+      const toDelete = reminders.find(
+        (r) => r.title.toLowerCase().includes(target)
+      );
+      if (toDelete) {
+        setReminders((prev) => prev.filter((r) => r.id !== toDelete.id));
+        setToast(`\u{1F5D1}\uFE0F Deleted: ${toDelete.title}`);
+        trackEvent("delete_reminder", { source: "hydration", title: toDelete.title });
+      } else {
+        setToast(`\u26A0\uFE0F Couldn't find reminder matching "${initialData2.targetReminder}"`);
+      }
+    } else if (action === "filter" && initialData2.filterType) {
+      const filterMap = {
+        today: "today",
+        overdue: "overdue",
+        completed: "completed",
+        urgent: "urgent",
+        all: "all",
+        week: "all"
+        // Show all for week view
+      };
+      const newFilter = filterMap[initialData2.filterType] || "all";
+      setQuickFilter(newFilter);
+      setToast(`\u{1F4CB} Showing: ${initialData2.filterType} reminders`);
+      trackEvent("filter_change", { source: "hydration", filter: newFilter });
+    }
+  }, [initialData2?.action]);
+  (0, import_react3.useEffect)(() => {
     persistState(reminders, stats);
   }, [reminders, stats]);
   (0, import_react3.useEffect)(() => {

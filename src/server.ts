@@ -552,6 +552,10 @@ function createReminderAppServer(): Server {
         console.log("Captured meta:", { userLocation, userLocale, userAgent });
 
         // If ChatGPT didn't pass structured arguments, try to infer reminder details from freeform text in meta
+        let detectedAction: "create" | "complete" | "delete" | "filter" | "show" | "open" = "open";
+        let filterType: string | null = null;
+        let targetReminder: string | null = null;
+        
         try {
           const candidates: any[] = [
             meta["openai/subject"],
@@ -567,24 +571,100 @@ function createReminderAppServer(): Server {
           if (!args.natural_input && userText) {
             args.natural_input = userText;
           }
+          
+          const text = (args.natural_input || "").toLowerCase();
+          
+          // Detect action type from user intent
+          // 1. Complete/Mark done patterns
+          if (/\b(complete|mark\s*(as\s*)?(done|complete|finished)|finish|done\s+with|checked?\s+off)\b/i.test(text)) {
+            detectedAction = "complete";
+            // Extract the reminder to complete
+            const match = text.match(/(?:complete|mark|finish|done with|check off)\s+(?:the\s+)?(?:reminder\s+)?(?:about\s+|for\s+|to\s+)?["']?([^"']+?)["']?(?:\s+reminder)?$/i);
+            if (match) targetReminder = match[1].trim();
+          }
+          // 2. Delete/Remove patterns
+          else if (/\b(delete|remove|cancel|clear)\s+(?:the\s+)?(?:reminder|task)/i.test(text)) {
+            detectedAction = "delete";
+            const match = text.match(/(?:delete|remove|cancel|clear)\s+(?:the\s+)?(?:reminder\s+)?(?:about\s+|for\s+|to\s+)?["']?([^"']+?)["']?(?:\s+reminder)?$/i);
+            if (match) targetReminder = match[1].trim();
+          }
+          // 3. Show/Filter patterns
+          else if (/\b(show|list|what|view|display|get|find)\b.*\b(reminder|task|due|todo)/i.test(text)) {
+            detectedAction = "filter";
+            // Detect filter type
+            if (/\btoday\b/i.test(text)) filterType = "today";
+            else if (/\btomorrow\b/i.test(text)) filterType = "tomorrow";
+            else if (/\b(overdue|late|past\s*due|missed)\b/i.test(text)) filterType = "overdue";
+            else if (/\b(complete|done|finished)\b/i.test(text)) filterType = "completed";
+            else if (/\b(urgent|critical|asap)\b/i.test(text)) filterType = "urgent";
+            else if (/\b(this\s*week|weekly)\b/i.test(text)) filterType = "week";
+            else if (/\b(all|everything)\b/i.test(text)) filterType = "all";
+            else filterType = "all";
+          }
+          // 4. Create/Add patterns (default for reminder-like input)
+          else if (/\b(remind|add|create|set|schedule|new)\b/i.test(text) || 
+                   /\bevery\s+(day|week|month|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i.test(text) ||
+                   args.title) {
+            detectedAction = "create";
+          }
 
           // Try to infer priority from keywords
           if (args.priority === undefined) {
-            if (/urgent|asap|immediately|critical/i.test(userText)) args.priority = "urgent";
-            else if (/important|high priority/i.test(userText)) args.priority = "high";
-            else if (/low priority|whenever|no rush/i.test(userText)) args.priority = "low";
+            if (/urgent|asap|immediately|critical/i.test(text)) args.priority = "urgent";
+            else if (/important|high priority/i.test(text)) args.priority = "high";
+            else if (/low priority|whenever|no rush/i.test(text)) args.priority = "low";
           }
           
           // Try to infer recurrence from keywords
           if (args.recurrence === undefined) {
-            if (/every day|daily/i.test(userText)) args.recurrence = "daily";
-            else if (/every week|weekly/i.test(userText)) args.recurrence = "weekly";
-            else if (/every month|monthly/i.test(userText)) args.recurrence = "monthly";
+            if (/every day|daily/i.test(text)) args.recurrence = "daily";
+            else if (/every\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)|every week|weekly/i.test(text)) args.recurrence = "weekly";
+            else if (/every month|monthly/i.test(text)) args.recurrence = "monthly";
+          }
+          
+          // Try to infer category from keywords
+          if (!args.tags || args.tags.length === 0) {
+            if (/\b(work|office|meeting|project|deadline|boss|colleague)\b/i.test(text)) args.tags = ["work"];
+            else if (/\b(family|mom|dad|parent|kid|child|brother|sister)\b/i.test(text)) args.tags = ["family"];
+            else if (/\b(health|doctor|medicine|gym|workout|exercise|vitamin)\b/i.test(text)) args.tags = ["health"];
+            else if (/\b(grocery|shop|buy|store|errand)\b/i.test(text)) args.tags = ["errands"];
+            else if (/\b(bill|pay|rent|money|bank|finance)\b/i.test(text)) args.tags = ["finance"];
+          }
+          
+          // Parse day of week for weekly reminders
+          let recurrenceDays: number[] | undefined;
+          const dayMatch = text.match(/every\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/i);
+          if (dayMatch) {
+            const dayMap: Record<string, number> = { sunday: 0, monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6 };
+            recurrenceDays = [dayMap[dayMatch[1].toLowerCase()]];
+          }
+          
+          // Extract title if creating a reminder
+          if (detectedAction === "create" && !args.title) {
+            // Parse the reminder title from natural language
+            let title = text
+              .replace(/^remind\s+me\s+(to\s+)?/gi, "")
+              .replace(/^add\s+(a\s+)?(reminder\s+)?(to\s+)?/gi, "")
+              .replace(/^create\s+(a\s+)?(reminder\s+)?(to\s+)?/gi, "")
+              .replace(/^set\s+(a\s+)?(reminder\s+)?(to\s+)?/gi, "")
+              .replace(/\bevery\s+(day|week|month|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/gi, "")
+              .replace(/\bdaily\b|\bweekly\b|\bmonthly\b/gi, "")
+              .replace(/\bat\s+\d{1,2}(:\d{2})?\s*(am|pm)?\b/gi, "")
+              .replace(/\s+/g, " ")
+              .trim();
+            if (title) args.title = title.charAt(0).toUpperCase() + title.slice(1);
+          }
+          
+          // Store parsed recurrence days
+          if (recurrenceDays) {
+            (args as any).recurrenceDays = recurrenceDays;
           }
 
         } catch (e) {
           console.warn("Parameter inference from meta failed", e);
         }
+        
+        console.log(`[Hydration] Detected action: ${detectedAction}, filter: ${filterType}, target: ${targetReminder}`);
 
 
         const responseTime = Date.now() - startTime;
@@ -633,17 +713,20 @@ function createReminderAppServer(): Server {
           timestamp: new Date().toISOString(),
           ...args,
           input_source: usedDefaults ? "default" : "user",
+          // Hydration action - tells widget what to do
+          action: detectedAction,
+          filterType: filterType,
+          targetReminder: targetReminder,
           // Include saved reminders for hydration
           reminders: savedData?.reminders || [],
           stats: savedData?.stats || null,
           // Summary + follow-ups for natural language UX
           summary: computeSummary(args),
-          suggested_followups: [
-            "Show my reminders",
-            "What's due today?",
-            "Set a daily reminder",
-            "Snooze this reminder"
-          ],
+          suggested_followups: detectedAction === "create" 
+            ? ["Show my reminders", "What's due today?", "Set another reminder"]
+            : detectedAction === "filter"
+            ? ["Add a new reminder", "Mark one as complete", "Show overdue tasks"]
+            : ["Show my reminders", "What's due today?", "Set a daily reminder", "Snooze this reminder"],
         } as const;
 
         // Embed the widget resource in _meta to mirror official examples and improve hydration reliability

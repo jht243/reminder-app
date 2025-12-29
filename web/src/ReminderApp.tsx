@@ -1078,6 +1078,104 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     trackEvent("load", { reminderCount: reminders.length, hasStats: !!stats.totalPoints });
   }, []); // Only on mount
   
+  // Process hydration action from ChatGPT prompt
+  useEffect(() => {
+    if (!initialData?.action) return;
+    
+    const action = initialData.action;
+    console.log("[Hydration] Processing action:", action, initialData);
+    
+    if (action === "create" && initialData.title) {
+      // Create a new reminder from prompt
+      const today = new Date();
+      const nextFriday = new Date(today);
+      nextFriday.setDate(today.getDate() + ((5 - today.getDay() + 7) % 7 || 7));
+      
+      // Parse recurrence days if provided
+      let recurrenceDays = initialData.recurrenceDays;
+      
+      // Infer category from tags
+      let category: Category = "other";
+      if (initialData.tags && initialData.tags.length > 0) {
+        const tagMap: Record<string, Category> = {
+          work: "work", family: "family", health: "health", 
+          errands: "errands", finance: "finance", social: "social",
+          learning: "learning", travel: "travel", home: "home"
+        };
+        category = tagMap[initialData.tags[0]] || "other";
+      }
+      
+      const newReminder: Reminder = {
+        id: `r-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        title: initialData.title,
+        description: initialData.description || "",
+        dueDate: initialData.due_date || nextFriday.toISOString().split("T")[0],
+        dueTime: initialData.due_time || undefined,
+        priority: initialData.priority || "medium",
+        category,
+        recurrence: initialData.recurrence || "none",
+        recurrenceInterval: 1,
+        recurrenceUnit: initialData.recurrence === "weekly" ? "weeks" : initialData.recurrence === "daily" ? "days" : "weeks",
+        recurrenceDays,
+        completed: false,
+        createdAt: new Date().toISOString(),
+        pointsAwarded: 0
+      };
+      
+      setReminders(prev => [...prev, newReminder]);
+      setToast(`✅ Added: ${newReminder.title}`);
+      trackEvent("create_reminder", { source: "hydration", category, recurrence: newReminder.recurrence });
+    }
+    else if (action === "complete" && initialData.targetReminder) {
+      // Complete a reminder by title match
+      const target = initialData.targetReminder.toLowerCase();
+      const toComplete = reminders.find(r => 
+        !r.completed && r.title.toLowerCase().includes(target)
+      );
+      if (toComplete) {
+        // Mark as complete (simplified version)
+        setReminders(prev => prev.map(r => 
+          r.id === toComplete.id 
+            ? { ...r, completed: true, completedAt: new Date().toISOString() }
+            : r
+        ));
+        setToast(`✅ Completed: ${toComplete.title}`);
+        trackEvent("complete_task", { source: "hydration", title: toComplete.title });
+      } else {
+        setToast(`⚠️ Couldn't find reminder matching "${initialData.targetReminder}"`);
+      }
+    }
+    else if (action === "delete" && initialData.targetReminder) {
+      // Delete a reminder by title match
+      const target = initialData.targetReminder.toLowerCase();
+      const toDelete = reminders.find(r => 
+        r.title.toLowerCase().includes(target)
+      );
+      if (toDelete) {
+        setReminders(prev => prev.filter(r => r.id !== toDelete.id));
+        setToast(`🗑️ Deleted: ${toDelete.title}`);
+        trackEvent("delete_reminder", { source: "hydration", title: toDelete.title });
+      } else {
+        setToast(`⚠️ Couldn't find reminder matching "${initialData.targetReminder}"`);
+      }
+    }
+    else if (action === "filter" && initialData.filterType) {
+      // Apply filter based on prompt
+      const filterMap: Record<string, typeof quickFilter> = {
+        today: "today",
+        overdue: "overdue",
+        completed: "completed",
+        urgent: "urgent",
+        all: "all",
+        week: "all", // Show all for week view
+      };
+      const newFilter = filterMap[initialData.filterType] || "all";
+      setQuickFilter(newFilter);
+      setToast(`📋 Showing: ${initialData.filterType} reminders`);
+      trackEvent("filter_change", { source: "hydration", filter: newFilter });
+    }
+  }, [initialData?.action]); // Only run when action changes
+  
   // Persist whenever reminders or stats change
   useEffect(() => {
     persistState(reminders, stats);
