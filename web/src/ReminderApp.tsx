@@ -990,16 +990,8 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const [screenshotModal, setScreenshotModal] = useState<{
     open: boolean;
     imageData: string | null;
-    analyzing: boolean;
     extractedText: string;
-  }>({ open: false, imageData: null, analyzing: false, extractedText: "" });
-  
-  // AI API Key (stored in localStorage)
-  const [aiApiKey, setAiApiKey] = useState<string>(() => {
-    try {
-      return localStorage.getItem("REMINDER_APP_AI_KEY") || "";
-    } catch { return ""; }
-  });
+  }>({ open: false, imageData: null, extractedText: "" });
 
   // File Upload Handler
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
@@ -1505,7 +1497,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     setToast(`Generated ${newReminders.length} sample reminders!`);
   };
 
-  // Screenshot handler - opens modal with image preview for AI analysis
+  // Screenshot handler - opens modal with image preview
   const handleScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent | File) => {
     let file: File | null = null;
     
@@ -1531,80 +1523,9 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     const reader = new FileReader();
     reader.onload = async (event) => {
       const base64 = event.target?.result as string;
-      setScreenshotModal({ open: true, imageData: base64, analyzing: false, extractedText: "" });
-      
-      // Auto-analyze if API key is set
-      if (aiApiKey) {
-        analyzeScreenshotWithAI(base64);
-      }
+      setScreenshotModal({ open: true, imageData: base64, extractedText: "" });
     };
     reader.readAsDataURL(file);
-  };
-  
-  // AI Vision analysis using OpenAI GPT-4 Vision
-  const analyzeScreenshotWithAI = async (imageData: string) => {
-    if (!aiApiKey) {
-      setToast("Please add your OpenAI API key in settings");
-      return;
-    }
-    
-    setScreenshotModal(prev => ({ ...prev, analyzing: true }));
-    
-    try {
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${aiApiKey}`
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            {
-              role: "user",
-              content: [
-                {
-                  type: "text",
-                  text: `Extract all tasks, reminders, to-dos, or action items from this image. For each item, output it on a new line in this format:
-- [task description] [optional: time like "at 5pm"] [optional: date like "tomorrow" or "next monday"]
-
-Examples:
-- Buy groceries tomorrow at 3pm
-- Call mom
-- Submit report next friday
-
-Only output the task list, nothing else. If no tasks are found, output "NO_TASKS_FOUND".`
-                },
-                {
-                  type: "image_url",
-                  image_url: { url: imageData }
-                }
-              ]
-            }
-          ],
-          max_tokens: 1000
-        })
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error?.message || "API request failed");
-      }
-      
-      const data = await response.json();
-      const extractedText = data.choices?.[0]?.message?.content || "";
-      
-      if (extractedText === "NO_TASKS_FOUND" || !extractedText.trim()) {
-        setScreenshotModal(prev => ({ ...prev, analyzing: false, extractedText: "" }));
-        setToast("No tasks found in screenshot");
-        return;
-      }
-      
-      setScreenshotModal(prev => ({ ...prev, analyzing: false, extractedText }));
-    } catch (error: any) {
-      setScreenshotModal(prev => ({ ...prev, analyzing: false }));
-      setToast(`AI Error: ${error.message}`);
-    }
   };
   
   // Import extracted tasks from screenshot
@@ -1637,7 +1558,7 @@ Only output the task list, nothing else. If no tasks are found, output "NO_TASKS
     
     if (newReminders.length > 0) {
       setReminders(prev => [...prev, ...newReminders]);
-      setScreenshotModal({ open: false, imageData: null, analyzing: false, extractedText: "" });
+      setScreenshotModal({ open: false, imageData: null, extractedText: "" });
       setToast(`Imported ${newReminders.length} reminders from screenshot!`);
     } else {
       setToast("No valid reminders found");
@@ -2575,240 +2496,133 @@ OR just paste a list:
           <div style={{ backgroundColor: COLORS.card, borderRadius: 24, width: "100%", maxWidth: 560, padding: 24, boxShadow: "0 16px 48px rgba(0,0,0,0.2)", maxHeight: "90vh", overflowY: "auto" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
               <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: COLORS.textMain }}>
-                📸 AI Screenshot Import
+                📸 Import from Screenshot
               </h2>
               <button 
-                onClick={() => setScreenshotModal({ open: false, imageData: null, analyzing: false, extractedText: "" })} 
+                onClick={() => setScreenshotModal({ open: false, imageData: null, extractedText: "" })} 
                 style={{ width: 36, height: 36, borderRadius: "50%", border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
               >
                 <X size={18} color={COLORS.textMuted} />
               </button>
             </div>
             
-            {/* Drag & Drop Zone or Image Preview */}
-            {!screenshotModal.imageData ? (
-              <div
-                onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  const file = e.dataTransfer.files?.[0];
-                  if (file) handleScreenshotUpload(file);
-                }}
-                style={{
-                  border: `2px dashed ${COLORS.primary}`,
-                  borderRadius: 16,
-                  backgroundColor: `${COLORS.primary}08`,
-                  padding: 40,
-                  textAlign: "center",
-                  cursor: "pointer",
-                  transition: "all 0.2s"
-                }}
-                onClick={() => document.getElementById("screenshot-file-input")?.click()}
-              >
-                <div style={{ fontSize: 48, marginBottom: 12 }}>📷</div>
-                <div style={{ fontSize: 15, fontWeight: 600, color: COLORS.textMain, marginBottom: 8 }}>
-                  Drop screenshot here
-                </div>
-                <div style={{ fontSize: 13, color: COLORS.textSecondary }}>
-                  or click to browse
-                </div>
-                <input
-                  id="screenshot-file-input"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleScreenshotUpload}
-                  style={{ display: "none" }}
-                />
+            {/* Instructions */}
+            <div style={{ padding: 16, backgroundColor: COLORS.primaryBg, borderRadius: 12, marginBottom: 20 }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.primary, marginBottom: 8 }}>
+                💡 How it works
               </div>
-            ) : (
-              <div>
-                {/* Image Preview */}
-                <div style={{ marginBottom: 16, borderRadius: 12, overflow: "hidden", border: `1px solid ${COLORS.border}` }}>
+              <ol style={{ margin: 0, paddingLeft: 20, fontSize: 13, color: COLORS.textSecondary, lineHeight: 1.6 }}>
+                <li>Drop or upload your screenshot below</li>
+                <li>Ask ChatGPT: <em>"Extract the tasks from this image"</em></li>
+                <li>Paste ChatGPT's response in the text box</li>
+                <li>Click Import!</li>
+              </ol>
+            </div>
+            
+            {/* Drag & Drop Zone */}
+            <div
+              onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              onDrop={(e) => {
+                e.preventDefault();
+                const file = e.dataTransfer.files?.[0];
+                if (file) handleScreenshotUpload(file);
+              }}
+              style={{
+                border: `2px dashed ${screenshotModal.imageData ? COLORS.primary : COLORS.border}`,
+                borderRadius: 16,
+                backgroundColor: screenshotModal.imageData ? `${COLORS.primary}08` : COLORS.cardAlt,
+                padding: screenshotModal.imageData ? 0 : 32,
+                textAlign: "center",
+                cursor: "pointer",
+                transition: "all 0.2s",
+                overflow: "hidden",
+                marginBottom: 16
+              }}
+              onClick={() => !screenshotModal.imageData && document.getElementById("screenshot-file-input")?.click()}
+            >
+              {screenshotModal.imageData ? (
+                <div style={{ position: "relative" }}>
                   <img 
                     src={screenshotModal.imageData} 
                     alt="Screenshot preview" 
-                    style={{ width: "100%", maxHeight: 200, objectFit: "contain", backgroundColor: COLORS.cardAlt }} 
+                    style={{ width: "100%", maxHeight: 180, objectFit: "contain", backgroundColor: COLORS.cardAlt }} 
                   />
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setScreenshotModal(prev => ({ ...prev, imageData: null })); }}
+                    style={{
+                      position: "absolute", top: 8, right: 8,
+                      width: 28, height: 28, borderRadius: "50%",
+                      backgroundColor: "rgba(0,0,0,0.6)", color: "#fff",
+                      border: "none", cursor: "pointer",
+                      display: "flex", alignItems: "center", justifyContent: "center"
+                    }}
+                  >
+                    <X size={14} />
+                  </button>
                 </div>
-                
-                {/* AI Analysis Status */}
-                {screenshotModal.analyzing ? (
-                  <div style={{ textAlign: "center", padding: 20, backgroundColor: COLORS.primaryBg, borderRadius: 12 }}>
-                    <div style={{ fontSize: 24, marginBottom: 8 }}>🤖</div>
-                    <div style={{ fontSize: 14, fontWeight: 500, color: COLORS.primary }}>
-                      AI is analyzing your screenshot...
-                    </div>
+              ) : (
+                <>
+                  <div style={{ fontSize: 40, marginBottom: 8 }}>📷</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.textMain, marginBottom: 4 }}>
+                    Drop screenshot here
                   </div>
-                ) : !aiApiKey ? (
-                  <div style={{ padding: 16, backgroundColor: COLORS.cardAlt, borderRadius: 12, marginBottom: 16 }}>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.textMain, marginBottom: 8 }}>
-                      🔑 OpenAI API Key Required
-                    </div>
-                    <div style={{ fontSize: 13, color: COLORS.textSecondary, marginBottom: 12 }}>
-                      Enter your OpenAI API key to enable AI-powered text extraction.
-                    </div>
-                    <input
-                      type="password"
-                      placeholder="sk-..."
-                      value={aiApiKey}
-                      onChange={(e) => {
-                        const key = e.target.value;
-                        setAiApiKey(key);
-                        try { localStorage.setItem("REMINDER_APP_AI_KEY", key); } catch {}
-                      }}
-                      style={{
-                        width: "100%",
-                        padding: "10px 14px",
-                        borderRadius: 8,
-                        border: `1px solid ${COLORS.border}`,
-                        backgroundColor: COLORS.inputBg,
-                        fontSize: 13,
-                        marginBottom: 12,
-                        ...inputStyle
-                      }}
-                    />
-                    <button
-                      onClick={() => screenshotModal.imageData && analyzeScreenshotWithAI(screenshotModal.imageData)}
-                      disabled={!aiApiKey}
-                      style={{
-                        width: "100%",
-                        padding: "10px 16px",
-                        borderRadius: 8,
-                        backgroundColor: aiApiKey ? COLORS.primary : COLORS.border,
-                        color: "#fff",
-                        border: "none",
-                        cursor: aiApiKey ? "pointer" : "not-allowed",
-                        fontSize: 13,
-                        fontWeight: 600
-                      }}
-                    >
-                      Analyze with AI
-                    </button>
-                    <div style={{ fontSize: 11, color: COLORS.textMuted, marginTop: 8, textAlign: "center" }}>
-                      Your key is stored locally and never sent to our servers
-                    </div>
+                  <div style={{ fontSize: 12, color: COLORS.textMuted }}>
+                    or click to browse
                   </div>
-                ) : screenshotModal.extractedText ? (
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.textMain, marginBottom: 8 }}>
-                      ✅ Tasks Found:
-                    </div>
-                    <textarea
-                      value={screenshotModal.extractedText}
-                      onChange={(e) => setScreenshotModal(prev => ({ ...prev, extractedText: e.target.value }))}
-                      style={{
-                        width: "100%",
-                        height: 120,
-                        padding: 12,
-                        borderRadius: 8,
-                        border: `1px solid ${COLORS.border}`,
-                        backgroundColor: COLORS.inputBg,
-                        fontSize: 13,
-                        fontFamily: "inherit",
-                        resize: "vertical",
-                        marginBottom: 12,
-                        ...inputStyle
-                      }}
-                    />
-                    <div style={{ display: "flex", gap: 10 }}>
-                      <button
-                        onClick={() => screenshotModal.imageData && analyzeScreenshotWithAI(screenshotModal.imageData)}
-                        style={{
-                          flex: 1,
-                          padding: "10px 16px",
-                          borderRadius: 8,
-                          backgroundColor: COLORS.cardAlt,
-                          color: COLORS.textMain,
-                          border: `1px solid ${COLORS.border}`,
-                          cursor: "pointer",
-                          fontSize: 13,
-                          fontWeight: 500
-                        }}
-                      >
-                        Re-analyze
-                      </button>
-                      <button
-                        onClick={importScreenshotTasks}
-                        style={{
-                          flex: 2,
-                          padding: "10px 16px",
-                          borderRadius: 8,
-                          backgroundColor: COLORS.primary,
-                          color: "#fff",
-                          border: "none",
-                          cursor: "pointer",
-                          fontSize: 13,
-                          fontWeight: 600
-                        }}
-                      >
-                        Import Tasks
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div style={{ display: "flex", gap: 10 }}>
-                    <button
-                      onClick={() => setScreenshotModal(prev => ({ ...prev, imageData: null }))}
-                      style={{
-                        flex: 1,
-                        padding: "10px 16px",
-                        borderRadius: 8,
-                        backgroundColor: COLORS.cardAlt,
-                        color: COLORS.textMain,
-                        border: `1px solid ${COLORS.border}`,
-                        cursor: "pointer",
-                        fontSize: 13,
-                        fontWeight: 500
-                      }}
-                    >
-                      Choose Different Image
-                    </button>
-                    <button
-                      onClick={() => screenshotModal.imageData && analyzeScreenshotWithAI(screenshotModal.imageData)}
-                      style={{
-                        flex: 2,
-                        padding: "10px 16px",
-                        borderRadius: 8,
-                        backgroundColor: COLORS.primary,
-                        color: "#fff",
-                        border: "none",
-                        cursor: "pointer",
-                        fontSize: 13,
-                        fontWeight: 600
-                      }}
-                    >
-                      🤖 Analyze with AI
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
+                </>
+              )}
+              <input
+                id="screenshot-file-input"
+                type="file"
+                accept="image/*"
+                onChange={handleScreenshotUpload}
+                style={{ display: "none" }}
+              />
+            </div>
             
-            {/* Manual Entry Option */}
-            {screenshotModal.imageData && !screenshotModal.extractedText && !screenshotModal.analyzing && (
-              <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${COLORS.border}` }}>
-                <div style={{ fontSize: 12, color: COLORS.textMuted, marginBottom: 8 }}>
-                  Or type tasks manually:
-                </div>
-                <textarea
-                  placeholder="- Buy groceries tomorrow&#10;- Call mom at 5pm&#10;- Submit report next friday"
-                  onChange={(e) => setScreenshotModal(prev => ({ ...prev, extractedText: e.target.value }))}
-                  style={{
-                    width: "100%",
-                    height: 80,
-                    padding: 12,
-                    borderRadius: 8,
-                    border: `1px solid ${COLORS.border}`,
-                    backgroundColor: COLORS.inputBg,
-                    fontSize: 13,
-                    fontFamily: "inherit",
-                    resize: "none",
-                    ...inputStyle
-                  }}
-                />
+            {/* Task Input Area */}
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.textMain, marginBottom: 8 }}>
+                Paste tasks from ChatGPT:
               </div>
-            )}
+              <textarea
+                value={screenshotModal.extractedText}
+                onChange={(e) => setScreenshotModal(prev => ({ ...prev, extractedText: e.target.value }))}
+                placeholder="- Buy groceries tomorrow at 3pm&#10;- Call mom&#10;- Submit report next friday&#10;- Pick up dry cleaning"
+                style={{
+                  width: "100%",
+                  height: 120,
+                  padding: 12,
+                  borderRadius: 12,
+                  border: `1px solid ${COLORS.border}`,
+                  backgroundColor: COLORS.inputBg,
+                  fontSize: 13,
+                  fontFamily: "inherit",
+                  resize: "vertical",
+                  ...inputStyle
+                }}
+              />
+            </div>
+            
+            {/* Import Button */}
+            <button
+              onClick={importScreenshotTasks}
+              disabled={!screenshotModal.extractedText.trim()}
+              style={{
+                width: "100%",
+                padding: "14px 20px",
+                borderRadius: 12,
+                backgroundColor: screenshotModal.extractedText.trim() ? COLORS.primary : COLORS.border,
+                color: "#fff",
+                border: "none",
+                cursor: screenshotModal.extractedText.trim() ? "pointer" : "not-allowed",
+                fontSize: 14,
+                fontWeight: 600
+              }}
+            >
+              Import Tasks
+            </button>
           </div>
         </div>
       )}
@@ -2825,7 +2639,7 @@ OR just paste a list:
         <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
           {/* Screenshot Upload - Opens Modal */}
           <button
-            onClick={() => setScreenshotModal({ open: true, imageData: null, analyzing: false, extractedText: "" })}
+            onClick={() => setScreenshotModal({ open: true, imageData: null, extractedText: "" })}
             style={{
               display: "flex", alignItems: "center", gap: 8,
               padding: "10px 16px", borderRadius: 50,
