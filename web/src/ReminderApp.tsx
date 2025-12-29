@@ -1130,7 +1130,15 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   
   // Persist whenever reminders or stats change
   useEffect(() => {
-    persistState(reminders, stats);
+    try {
+      persistState(reminders, stats);
+    } catch (e: any) {
+      console.error("[Persist] Unexpected error:", e);
+      trackEvent("client_persist_error", {
+        message: e?.message || String(e || ""),
+        stack: e?.stack,
+      });
+    }
   }, [reminders, stats]);
   useEffect(() => { if (toast) { const t = setTimeout(() => setToast(null), 3000); return () => clearTimeout(t); }}, [toast]);
   useEffect(() => { if (achievement) { const t = setTimeout(() => setAchievement(null), 4000); return () => clearTimeout(t); }}, [achievement]);
@@ -1205,46 +1213,62 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   // Check for newly completed progression tasks and award points
   // IMPORTANT: Tasks must be completed in SEQUENTIAL order
   useEffect(() => {
-    const currentCompleted = stats.completedTasks || [];
-    
-    // Sync ref with current state
-    currentCompleted.forEach(id => processedTasksRef.current.add(id));
-    
-    console.log("[Progression] Checking tasks. Current completed:", currentCompleted);
-    console.log("[Progression] Reminders count:", reminders.length);
-    console.log("[Progression] Stats:", { completedAllTime: stats.completedAllTime, currentStreak: stats.currentStreak });
-    
-    // Find the NEXT task in sequence (first one not completed)
-    let nextTaskIndex = 0;
-    for (let i = 0; i < PROGRESSION_TASKS.length; i++) {
-      if (!processedTasksRef.current.has(PROGRESSION_TASKS[i].id)) {
-        nextTaskIndex = i;
-        break;
-      }
-    }
-    
-    const nextTask = PROGRESSION_TASKS[nextTaskIndex];
-    if (!nextTask || processedTasksRef.current.has(nextTask.id)) {
-      console.log("[Progression] All tasks completed or no next task");
-      return;
-    }
-    
-    console.log(`[Progression] Next task to complete: "${nextTask.id}"`);
-    
-    // Check if the next task's condition is met
-    const isComplete = nextTask.check(reminders, stats);
-    console.log(`[Progression] Task "${nextTask.id}": check=${isComplete}`);
-    
-    if (isComplete) {
-      processedTasksRef.current.add(nextTask.id); // Mark as processed immediately
-      console.log(`[Progression] Task "${nextTask.id}" COMPLETED! +${nextTask.points} pts`);
+    try {
+      const currentCompleted = stats.completedTasks || [];
       
-      setStats(prev => ({
-        ...prev,
-        totalPoints: prev.totalPoints + nextTask.points,
-        completedTasks: [...new Set([...(prev.completedTasks || []), nextTask.id])]
-      }));
-      setToast(`🎉 "${nextTask.name}" complete! +${nextTask.points} pts`);
+      // Sync ref with current state
+      currentCompleted.forEach(id => processedTasksRef.current.add(id));
+      
+      console.log("[Progression] Checking tasks. Current completed:", currentCompleted);
+      console.log("[Progression] Reminders count:", reminders.length);
+      console.log("[Progression] Stats:", { completedAllTime: stats.completedAllTime, currentStreak: stats.currentStreak });
+      
+      // Find the NEXT task in sequence (first one not completed)
+      let nextTaskIndex = 0;
+      for (let i = 0; i < PROGRESSION_TASKS.length; i++) {
+        if (!processedTasksRef.current.has(PROGRESSION_TASKS[i].id)) {
+          nextTaskIndex = i;
+          break;
+        }
+      }
+      
+      const nextTask = PROGRESSION_TASKS[nextTaskIndex];
+      if (!nextTask || processedTasksRef.current.has(nextTask.id)) {
+        console.log("[Progression] All tasks completed or no next task");
+        return;
+      }
+      
+      console.log(`[Progression] Next task to complete: "${nextTask.id}"`);
+      
+      // Check if the next task's condition is met
+      const isComplete = nextTask.check(reminders, stats);
+      console.log(`[Progression] Task "${nextTask.id}": check=${isComplete}`);
+      
+      if (isComplete) {
+        processedTasksRef.current.add(nextTask.id); // Mark as processed immediately
+        console.log(`[Progression] Task "${nextTask.id}" COMPLETED! +${nextTask.points} pts`);
+        
+        setStats(prev => ({
+          ...prev,
+          totalPoints: prev.totalPoints + nextTask.points,
+          completedTasks: [...new Set([...(prev.completedTasks || []), nextTask.id])]
+        }));
+        setToast(`🎉 "${nextTask.name}" complete! +${nextTask.points} pts`);
+      }
+    } catch (e: any) {
+      console.error("[Progression] Error evaluating progression:", e);
+      trackEvent("client_progression_error", {
+        message: e?.message || String(e || ""),
+        stack: e?.stack,
+        reminders_count: reminders.length,
+        stats: {
+          completedAllTime: stats.completedAllTime,
+          currentStreak: stats.currentStreak,
+          longestStreak: stats.longestStreak,
+          totalPoints: stats.totalPoints,
+          completedTasksCount: (stats.completedTasks || []).length,
+        },
+      });
     }
   }, [reminders.length, stats.completedAllTime, stats.currentStreak, stats.longestStreak]);
   

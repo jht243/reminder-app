@@ -26983,7 +26983,15 @@ function ReminderApp({ initialData: initialData2 }) {
     trackEvent("load", { reminderCount: reminders.length, hasStats: !!stats.totalPoints });
   }, []);
   (0, import_react3.useEffect)(() => {
-    persistState(reminders, stats);
+    try {
+      persistState(reminders, stats);
+    } catch (e) {
+      console.error("[Persist] Unexpected error:", e);
+      trackEvent("client_persist_error", {
+        message: e?.message || String(e || ""),
+        stack: e?.stack
+      });
+    }
   }, [reminders, stats]);
   (0, import_react3.useEffect)(() => {
     if (toast) {
@@ -27047,35 +27055,51 @@ function ReminderApp({ initialData: initialData2 }) {
   const levelInfo = calcLevel(stats.totalPoints);
   const processedTasksRef = (0, import_react3.useRef)(new Set(stats.completedTasks || []));
   (0, import_react3.useEffect)(() => {
-    const currentCompleted = stats.completedTasks || [];
-    currentCompleted.forEach((id) => processedTasksRef.current.add(id));
-    console.log("[Progression] Checking tasks. Current completed:", currentCompleted);
-    console.log("[Progression] Reminders count:", reminders.length);
-    console.log("[Progression] Stats:", { completedAllTime: stats.completedAllTime, currentStreak: stats.currentStreak });
-    let nextTaskIndex = 0;
-    for (let i = 0; i < PROGRESSION_TASKS.length; i++) {
-      if (!processedTasksRef.current.has(PROGRESSION_TASKS[i].id)) {
-        nextTaskIndex = i;
-        break;
+    try {
+      const currentCompleted = stats.completedTasks || [];
+      currentCompleted.forEach((id) => processedTasksRef.current.add(id));
+      console.log("[Progression] Checking tasks. Current completed:", currentCompleted);
+      console.log("[Progression] Reminders count:", reminders.length);
+      console.log("[Progression] Stats:", { completedAllTime: stats.completedAllTime, currentStreak: stats.currentStreak });
+      let nextTaskIndex = 0;
+      for (let i = 0; i < PROGRESSION_TASKS.length; i++) {
+        if (!processedTasksRef.current.has(PROGRESSION_TASKS[i].id)) {
+          nextTaskIndex = i;
+          break;
+        }
       }
-    }
-    const nextTask = PROGRESSION_TASKS[nextTaskIndex];
-    if (!nextTask || processedTasksRef.current.has(nextTask.id)) {
-      console.log("[Progression] All tasks completed or no next task");
-      return;
-    }
-    console.log(`[Progression] Next task to complete: "${nextTask.id}"`);
-    const isComplete = nextTask.check(reminders, stats);
-    console.log(`[Progression] Task "${nextTask.id}": check=${isComplete}`);
-    if (isComplete) {
-      processedTasksRef.current.add(nextTask.id);
-      console.log(`[Progression] Task "${nextTask.id}" COMPLETED! +${nextTask.points} pts`);
-      setStats((prev) => ({
-        ...prev,
-        totalPoints: prev.totalPoints + nextTask.points,
-        completedTasks: [.../* @__PURE__ */ new Set([...prev.completedTasks || [], nextTask.id])]
-      }));
-      setToast(`\u{1F389} "${nextTask.name}" complete! +${nextTask.points} pts`);
+      const nextTask = PROGRESSION_TASKS[nextTaskIndex];
+      if (!nextTask || processedTasksRef.current.has(nextTask.id)) {
+        console.log("[Progression] All tasks completed or no next task");
+        return;
+      }
+      console.log(`[Progression] Next task to complete: "${nextTask.id}"`);
+      const isComplete = nextTask.check(reminders, stats);
+      console.log(`[Progression] Task "${nextTask.id}": check=${isComplete}`);
+      if (isComplete) {
+        processedTasksRef.current.add(nextTask.id);
+        console.log(`[Progression] Task "${nextTask.id}" COMPLETED! +${nextTask.points} pts`);
+        setStats((prev) => ({
+          ...prev,
+          totalPoints: prev.totalPoints + nextTask.points,
+          completedTasks: [.../* @__PURE__ */ new Set([...prev.completedTasks || [], nextTask.id])]
+        }));
+        setToast(`\u{1F389} "${nextTask.name}" complete! +${nextTask.points} pts`);
+      }
+    } catch (e) {
+      console.error("[Progression] Error evaluating progression:", e);
+      trackEvent("client_progression_error", {
+        message: e?.message || String(e || ""),
+        stack: e?.stack,
+        reminders_count: reminders.length,
+        stats: {
+          completedAllTime: stats.completedAllTime,
+          currentStreak: stats.currentStreak,
+          longestStreak: stats.longestStreak,
+          totalPoints: stats.totalPoints,
+          completedTasksCount: (stats.completedTasks || []).length
+        }
+      });
     }
   }, [reminders.length, stats.completedAllTime, stats.currentStreak, stats.longestStreak]);
   const getCurrentProgressionTask = () => {
@@ -28847,6 +28871,55 @@ OR just paste a list:
 
 // src/main.tsx
 var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
+var __WIDGET_START_MS = typeof performance !== "undefined" && performance.now ? performance.now() : Date.now();
+var __sinceStartMs = () => {
+  const now = typeof performance !== "undefined" && performance.now ? performance.now() : Date.now();
+  return Math.round(now - __WIDGET_START_MS);
+};
+var __log = (...args) => console.log(`[t+${__sinceStartMs()}ms]`, ...args);
+var __report = async (event, data) => {
+  try {
+    await fetch("/api/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ event, data })
+    });
+  } catch {
+  }
+};
+window.addEventListener(
+  "error",
+  (ev) => {
+    const err = ev?.error;
+    __log("[GlobalError]", ev?.message, err);
+    __report("widget_global_error", {
+      t_ms: __sinceStartMs(),
+      message: ev?.message,
+      filename: ev?.filename,
+      lineno: ev?.lineno,
+      colno: ev?.colno,
+      error: err?.message || String(err || ""),
+      stack: err?.stack
+    });
+  },
+  true
+);
+window.addEventListener(
+  "unhandledrejection",
+  (ev) => {
+    const reason = ev?.reason;
+    __log("[UnhandledRejection]", reason);
+    __report("widget_unhandled_rejection", {
+      t_ms: __sinceStartMs(),
+      reason: reason?.message || String(reason || ""),
+      stack: reason?.stack
+    });
+  },
+  true
+);
+window.setTimeout(() => __log("[Heartbeat] alive @3s"), 3e3);
+window.setTimeout(() => __log("[Heartbeat] alive @5s"), 5e3);
+window.setTimeout(() => __log("[Heartbeat] alive @7s"), 7e3);
 var ErrorBoundary = class extends import_react4.default.Component {
   constructor(props) {
     super(props);
