@@ -207,11 +207,13 @@ if (!container) {
 
 const root = createRoot(container);
 
+let __appliedLateHydration = false;
+
 const renderApp = (data: any) => {
   root.render(
     <React.StrictMode>
       <ErrorBoundary>
-        <App key={Date.now()} initialData={data} />
+        <App initialData={data} />
       </ErrorBoundary>
     </React.StrictMode>
   );
@@ -239,7 +241,12 @@ window.addEventListener('openai:set_globals', (ev: any) => {
     for (const candidate of candidates) {
        if (candidate && typeof candidate === 'object' && Object.keys(candidate).length > 0) {
           console.log("[Hydration] Re-rendering with late data:", candidate);
-          // Force re-mount by changing key, ensuring initialData is applied fresh
+          // Apply late hydration at most once to avoid repeated remounts and analytics spam.
+          if (__appliedLateHydration) {
+            __log("[Hydration] Ignoring additional late hydration (already applied once)");
+            return;
+          }
+          __appliedLateHydration = true;
           renderApp(candidate);
           return;
        }

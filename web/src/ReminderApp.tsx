@@ -1092,7 +1092,27 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
 
   // Track widget load on mount
   useEffect(() => {
-    trackEvent("load", { reminderCount: reminders.length, hasStats: !!stats.totalPoints });
+    // Dedupe: ChatGPT host can remount widgets or re-hydrate multiple times.
+    // We only want one widget_load per session.
+    try {
+      const key = "__reminder_widget_load_tracked";
+      const already =
+        (typeof sessionStorage !== "undefined" && sessionStorage.getItem(key) === "1") ||
+        (window as any)[key] === true;
+      if (already) return;
+      if (typeof sessionStorage !== "undefined") sessionStorage.setItem(key, "1");
+      (window as any)[key] = true;
+    } catch {
+      // If storage is blocked, fall back to per-page guard.
+      const key = "__reminder_widget_load_tracked";
+      if ((window as any)[key] === true) return;
+      (window as any)[key] = true;
+    }
+
+    trackEvent("load", {
+      reminderCount: reminders.length,
+      hasStats: !!stats.totalPoints,
+    });
   }, []); // Only on mount
   
   // Persist whenever reminders or stats change

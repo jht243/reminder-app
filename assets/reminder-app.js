@@ -26953,7 +26953,21 @@ function ReminderApp({ initialData: initialData2 }) {
     reader.readAsText(file);
   };
   (0, import_react3.useEffect)(() => {
-    trackEvent("load", { reminderCount: reminders.length, hasStats: !!stats.totalPoints });
+    try {
+      const key = "__reminder_widget_load_tracked";
+      const already = typeof sessionStorage !== "undefined" && sessionStorage.getItem(key) === "1" || window[key] === true;
+      if (already) return;
+      if (typeof sessionStorage !== "undefined") sessionStorage.setItem(key, "1");
+      window[key] = true;
+    } catch {
+      const key = "__reminder_widget_load_tracked";
+      if (window[key] === true) return;
+      window[key] = true;
+    }
+    trackEvent("load", {
+      reminderCount: reminders.length,
+      hasStats: !!stats.totalPoints
+    });
   }, []);
   (0, import_react3.useEffect)(() => {
     persistState(reminders, stats);
@@ -28983,9 +28997,10 @@ if (!container) {
   throw new Error("reminder-app-root element not found");
 }
 var root = (0, import_client.createRoot)(container);
+var __appliedLateHydration = false;
 var renderApp = (data) => {
   root.render(
-    /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(import_react4.default.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(ErrorBoundary, { children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(App, { initialData: data }, Date.now()) }) })
+    /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(import_react4.default.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(ErrorBoundary, { children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(App, { initialData: data }) }) })
   );
 };
 var initialData = getHydrationData();
@@ -29004,6 +29019,11 @@ window.addEventListener("openai:set_globals", (ev) => {
     for (const candidate of candidates) {
       if (candidate && typeof candidate === "object" && Object.keys(candidate).length > 0) {
         console.log("[Hydration] Re-rendering with late data:", candidate);
+        if (__appliedLateHydration) {
+          __log("[Hydration] Ignoring additional late hydration (already applied once)");
+          return;
+        }
+        __appliedLateHydration = true;
         renderApp(candidate);
         return;
       }
