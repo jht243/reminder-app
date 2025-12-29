@@ -196,7 +196,7 @@ function widgetMeta(widget: ReminderWidget, bustCache: boolean = false) {
   return {
     "openai/outputTemplate": templateUri,
     "openai/widgetDescription":
-      "Create Reminders App - An AI-powered reminder app with natural language input. Works with general prompts too — if the user says something like 'create a reminder' or 'show my reminders' with no specific details, the app opens ready to use with an empty input field. Type tasks like 'Call mom tomorrow at 5pm' and they're automatically parsed. Features gamification with points, streaks, and achievements. Supports recurring reminders, categories, and priority levels.",
+      "Create Reminders App - An AI-powered reminder app with natural language inputs. Works with general prompts too — if the user says something like 'create a reminder' or 'show my reminders' with no specific details, the app opens ready to use with an empty input field. Type tasks like 'Call mom tomorrow at 5pm' and they're automatically parsed. Features gamification with points, streaks, and achievements. Supports recurring reminders, categories, and priority levels.",
     "openai/componentDescriptions": {
       "task-input": "Natural language input for creating reminders - just type what you need to remember.",
       "reminder-list": "Organized display of reminders with category filters, search, and sorting.",
@@ -1455,6 +1455,7 @@ async function handleAnalytics(req: IncomingMessage, res: ServerResponse) {
 async function handleTrackEvent(req: IncomingMessage, res: ServerResponse) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Headers", "content-type");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Content-Type", "application/json");
 
   if (req.method === "OPTIONS") {

@@ -11,7 +11,13 @@ import ReminderApp from "./ReminderApp";
  const __log = (...args: any[]) => console.log(`[t+${__sinceStartMs()}ms]`, ...args);
  const __getBaseUrl = () => {
    try {
-     return (window as any).openai?.serverUrl || "";
+     const raw = (window as any).openai?.serverUrl || "";
+     if (!raw) return "";
+     try {
+       return new URL(raw).origin;
+     } catch {
+       return raw;
+     }
    } catch {
      return "";
    }

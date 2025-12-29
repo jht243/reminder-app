@@ -26104,7 +26104,13 @@ var X = createLucideIcon("x", __iconNode25);
 var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
 var trackEvent = (event, data = {}) => {
   try {
-    const baseUrl = window.openai?.serverUrl || "";
+    const rawServerUrl = window.openai?.serverUrl || "";
+    let baseUrl = rawServerUrl;
+    try {
+      if (rawServerUrl) baseUrl = new URL(rawServerUrl).origin;
+    } catch {
+      baseUrl = rawServerUrl;
+    }
     fetch(`${baseUrl}/api/track`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -28879,7 +28885,13 @@ var __sinceStartMs = () => {
 var __log = (...args) => console.log(`[t+${__sinceStartMs()}ms]`, ...args);
 var __getBaseUrl = () => {
   try {
-    return window.openai?.serverUrl || "";
+    const raw = window.openai?.serverUrl || "";
+    if (!raw) return "";
+    try {
+      return new URL(raw).origin;
+    } catch {
+      return raw;
+    }
   } catch {
     return "";
   }
