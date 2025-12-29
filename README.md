@@ -1,29 +1,29 @@
-# Smart Travel Checklist - ChatGPT MCP Connector
+# Smart Reminders - ChatGPT MCP Connector
 
-A Model Context Protocol (MCP) server that provides an interactive travel checklist widget for ChatGPT. Helps users generate personalized, customizable packing lists based on their trip profile.
+A Model Context Protocol (MCP) server that provides an AI-powered reminder app widget for ChatGPT. Features natural language processing, gamification, and smart notifications.
 
 **[Privacy Policy](PRIVACY.md)** | **[OpenAI Apps SDK](https://developers.openai.com/apps-sdk)**
 
 ## Features
 
-- ✈️ Generate personalized packing checklists based on trip details
-- 📋 Smart rules engine for documents, clothing, toiletries, health, tech, and more
-- 🌍 International vs domestic trip support with appropriate items
-- 👨‍👩‍👧‍👦 Family-specific items for children, infants, seniors, and pets
-- 🎿 Activity-specific gear recommendations (hiking, beach, camping, etc.)
-- ✅ Interactive checklist with progress tracking
+- 🧠 Natural language task creation ("Call mom tomorrow at 5pm")
+- 🎮 Gamification with points, levels, streaks, and achievements
+- 📸 Screenshot import with OCR - upload a photo of your tasks
+- 🔄 Recurring reminders (daily, weekly, monthly, custom)
+- 📊 Progress tracking and analytics
+- ✅ Smart categorization (work, family, health, errands, etc.)
 - 🖨️ Print-friendly output
 
-## Checklist Categories
+## Task Categories
 
-1. **Mandatory Documents** - ID, passport, visa, insurance, itinerary
-2. **Clothing & Accessories** - Climate-appropriate items with quantities
-3. **Toiletries** - TSA-compliant options for carry-on travelers
-4. **Health & Safety** - First aid, medications, sanitizer
-5. **Tech & Gadgets** - Phone, chargers, adapters
-6. **Activity-Specific Gear** - Based on planned activities
-7. **Family-Specific Items** - For children, infants, seniors, pets
-8. **Pre-Departure Tasks** - Confirmations, bank notifications, home prep
+1. **Work** - Professional tasks and deadlines
+2. **Family** - Family-related reminders
+3. **Health** - Medical appointments and wellness
+4. **Errands** - Shopping and daily tasks
+5. **Finance** - Bills and financial tasks
+6. **Social** - Events and social commitments
+7. **Learning** - Educational goals
+8. **Travel** - Trip planning and bookings
 
 ## Quick Start
 
@@ -63,16 +63,16 @@ Server runs on `http://localhost:8000`. **Note:** HTTP endpoints are for local d
 
 1. Open ChatGPT in **Developer Mode**
 2. Add MCP Connector with your deployed URL
-3. Say: **"What should I pack for my trip?"** or **"Create a packing list for Paris"**
+3. Say: **"Show me my reminders"** or **"Add a reminder"**
 4. The interactive widget appears!
 
 ### Example Prompts
 
-- "I'm going to Paris for 7 days"
-- "Help me pack for a beach vacation in Hawaii"
-- "Business trip packing list for London"
-- "Family vacation checklist with 2 kids"
-- "What documents do I need for international travel?"
+- "Remind me to call mom tomorrow at 5pm"
+- "Add: Buy groceries, Pay rent Friday, Schedule dentist"
+- "Show my reminders for this week"
+- "Create a daily reminder to take vitamins"
+- "What tasks do I have today?"
 
 ## Tech Stack
 
@@ -93,10 +93,10 @@ ANALYTICS_PASSWORD=your_password
 
 ## Privacy & Data Use
 
-- **What we collect:** When the widget runs inside ChatGPT we receive the location (city/region/country), locale, device/browser fingerprint, and trip query details via `_meta`.
+- **What we collect:** When the widget runs inside ChatGPT we receive the location (city/region/country), locale, and device/browser fingerprint via `_meta`.
 - **How we use it:** These fields feed the `/analytics` dashboard only; we do not sell or share this data.
 - **Retention:** Logs are stored for **30 days** in the `/logs` folder and then automatically rotated.
-- **User input storage:** The widget caches your checklist progress in `localStorage`; entries expire after **30 days**. Clear anytime with the "Reset" button.
+- **User input storage:** The widget caches your reminders in `localStorage`. Clear anytime with the "Reset" button.
 
 ## Monitoring & Alerts
 

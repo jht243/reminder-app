@@ -234,10 +234,10 @@ function widgetMeta(widget: ReminderWidget, bustCache: boolean = false) {
     "openai/widgetPrefersBorder": true,
     "openai/widgetCSP": {
       connect_domains: [
-        "https://reminder-app.onrender.com"
+        "https://reminder-app-3pz5.onrender.com"
       ],
       resource_domains: [
-        "https://reminder-app.onrender.com"
+        "https://reminder-app-3pz5.onrender.com"
       ],
     },
     "openai/widgetDomain": "https://web-sandbox.oaiusercontent.com",
@@ -396,7 +396,7 @@ const resources: Resource[] = widgets.map((widget) => ({
   uri: widget.templateUri,
   name: widget.title,
   description:
-    "HTML template for the Travel Checklist widget that generates personalized packing lists based on trip details.",
+    "HTML template for the Smart Reminders widget - an AI-powered reminder app.",
   mimeType: "text/html+skybridge",
   _meta: widgetMeta(widget),
 }));
@@ -405,18 +405,18 @@ const resourceTemplates: ResourceTemplate[] = widgets.map((widget) => ({
   uriTemplate: widget.templateUri,
   name: widget.title,
   description:
-    "Template descriptor for the Travel Checklist widget.",
+    "Template descriptor for the Smart Reminders widget.",
   mimeType: "text/html+skybridge",
   _meta: widgetMeta(widget),
 }));
 
-function createTravelChecklistServer(): Server {
+function createReminderAppServer(): Server {
   const server = new Server(
     {
-      name: "travel-checklist",
+      name: "reminder-app",
       version: "0.1.0",
       description:
-        "Smart Travel Checklist helps users generate personalized packing lists based on their trip profile including destination, duration, climate, and activities.",
+        "Smart Reminders - an AI-powered reminder app with natural language processing, gamification, and smart notifications.",
     },
     {
       capabilities: {
@@ -986,7 +986,7 @@ function generateAnalyticsDashboard(logs: AnalyticsEvent[], alerts: AlertEntry[]
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Travel Checklist Analytics</title>
+  <title>Reminder App Analytics</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; padding: 20px; }
@@ -1013,7 +1013,7 @@ function generateAnalyticsDashboard(logs: AnalyticsEvent[], alerts: AlertEntry[]
 </head>
 <body>
   <div class="container">
-    <h1>📊 Travel Checklist Analytics</h1>
+    <h1>📊 Reminder App Analytics</h1>
     <p class="subtitle">Last 7 days • Auto-refresh every 60s</p>
     
     <div class="grid">
@@ -1338,7 +1338,7 @@ async function subscribeToButtondown(email: string, topicId: string, topicName: 
 
   const metadata: Record<string, any> = {
     topicName,
-    source: "travel-checklist",
+    source: "reminder-app",
     subscribedAt: new Date().toISOString(),
   };
 
@@ -1428,7 +1428,7 @@ async function updateButtondownSubscriber(email: string, topicId: string, topicN
   const updatedMetadata = {
     ...existingMetadata,
     [topicKey]: topicData,
-    source: "travel-checklist",
+    source: "reminder-app",
   };
 
   const updateRequestBody = {
@@ -1483,8 +1483,8 @@ async function handleSubscribe(req: IncomingMessage, res: ServerResponse) {
     // Support both old (settlementId/settlementName) and new (topicId/topicName) field names
     const parsed = JSON.parse(body);
     const email = parsed.email;
-    const topicId = parsed.topicId || parsed.settlementId || "travel-checklist";
-    const topicName = parsed.topicName || parsed.settlementName || "Travel Checklist Updates";
+    const topicId = parsed.topicId || parsed.settlementId || "reminder-app";
+    const topicName = parsed.topicName || parsed.settlementName || "Reminder App Updates";
     if (!email || !email.includes("@")) {
       res.writeHead(400).end(JSON.stringify({ error: "Invalid email address" }));
       return;
@@ -1558,7 +1558,7 @@ async function handleSubscribe(req: IncomingMessage, res: ServerResponse) {
 
 async function handleSseRequest(res: ServerResponse) {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  const server = createTravelChecklistServer();
+  const server = createReminderAppServer();
   const transport = new SSEServerTransport(postPath, res);
   const sessionId = transport.sessionId;
 
@@ -1678,8 +1678,8 @@ const httpServer = createServer(
     }
 
     // Serve alias for legacy loader path -> our main widget HTML
-    if (req.method === "GET" && (url.pathname === "/assets/travel-checklist.html" || url.pathname === "/assets/crypto-portfolio-optimizer.html")) {
-      const mainAssetPath = path.join(ASSETS_DIR, "travel-checklist.html");
+    if (req.method === "GET" && (url.pathname === "/assets/reminder-app.html" || url.pathname === "/assets/travel-checklist.html" || url.pathname === "/assets/crypto-portfolio-optimizer.html")) {
+      const mainAssetPath = path.join(ASSETS_DIR, "reminder-app.html");
       console.log(`[Debug Legacy] Request: ${url.pathname}, Main Path: ${mainAssetPath}, Exists: ${fs.existsSync(mainAssetPath)}`);
       if (fs.existsSync(mainAssetPath) && fs.statSync(mainAssetPath).isFile()) {
         res.writeHead(200, {
@@ -1751,7 +1751,7 @@ function startMonitoring() {
 
 httpServer.listen(port, () => {
   startMonitoring();
-  console.log(`Travel Checklist MCP server listening on http://localhost:${port}`);
+  console.log(`Reminder App MCP server listening on http://localhost:${port}`);
   console.log(`  SSE stream: GET http://localhost:${port}${ssePath}`);
   console.log(
     `  Message post endpoint: POST http://localhost:${port}${postPath}?sessionId=...`
