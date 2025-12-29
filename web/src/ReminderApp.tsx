@@ -887,23 +887,15 @@ const persistState = (reminders: Reminder[], stats: UserStats) => {
     }
   }
   
-  // 2. Also save to localStorage as fallback
+  // Save to localStorage (following prior projects pattern)
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(reminders));
-    localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+    const dataToSave = {
+      data: { reminders, stats },
+      timestamp: new Date().getTime()
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
   } catch (e) {
     console.error("[Persist] localStorage error:", e);
-  }
-  
-  // 3. Call save tool if available (for cross-session persistence)
-  if ((window as any).openai?.callTool) {
-    try {
-      (window as any).openai.callTool("save_reminders", state).catch((e: any) => {
-        console.log("[Persist] callTool not available or failed:", e);
-      });
-    } catch (e) {
-      // Tool may not exist, that's ok
-    }
   }
 };
 
@@ -938,17 +930,25 @@ const loadInitialState = (initialData: any): { reminders: Reminder[], stats: Use
     } catch (e) {}
   }
   
-  // Priority 3: localStorage fallback
+  // Priority 3: localStorage fallback (following prior projects pattern)
   if (baseReminders.length === 0) {
     try {
-      const savedReminders = localStorage.getItem(STORAGE_KEY);
-      const savedStats = localStorage.getItem(STATS_KEY);
-      if (savedReminders) {
-        baseReminders = JSON.parse(savedReminders);
-        console.log("[Load] Using localStorage:", baseReminders.length, "reminders");
-        baseStats = savedStats ? JSON.parse(savedStats) : defaultStats;
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const { data, timestamp } = JSON.parse(saved);
+        const now = new Date().getTime();
+        const daysDiff = (now - timestamp) / (1000 * 60 * 60 * 24);
+        
+        // Only use data if less than 30 days old
+        if (daysDiff < 30 && data?.reminders) {
+          baseReminders = data.reminders;
+          baseStats = data.stats || defaultStats;
+          console.log("[Load] Using localStorage:", baseReminders.length, "reminders");
+        }
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error("[Load] localStorage error:", e);
+    }
   }
   
   // If initialData has a title (from prompt like "remind me to call mom"), create a pending reminder
@@ -1138,20 +1138,6 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     }
   }, [input]);
   
-  // Force re-render every 5 seconds to update recently completed items visibility
-  const [tick, setTick] = useState(0);
-  useEffect(() => {
-    const interval = setInterval(() => setTick(n => n + 1), 5000);
-    return () => clearInterval(interval);
-  }, []);
-  
-  // Notify height changes
-  useEffect(() => {
-    const notify = () => { if ((window as any).openai?.notifyIntrinsicHeight) (window as any).openai.notifyIntrinsicHeight(); };
-    notify(); window.addEventListener("resize", notify);
-    return () => window.removeEventListener("resize", notify);
-  }, [reminders, parsed, editing]);
-  
   // Filter and sort reminders with quick filter support
   const filtered = useMemo(() => {
     let f = [...reminders];
@@ -1181,7 +1167,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     }
     
     return f;
-  }, [reminders, search, quickFilter, tick, recentlyCompletedIds]);
+  }, [reminders, search, quickFilter, recentlyCompletedIds]);
   
   // Group reminders by time section for smart display
   const groupedByTime = useMemo(() => {
@@ -1198,7 +1184,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       groups[section].push(r);
     });
     return groups;
-  }, [filtered, tick, recentlyCompletedIds]);
+  }, [filtered, recentlyCompletedIds]);
   
   // Section order for display
   const sectionOrder = ["overdue", "today", "tomorrow", "thisWeek", "later"] as const;
@@ -1514,7 +1500,6 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const resetProgress = () => {
     trackEvent("reset_progress", { reminderCount: reminders.length, totalPoints: stats.totalPoints });
     localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(STATS_KEY);
     processedTasksRef.current.clear();
     setReminders([]);
     setStats({

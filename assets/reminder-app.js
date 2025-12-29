@@ -26166,7 +26166,6 @@ var CATEGORY_CONFIG = {
   other: { icon: Star, color: "#8A998A", bg: "#F0F0F0", label: "Other" }
 };
 var STORAGE_KEY = "REMINDER_APP_DATA";
-var STATS_KEY = "REMINDER_APP_STATS";
 var QUICK_FILTERS = [
   { id: "all", label: "All", emoji: "\u{1F4CB}", color: COLORS.primary, bg: COLORS.iconBg },
   { id: "urgent", label: "Urgent", emoji: "\u{1F525}", color: "#C97070", bg: "#F5E8E8" },
@@ -26802,18 +26801,13 @@ var persistState = (reminders, stats) => {
     }
   }
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(reminders));
-    localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+    const dataToSave = {
+      data: { reminders, stats },
+      timestamp: (/* @__PURE__ */ new Date()).getTime()
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
   } catch (e) {
     console.error("[Persist] localStorage error:", e);
-  }
-  if (window.openai?.callTool) {
-    try {
-      window.openai.callTool("save_reminders", state).catch((e) => {
-        console.log("[Persist] callTool not available or failed:", e);
-      });
-    } catch (e) {
-    }
   }
 };
 var loadInitialState = (initialData2) => {
@@ -26847,14 +26841,19 @@ var loadInitialState = (initialData2) => {
   }
   if (baseReminders.length === 0) {
     try {
-      const savedReminders = localStorage.getItem(STORAGE_KEY);
-      const savedStats = localStorage.getItem(STATS_KEY);
-      if (savedReminders) {
-        baseReminders = JSON.parse(savedReminders);
-        console.log("[Load] Using localStorage:", baseReminders.length, "reminders");
-        baseStats = savedStats ? JSON.parse(savedStats) : defaultStats;
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const { data, timestamp } = JSON.parse(saved);
+        const now = (/* @__PURE__ */ new Date()).getTime();
+        const daysDiff = (now - timestamp) / (1e3 * 60 * 60 * 24);
+        if (daysDiff < 30 && data?.reminders) {
+          baseReminders = data.reminders;
+          baseStats = data.stats || defaultStats;
+          console.log("[Load] Using localStorage:", baseReminders.length, "reminders");
+        }
       }
     } catch (e) {
+      console.error("[Load] localStorage error:", e);
     }
   }
   let pendingReminder;
@@ -27002,19 +27001,6 @@ function ReminderApp({ initialData: initialData2 }) {
       setParsed(null);
     }
   }, [input]);
-  const [tick, setTick] = (0, import_react3.useState)(0);
-  (0, import_react3.useEffect)(() => {
-    const interval = setInterval(() => setTick((n) => n + 1), 5e3);
-    return () => clearInterval(interval);
-  }, []);
-  (0, import_react3.useEffect)(() => {
-    const notify = () => {
-      if (window.openai?.notifyIntrinsicHeight) window.openai.notifyIntrinsicHeight();
-    };
-    notify();
-    window.addEventListener("resize", notify);
-    return () => window.removeEventListener("resize", notify);
-  }, [reminders, parsed, editing]);
   const filtered = (0, import_react3.useMemo)(() => {
     let f = [...reminders];
     if (search) {
@@ -27037,7 +27023,7 @@ function ReminderApp({ initialData: initialData2 }) {
       }
     }
     return f;
-  }, [reminders, search, quickFilter, tick, recentlyCompletedIds]);
+  }, [reminders, search, quickFilter, recentlyCompletedIds]);
   const groupedByTime = (0, import_react3.useMemo)(() => {
     const groups = {
       overdue: [],
@@ -27051,7 +27037,7 @@ function ReminderApp({ initialData: initialData2 }) {
       groups[section].push(r);
     });
     return groups;
-  }, [filtered, tick, recentlyCompletedIds]);
+  }, [filtered, recentlyCompletedIds]);
   const sectionOrder = ["overdue", "today", "tomorrow", "thisWeek", "later"];
   const overdueCount = reminders.filter(isOverdue).length;
   const todayCount = reminders.filter((r) => !r.completed && r.dueDate === (/* @__PURE__ */ new Date()).toISOString().split("T")[0]).length;
@@ -27314,7 +27300,6 @@ function ReminderApp({ initialData: initialData2 }) {
   const resetProgress = () => {
     trackEvent("reset_progress", { reminderCount: reminders.length, totalPoints: stats.totalPoints });
     localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(STATS_KEY);
     processedTasksRef.current.clear();
     setReminders([]);
     setStats({
