@@ -312,8 +312,30 @@ const userRemindersStore: Map<string, { reminders: any[], stats: any, savedAt: n
 const saveRemindersSchema = {
   type: "object",
   properties: {
-    reminders: { type: "array", description: "Array of reminder objects to save." },
-    stats: { type: "object", description: "User stats object." },
+    reminders: { 
+      type: "array", 
+      description: "Array of reminder objects to save.",
+      items: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+          title: { type: "string" },
+          description: { type: "string" },
+          dueDate: { type: "string" },
+          dueTime: { type: "string" },
+          priority: { type: "string" },
+          category: { type: "string" },
+          recurrence: { type: "string" },
+          completed: { type: "boolean" },
+        },
+        additionalProperties: true,
+      },
+    },
+    stats: { 
+      type: "object", 
+      description: "User stats object.",
+      additionalProperties: true,
+    },
     savedAt: { type: "number", description: "Timestamp when saved." },
   },
   required: ["reminders"],
