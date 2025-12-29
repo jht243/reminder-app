@@ -196,11 +196,12 @@ function widgetMeta(widget: ReminderWidget, bustCache: boolean = false) {
   return {
     "openai/outputTemplate": templateUri,
     "openai/widgetDescription":
-      "A smart reminder app with natural language input, organized displays, search/filter, recurring reminders, snooze, notifications (email/SMS), and gamification (points, streaks, achievements). Call this tool to help users manage their reminders and tasks.",
+      "Create Reminders App - An AI-powered reminder app with natural language input. Type tasks like 'Call mom tomorrow at 5pm' and they're automatically parsed. Features gamification with points, streaks, and achievements. Supports recurring reminders, categories, and priority levels.",
     "openai/componentDescriptions": {
-      "reminder-form": "Input form for creating reminders with natural language parsing.",
-      "reminder-list": "Display showing organized reminders with filters and search.",
-      "gamification-stats": "Stats bar showing points, streaks, level, and achievements.",
+      "task-input": "Natural language input for creating reminders - just type what you need to remember.",
+      "reminder-list": "Organized display of reminders with category filters, search, and sorting.",
+      "gamification-header": "Stats bar showing level, points, and daily streak.",
+      "screenshot-import": "Upload a screenshot of tasks to auto-import them via OCR.",
     },
     "openai/widgetKeywords": [
       "reminder",
@@ -218,18 +219,19 @@ function widgetMeta(widget: ReminderWidget, bustCache: boolean = false) {
       "snooze"
     ],
     "openai/sampleConversations": [
-      { "user": "Remind me to call mom tomorrow at 3pm", "assistant": "I've created a reminder for you to call mom tomorrow at 3pm." },
-      { "user": "Show me my reminders", "assistant": "Here are your reminders organized by due date." },
-      { "user": "Set a daily reminder to take vitamins", "assistant": "I've set up a daily recurring reminder to take vitamins." },
+      { "user": "Remind me to call mom tomorrow at 3pm", "assistant": "Opening Create Reminders App. I've added 'Call mom' for tomorrow at 3pm." },
+      { "user": "I need to buy groceries, pay rent on Friday, and schedule a dentist appointment", "assistant": "Opening Create Reminders App. I've added 3 reminders for you." },
+      { "user": "Set a daily reminder to take vitamins at 9am", "assistant": "Done! I've created a daily recurring reminder for vitamins at 9am." },
+      { "user": "What tasks do I have this week?", "assistant": "Here are your reminders for this week in Create Reminders App." },
+      { "user": "Help me stay organized", "assistant": "Opening Create Reminders App - add your tasks using natural language!" },
     ],
     "openai/starterPrompts": [
-      "Remind me to...",
-      "Show my reminders",
-      "Create a reminder",
-      "Set a daily reminder",
-      "What's due today?",
-      "Help me stay organized",
-      "Snooze my reminder",
+      "Remind me to call mom tomorrow at 5pm",
+      "Add: Buy groceries, Pay bills Friday, Call dentist",
+      "Set a daily reminder to take vitamins",
+      "What tasks do I have today?",
+      "Help me stay organized with reminders",
+      "Create a reminder for my meeting next Monday",
     ],
     "openai/widgetPrefersBorder": true,
     "openai/widgetCSP": {
@@ -889,8 +891,8 @@ function generateAnalyticsDashboard(logs: AnalyticsEvent[], alerts: AlertEntry[]
       : "N/A";
 
   const paramUsage: Record<string, number> = {};
-  const yieldStatusDist: Record<string, number> = {};
-  const riskPreferenceDist: Record<string, number> = {};
+  const priorityDist: Record<string, number> = {};
+  const categoryDist: Record<string, number> = {};
   
   successLogs.forEach((log) => {
     if (log.params) {
@@ -899,15 +901,11 @@ function generateAnalyticsDashboard(logs: AnalyticsEvent[], alerts: AlertEntry[]
           paramUsage[key] = (paramUsage[key] || 0) + 1;
         }
       });
-      // Track risk preference distribution
-      if (log.params.risk_preference) {
-        const risk = log.params.risk_preference;
-        riskPreferenceDist[risk] = (riskPreferenceDist[risk] || 0) + 1;
+      // Track priority distribution
+      if (log.params.priority) {
+        const priority = log.params.priority;
+        priorityDist[priority] = (priorityDist[priority] || 0) + 1;
       }
-    }
-    if (log.structuredContent?.summary?.yield_status) {
-       const cat = log.structuredContent.summary.yield_status;
-       yieldStatusDist[cat] = (yieldStatusDist[cat] || 0) + 1;
     }
   });
   
@@ -917,68 +915,32 @@ function generateAnalyticsDashboard(logs: AnalyticsEvent[], alerts: AlertEntry[]
     widgetInteractions[humanName] = (widgetInteractions[humanName] || 0) + 1;
   });
   
-  // Crypto holdings distribution (BTC)
-  const btcHoldingsDist: Record<string, number> = {};
+  // Recurrence distribution
+  const recurrenceDist: Record<string, number> = {};
   successLogs.forEach((log) => {
-    if (log.params?.btc) {
-      const amount = log.params.btc;
-      let bucket = "Unknown";
-      if (amount < 1000) bucket = "Under $1k";
-      else if (amount < 10000) bucket = "$1k-$10k";
-      else if (amount < 50000) bucket = "$10k-$50k";
-      else if (amount < 100000) bucket = "$50k-$100k";
-      else bucket = "$100k+";
-      btcHoldingsDist[bucket] = (btcHoldingsDist[bucket] || 0) + 1;
+    if (log.params?.recurrence) {
+      const recurrence = log.params.recurrence;
+      recurrenceDist[recurrence] = (recurrenceDist[recurrence] || 0) + 1;
     }
   });
 
-  // ETH holdings distribution
-  const ethHoldingsDist: Record<string, number> = {};
-  successLogs.forEach((log) => {
-    if (log.params?.eth) {
-      const amount = log.params.eth;
-      let bucket = "Unknown";
-      if (amount < 1000) bucket = "Under $1k";
-      else if (amount < 10000) bucket = "$1k-$10k";
-      else if (amount < 50000) bucket = "$10k-$50k";
-      else if (amount < 100000) bucket = "$50k-$100k";
-      else bucket = "$100k+";
-      ethHoldingsDist[bucket] = (ethHoldingsDist[bucket] || 0) + 1;
-    }
-  });
-
-  // Current yield distribution
-  const currentYieldDist: Record<string, number> = {};
-  successLogs.forEach((log) => {
-    if (log.params?.current_yield_percent !== undefined) {
-      const yieldPct = log.params.current_yield_percent;
-      let bucket = "Unknown";
-      if (yieldPct === 0) bucket = "0% (None)";
-      else if (yieldPct < 3) bucket = "0-3%";
-      else if (yieldPct < 6) bucket = "3-6%";
-      else if (yieldPct < 10) bucket = "6-10%";
-      else bucket = "10%+";
-      currentYieldDist[bucket] = (currentYieldDist[bucket] || 0) + 1;
-    }
-  });
-
-  // Calculator Actions
+  // Reminder Actions
   const actionCounts: Record<string, number> = {
-    "Calculate": 0,
-    "Subscribe": 0,
-    "View Graph": 0, 
-    "View Summary": 0,
-    "View Tips": 0,
-    "Advanced Toggle": 0
+    "Create Reminder": 0,
+    "Complete Task": 0,
+    "Filter Change": 0, 
+    "Search": 0,
+    "Screenshot Import": 0,
+    "Reset Progress": 0
   };
 
   widgetEvents.forEach(log => {
-      if (log.event === "widget_calculate_click") actionCounts["Calculate"]++;
-      if (log.event === "widget_notify_me_subscribe") actionCounts["Subscribe"]++;
-      if (log.event === "widget_view_graph") actionCounts["View Graph"]++;
-      if (log.event === "widget_view_summary") actionCounts["View Summary"]++;
-      if (log.event === "widget_view_tips") actionCounts["View Tips"]++;
-      if (log.event === "widget_advanced_toggle") actionCounts["Advanced Toggle"]++;
+      if (log.event === "widget_create_reminder") actionCounts["Create Reminder"]++;
+      if (log.event === "widget_complete_task") actionCounts["Complete Task"]++;
+      if (log.event === "widget_filter_change") actionCounts["Filter Change"]++;
+      if (log.event === "widget_search") actionCounts["Search"]++;
+      if (log.event === "widget_screenshot_import") actionCounts["Screenshot Import"]++;
+      if (log.event === "widget_reset_progress") actionCounts["Reset Progress"]++;
   });
 
   return `<!DOCTYPE html>
@@ -1071,16 +1033,16 @@ function generateAnalyticsDashboard(logs: AnalyticsEvent[], alerts: AlertEntry[]
 
     <div class="grid" style="margin-bottom: 20px;">
       <div class="card">
-        <h2>Yield Status</h2>
+        <h2>Priority Distribution</h2>
         <table>
-          <thead><tr><th>Status</th><th>Count</th></tr></thead>
+          <thead><tr><th>Priority</th><th>Count</th></tr></thead>
           <tbody>
-            ${Object.entries(yieldStatusDist).length > 0 ? Object.entries(yieldStatusDist)
+            ${Object.entries(priorityDist).length > 0 ? Object.entries(priorityDist)
               .sort((a, b) => (b[1] as number) - (a[1] as number))
               .map(
-                ([cat, count]) => `
+                ([priority, count]) => `
               <tr>
-                <td>${cat}</td>
+                <td>${priority}</td>
                 <td>${count}</td>
               </tr>
             `
@@ -1134,56 +1096,16 @@ function generateAnalyticsDashboard(logs: AnalyticsEvent[], alerts: AlertEntry[]
 
     <div class="grid" style="margin-bottom: 20px;">
       <div class="card">
-        <h2>BTC Holdings</h2>
+        <h2>Recurrence Types</h2>
         <table>
-          <thead><tr><th>Amount</th><th>Users</th></tr></thead>
+          <thead><tr><th>Type</th><th>Count</th></tr></thead>
           <tbody>
-            ${Object.entries(btcHoldingsDist).length > 0 ? Object.entries(btcHoldingsDist)
+            ${Object.entries(recurrenceDist).length > 0 ? Object.entries(recurrenceDist)
               .sort((a, b) => (b[1] as number) - (a[1] as number))
               .map(
-                ([amount, count]) => `
+                ([recurrence, count]) => `
               <tr>
-                <td>${amount}</td>
-                <td>${count}</td>
-              </tr>
-            `
-              )
-              .join("") : '<tr><td colspan="2" style="text-align: center; color: #9ca3af;">No data yet</td></tr>'}
-          </tbody>
-        </table>
-      </div>
-      
-      <div class="card">
-        <h2>ETH Holdings</h2>
-        <table>
-          <thead><tr><th>Amount</th><th>Users</th></tr></thead>
-          <tbody>
-            ${Object.entries(ethHoldingsDist).length > 0 ? Object.entries(ethHoldingsDist)
-              .sort((a, b) => (b[1] as number) - (a[1] as number))
-              .map(
-                ([amount, count]) => `
-              <tr>
-                <td>${amount}</td>
-                <td>${count}</td>
-              </tr>
-            `
-              )
-              .join("") : '<tr><td colspan="2" style="text-align: center; color: #9ca3af;">No data yet</td></tr>'}
-          </tbody>
-        </table>
-      </div>
-      
-      <div class="card">
-        <h2>Current Yield %</h2>
-        <table>
-          <thead><tr><th>APY Range</th><th>Users</th></tr></thead>
-          <tbody>
-            ${Object.entries(currentYieldDist).length > 0 ? Object.entries(currentYieldDist)
-              .sort((a, b) => (b[1] as number) - (a[1] as number))
-              .map(
-                ([yieldRange, count]) => `
-              <tr>
-                <td>${yieldRange}</td>
+                <td>${recurrence}</td>
                 <td>${count}</td>
               </tr>
             `
