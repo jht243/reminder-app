@@ -26104,11 +26104,26 @@ var X = createLucideIcon("x", __iconNode25);
 var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
 var trackEvent = (event, data = {}) => {
   try {
-    const baseUrl = window.openai?.serverUrl || "";
+    const rawServerUrl = window.openai?.serverUrl || "";
+    let baseUrl = rawServerUrl;
+    try {
+      if (rawServerUrl) baseUrl = new URL(rawServerUrl).origin;
+    } catch {
+      baseUrl = rawServerUrl;
+    }
+    if (!baseUrl || /oaiusercontent\.com$/i.test(baseUrl)) {
+      baseUrl = "https://reminder-app-3pz5.onrender.com";
+    }
     fetch(`${baseUrl}/api/track`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ event, data })
+      body: JSON.stringify({
+        event,
+        data: {
+          ...data,
+          ts: Date.now()
+        }
+      })
     }).catch(() => {
     });
   } catch (e) {
@@ -28819,6 +28834,80 @@ OR just paste a list:
 
 // src/main.tsx
 var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
+var __WIDGET_START_MS = typeof performance !== "undefined" && performance.now ? performance.now() : Date.now();
+var __sinceStartMs = () => {
+  const now = typeof performance !== "undefined" && performance.now ? performance.now() : Date.now();
+  return Math.round(now - __WIDGET_START_MS);
+};
+var __log = (...args) => console.log(`[t+${__sinceStartMs()}ms]`, ...args);
+var __getBaseUrl = () => {
+  try {
+    const raw = window.openai?.serverUrl || "";
+    if (!raw) return "https://reminder-app-3pz5.onrender.com";
+    try {
+      const origin = new URL(raw).origin;
+      if (/oaiusercontent\.com$/i.test(origin)) {
+        return "https://reminder-app-3pz5.onrender.com";
+      }
+      return origin;
+    } catch {
+      if (/oaiusercontent\.com/i.test(raw)) {
+        return "https://reminder-app-3pz5.onrender.com";
+      }
+      return raw;
+    }
+  } catch {
+    return "https://reminder-app-3pz5.onrender.com";
+  }
+};
+var __report = async (event, data) => {
+  try {
+    const baseUrl = __getBaseUrl();
+    await fetch(`${baseUrl}/api/track`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event,
+        data: {
+          ...data,
+          t_ms: __sinceStartMs()
+        }
+      })
+    });
+  } catch {
+  }
+};
+window.addEventListener(
+  "error",
+  (ev) => {
+    const err = ev?.error;
+    __log("[GlobalError]", ev?.message, err);
+    __report("widget_global_error", {
+      message: ev?.message,
+      filename: ev?.filename,
+      lineno: ev?.lineno,
+      colno: ev?.colno,
+      error: err?.message || String(err || ""),
+      stack: err?.stack
+    });
+  },
+  true
+);
+window.addEventListener(
+  "unhandledrejection",
+  (ev) => {
+    const reason = ev?.reason;
+    __log("[UnhandledRejection]", reason);
+    __report("widget_unhandled_rejection", {
+      reason: reason?.message || String(reason || ""),
+      stack: reason?.stack
+    });
+  },
+  true
+);
+window.setTimeout(() => __log("[Heartbeat] alive @3s"), 3e3);
+window.setTimeout(() => __log("[Heartbeat] alive @5s"), 5e3);
+window.setTimeout(() => __log("[Heartbeat] alive @7s"), 7e3);
 var ErrorBoundary = class extends import_react4.default.Component {
   constructor(props) {
     super(props);
@@ -28830,18 +28919,12 @@ var ErrorBoundary = class extends import_react4.default.Component {
   componentDidCatch(error, errorInfo) {
     console.error("Widget Error Boundary caught error:", error, errorInfo);
     try {
-      fetch("/api/track", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          event: "crash",
-          data: {
-            error: error?.message || "Unknown error",
-            stack: error?.stack,
-            componentStack: errorInfo?.componentStack
-          }
-        })
-      }).catch((e) => console.error("Failed to report crash", e));
+      __report("crash", {
+        error: error?.message || "Unknown error",
+        stack: error?.stack,
+        componentStack: errorInfo?.componentStack
+      }).catch(() => {
+      });
     } catch (e) {
     }
   }
@@ -28891,6 +28974,7 @@ var getHydrationData = () => {
   return {};
 };
 console.log("[Main] Reminder App main.tsx loading...");
+__log("[Main] Starting (baseUrl)", __getBaseUrl());
 function App({ initialData: initialData2 }) {
   return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(ReminderApp, { initialData: initialData2 });
 }
@@ -28905,6 +28989,7 @@ var renderApp = (data) => {
   );
 };
 var initialData = getHydrationData();
+__log("[Hydration] initialData keys", initialData && typeof initialData === "object" ? Object.keys(initialData) : []);
 renderApp(initialData);
 window.addEventListener("openai:set_globals", (ev) => {
   const globals = ev?.detail?.globals;

@@ -10,12 +10,29 @@ import {
 // Analytics tracking helper - sends events to server
 const trackEvent = (event: string, data: Record<string, any> = {}) => {
   try {
-    // Get the server URL from window.openai or fallback to relative path
-    const baseUrl = (window as any).openai?.serverUrl || "";
+    const rawServerUrl = (window as any).openai?.serverUrl || "";
+    let baseUrl = rawServerUrl;
+    try {
+      if (rawServerUrl) baseUrl = new URL(rawServerUrl).origin;
+    } catch {
+      baseUrl = rawServerUrl;
+    }
+    // In ChatGPT web-sandbox, openai.serverUrl may be missing; a relative /api/track will hit
+    // the sandbox origin (oaiusercontent.com) which can fail. Force a safe fallback.
+    if (!baseUrl || /oaiusercontent\.com$/i.test(baseUrl)) {
+      baseUrl = "https://reminder-app-3pz5.onrender.com";
+    }
+
     fetch(`${baseUrl}/api/track`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ event, data }),
+      body: JSON.stringify({
+        event,
+        data: {
+          ...data,
+          ts: Date.now(),
+        },
+      }),
     }).catch(() => {}); // Silent fail - don't block UI
   } catch (e) {
     // Silent fail

@@ -188,10 +188,10 @@ function readWidgetHtml(componentName: string): string {
 // Added timestamp suffix to force cache invalidation for width fix
 const VERSION = (process.env.RENDER_GIT_COMMIT?.slice(0, 7) || Date.now().toString()) + '-' + Date.now();
 
+const STABLE_TEMPLATE_URI = "ui://widget/reminder-app.html";
+
 function widgetMeta(widget: ReminderWidget, bustCache: boolean = false) {
-  const templateUri = bustCache
-    ? `ui://widget/reminder-app.html?v=${VERSION}`
-    : widget.templateUri;
+  const templateUri = widget.templateUri;
 
   return {
     "openai/outputTemplate": templateUri,
@@ -257,7 +257,7 @@ const widgets: ReminderWidget[] = [
   {
     id: "create-reminders-app",
     title: "Create Reminders App — AI-powered reminder app with gamification",
-    templateUri: `ui://widget/reminder-app.html?v=${VERSION}`,
+    templateUri: STABLE_TEMPLATE_URI,
     invoking:
       "Opening Create Reminders App...",
     invoked:
@@ -272,6 +272,10 @@ const widgetsByUri = new Map<string, ReminderWidget>();
 widgets.forEach((widget) => {
   widgetsById.set(widget.id, widget);
   widgetsByUri.set(widget.templateUri, widget);
+  // Be tolerant if ChatGPT or middleware adds/removes query params.
+  // We treat ui://widget/<name>.html as the canonical identity.
+  const baseUri = widget.templateUri.split("?")[0];
+  widgetsByUri.set(baseUri, widget);
 });
 
 const toolInputSchema = {
@@ -452,11 +456,26 @@ function createReminderAppServer(): Server {
   server.setRequestHandler(
     ReadResourceRequestSchema,
     async (request: ReadResourceRequest) => {
-      const widget = widgetsByUri.get(request.params.uri);
+      const requestedUri = request.params.uri;
+      const normalizedUri = requestedUri.split("?")[0];
+      const widget = widgetsByUri.get(requestedUri) ?? widgetsByUri.get(normalizedUri);
 
       if (!widget) {
-        throw new Error(`Unknown resource: ${request.params.uri}`);
+        console.error("[ReadResource] Unknown resource", {
+          requestedUri,
+          normalizedUri,
+          knownUris: Array.from(widgetsByUri.keys()).slice(0, 25),
+          knownUriCount: widgetsByUri.size,
+        });
+        throw new Error(`Unknown resource: ${requestedUri}`);
       }
+
+      console.log("[ReadResource] Serving widget resource", {
+        requestedUri,
+        normalizedUri,
+        widgetUri: widget.templateUri,
+        htmlBytes: widget.html?.length ?? 0,
+      });
 
       const htmlToSend = widget.html;
 

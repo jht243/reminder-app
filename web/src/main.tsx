@@ -3,6 +3,96 @@ import { createRoot } from "react-dom/client";
 
 import ReminderApp from "./ReminderApp";
 
+const __WIDGET_START_MS =
+  typeof performance !== "undefined" && performance.now
+    ? performance.now()
+    : Date.now();
+
+const __sinceStartMs = () => {
+  const now =
+    typeof performance !== "undefined" && performance.now
+      ? performance.now()
+      : Date.now();
+  return Math.round(now - __WIDGET_START_MS);
+};
+
+const __log = (...args: any[]) =>
+  console.log(`[t+${__sinceStartMs()}ms]`, ...args);
+
+const __getBaseUrl = () => {
+  try {
+    const raw = (window as any).openai?.serverUrl || "";
+    if (!raw) return "https://reminder-app-3pz5.onrender.com";
+    try {
+      const origin = new URL(raw).origin;
+      if (/oaiusercontent\.com$/i.test(origin)) {
+        return "https://reminder-app-3pz5.onrender.com";
+      }
+      return origin;
+    } catch {
+      if (/oaiusercontent\.com/i.test(raw)) {
+        return "https://reminder-app-3pz5.onrender.com";
+      }
+      return raw;
+    }
+  } catch {
+    return "https://reminder-app-3pz5.onrender.com";
+  }
+};
+
+const __report = async (event: string, data: Record<string, any>) => {
+  try {
+    const baseUrl = __getBaseUrl();
+    await fetch(`${baseUrl}/api/track`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event,
+        data: {
+          ...data,
+          t_ms: __sinceStartMs(),
+        },
+      }),
+    });
+  } catch {
+    // ignore
+  }
+};
+
+window.addEventListener(
+  "error",
+  (ev: any) => {
+    const err = ev?.error;
+    __log("[GlobalError]", ev?.message, err);
+    __report("widget_global_error", {
+      message: ev?.message,
+      filename: ev?.filename,
+      lineno: ev?.lineno,
+      colno: ev?.colno,
+      error: err?.message || String(err || ""),
+      stack: err?.stack,
+    });
+  },
+  true
+);
+
+window.addEventListener(
+  "unhandledrejection",
+  (ev: any) => {
+    const reason = ev?.reason;
+    __log("[UnhandledRejection]", reason);
+    __report("widget_unhandled_rejection", {
+      reason: reason?.message || String(reason || ""),
+      stack: reason?.stack,
+    });
+  },
+  true
+);
+
+window.setTimeout(() => __log("[Heartbeat] alive @3s"), 3000);
+window.setTimeout(() => __log("[Heartbeat] alive @5s"), 5000);
+window.setTimeout(() => __log("[Heartbeat] alive @7s"), 7000);
+
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean; error?: any }
@@ -20,18 +110,11 @@ class ErrorBoundary extends React.Component<
     console.error("Widget Error Boundary caught error:", error, errorInfo);
     // Log to server
     try {
-        fetch("/api/track", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                event: "crash",
-                data: {
-                    error: error?.message || "Unknown error",
-                    stack: error?.stack,
-                    componentStack: errorInfo?.componentStack
-                }
-            })
-        }).catch(e => console.error("Failed to report crash", e));
+      __report("crash", {
+        error: error?.message || "Unknown error",
+        stack: error?.stack,
+        componentStack: errorInfo?.componentStack,
+      }).catch(() => {});
     } catch (e) {
         // Ignore reporting errors
     }
@@ -108,6 +191,7 @@ const getHydrationData = (): any => {
 };
 
 console.log("[Main] Reminder App main.tsx loading...");
+__log("[Main] Starting (baseUrl)", __getBaseUrl());
 
 // App wrapper - Reminder App
 function App({ initialData }: { initialData: any }) {
@@ -135,6 +219,7 @@ const renderApp = (data: any) => {
 
 // Initial render
 const initialData = getHydrationData();
+__log("[Hydration] initialData keys", initialData && typeof initialData === "object" ? Object.keys(initialData) : []);
 renderApp(initialData);
 
 // Listen for late hydration events (Apps SDK pattern)
