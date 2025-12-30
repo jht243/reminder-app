@@ -299,12 +299,16 @@ const toolInputSchema = {
     natural_input: { type: "string", description: "Natural language input like 'remind me to call mom tomorrow at 3pm'." },
     action: {
       type: "string",
-      enum: ["open", "create", "complete", "uncomplete"],
-      description: "Optional intent for the widget to apply on open. 'open'/'create' prefill input, 'complete' marks a reminder complete, 'uncomplete' reverses completion.",
+      enum: ["open", "create", "complete", "uncomplete", "delete"],
+      description: "Optional intent for the widget to apply on open. 'open'/'create' prefill input, 'complete' marks a reminder complete, 'uncomplete' reverses completion, 'delete' removes a matching reminder.",
     },
     complete_query: {
       type: "string",
       description: "If action is 'complete' or 'uncomplete', this is the reminder title/query to match (e.g. 'mailed the check to my landlord').",
+    },
+    delete_query: {
+      type: "string",
+      description: "If action is 'delete', this is the reminder title/query to match.",
     },
   },
   required: [],
@@ -325,8 +329,9 @@ const toolInputParser = z.object({
   notification_email: z.string().optional(),
   notification_phone: z.string().optional(),
   natural_input: z.string().optional(),
-  action: z.enum(["open", "create", "complete", "uncomplete"]).optional(),
+  action: z.enum(["open", "create", "complete", "uncomplete", "delete"]).optional(),
   complete_query: z.string().optional(),
+  delete_query: z.string().optional(),
 });
 
 // Storage for user reminders (in-memory, persists during server lifetime)
@@ -602,6 +607,17 @@ function createReminderAppServer(): Server {
 
         // If ChatGPT didn't pass structured arguments, try to infer reminder details from freeform text in meta
         try {
+          const isLikelyOpaqueToken = (value: string) => {
+            const t = value.trim();
+            if (t.length < 40) return false;
+            if (/\s/.test(t)) return false;
+            return /^[A-Za-z0-9/_\-+=.]+$/.test(t);
+          };
+
+          if (args.natural_input && isLikelyOpaqueToken(args.natural_input)) {
+            args.natural_input = undefined;
+          }
+
           const candidates: any[] = [
             meta["openai/subject"],
             meta["openai/userPrompt"],
@@ -610,7 +626,10 @@ function createReminderAppServer(): Server {
             meta["openai/inputText"],
             meta["openai/requestText"],
           ];
-          const userText = candidates.find((t) => typeof t === "string" && t.trim().length > 0) || "";
+          const userText =
+            candidates.find(
+              (t) => typeof t === "string" && t.trim().length > 0 && !isLikelyOpaqueToken(t)
+            ) || "";
 
           // Use natural_input if provided, or fallback to userText
           if (!args.natural_input && userText) {

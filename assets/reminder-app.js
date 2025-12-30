@@ -27034,6 +27034,12 @@ function ReminderApp({ initialData: initialData2 }) {
     }
     return best ? best.r : null;
   };
+  const isLikelyOpaqueToken = (value) => {
+    const t = value.trim();
+    if (t.length < 40) return false;
+    if (/\s/.test(t)) return false;
+    return /^[A-Za-z0-9/_\-+=.]+$/.test(t);
+  };
   const inferActionFromNaturalInput = (text) => {
     const t = text.trim();
     const lower = t.toLowerCase();
@@ -27061,9 +27067,9 @@ function ReminderApp({ initialData: initialData2 }) {
   };
   const buildPrefillText = (data) => {
     const natural = typeof data?.natural_input === "string" ? data.natural_input.trim() : "";
-    if (natural) return natural;
+    if (natural && !isLikelyOpaqueToken(natural)) return natural;
     const title = typeof data?.title === "string" ? data.title.trim() : "";
-    if (!title) return "";
+    if (!title || isLikelyOpaqueToken(title)) return "";
     const dueDate = typeof data?.due_date === "string" ? data.due_date.trim() : "";
     const dueTime = typeof data?.due_time === "string" ? data.due_time.trim() : "";
     const recurrence = typeof data?.recurrence === "string" ? data.recurrence.trim() : "";
@@ -27110,7 +27116,7 @@ function ReminderApp({ initialData: initialData2 }) {
         action: effectiveAction || ""
       });
     }
-    const wantsCreate = effectiveAction === "create" || effectiveAction === "open" || !effectiveAction;
+    const wantsCreate = effectiveAction === "create" || !effectiveAction;
     if (wantsCreate && prefill && prefill.trim()) {
       pendingAutoCreateRef.current = { signature, text: prefill };
     }

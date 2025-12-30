@@ -1204,6 +1204,13 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     return best ? best.r : null;
   };
 
+  const isLikelyOpaqueToken = (value: string) => {
+    const t = value.trim();
+    if (t.length < 40) return false;
+    if (/\s/.test(t)) return false;
+    return /^[A-Za-z0-9/_\-+=.]+$/.test(t);
+  };
+
   const inferActionFromNaturalInput = (text: string): { action?: "create" | "complete" | "uncomplete" | "delete"; query?: string; prefill?: string } => {
     const t = text.trim();
     const lower = t.toLowerCase();
@@ -1241,9 +1248,9 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
 
   const buildPrefillText = (data: any): string => {
     const natural = typeof data?.natural_input === "string" ? data.natural_input.trim() : "";
-    if (natural) return natural;
+    if (natural && !isLikelyOpaqueToken(natural)) return natural;
     const title = typeof data?.title === "string" ? data.title.trim() : "";
-    if (!title) return "";
+    if (!title || isLikelyOpaqueToken(title)) return "";
 
     const dueDate = typeof data?.due_date === "string" ? data.due_date.trim() : "";
     const dueTime = typeof data?.due_time === "string" ? data.due_time.trim() : "";
@@ -1313,7 +1320,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
 
     // Auto-create reminders when hydration indicates creation intent.
     // This should only run once per unique hydration payload.
-    const wantsCreate = effectiveAction === "create" || effectiveAction === "open" || !effectiveAction;
+    const wantsCreate = effectiveAction === "create" || !effectiveAction;
     if (wantsCreate && prefill && prefill.trim()) {
       pendingAutoCreateRef.current = { signature, text: prefill };
     }
