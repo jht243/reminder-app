@@ -26563,6 +26563,9 @@ var parseNaturalLanguage = (input) => {
     const daysMatch = lower.match(/every\s+((?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(?:\s*(?:,|and)\s*(?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))*)/i);
     if (daysMatch) {
       recurrenceDays = extractDays(daysMatch[1]);
+      if (recurrenceDays.length > 0) {
+        dueDate = pickNextDueDateForDays(recurrenceDays, today);
+      }
     }
     confidence += 15;
   } else if (/\bon\s+(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(\s*(,|and)\s*(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))+/i.test(lower)) {
@@ -26584,7 +26587,10 @@ var parseNaturalLanguage = (input) => {
     const singleDayMatch = lower.match(/every\s+(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)\b/i);
     if (singleDayMatch) {
       const dayNum = dayNameToNum[singleDayMatch[1].toLowerCase()];
-      if (dayNum !== void 0) recurrenceDays = [dayNum];
+      if (dayNum !== void 0) {
+        recurrenceDays = [dayNum];
+        dueDate = pickNextDueDateForDays([dayNum], today);
+      }
     }
     confidence += 15;
   } else if (/\bevery\s*day\b|daily/i.test(lower)) {
