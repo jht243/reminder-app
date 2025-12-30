@@ -26835,7 +26835,7 @@ var persistState = (reminders, stats) => {
   } catch (e) {
     console.error("[Persist] localStorage error:", e);
   }
-  if (window.openai?.callTool) {
+  if (window.openai?.callTool && window.openai?.__enableSaveRemindersTool === true) {
     try {
       window.openai.callTool("save_reminders", state).catch((e) => {
         console.log("[Persist] callTool not available or failed:", e);

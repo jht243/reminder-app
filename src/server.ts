@@ -375,7 +375,7 @@ const saveRemindersTool: Tool = {
 
 const tools: Tool[] = [
   // Add save_reminders tool
-  saveRemindersTool,
+  ...(process.env.EXPOSE_SAVE_TOOL === "1" ? [saveRemindersTool] : []),
   // Add widget tools
   ...widgets.map((widget) => ({
   name: widget.id,

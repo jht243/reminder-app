@@ -935,7 +935,7 @@ const persistState = (reminders: Reminder[], stats: UserStats) => {
   }
   
   // 3. Call save tool if available (for cross-session persistence)
-  if ((window as any).openai?.callTool) {
+  if ((window as any).openai?.callTool && (window as any).openai?.__enableSaveRemindersTool === true) {
     try {
       (window as any).openai.callTool("save_reminders", state).catch((e: any) => {
         console.log("[Persist] callTool not available or failed:", e);
