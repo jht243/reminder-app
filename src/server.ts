@@ -338,7 +338,7 @@ const userRemindersStore: Map<string, { reminders: any[], stats: any, savedAt: n
 // Storage for daily digest email subscribers
 type DigestSubscriber = {
   email: string;
-  odaiSubject: string; // OpenAI user subject ID for linking reminders
+  odaiSubject?: string; // Backwards compatibility: older clients sent this
   subscribedAt: number;
   timezone?: string;
   sendTime?: string; // HH:MM format, default "07:00"
@@ -382,7 +382,7 @@ const saveRemindersTool: Tool = {
     },
   },
   annotations: {
-    readOnlyHint: false,
+    readOnlyHint: true,
     destructiveHint: false,
     idempotentHint: true,
     openWorldHint: false,
@@ -553,15 +553,17 @@ function createReminderAppServer(): Server {
         if (request.params.name === "save_reminders") {
           const args = request.params.arguments as any || {};
           const sessionId = (request as any)._meta?.sessionId || "default";
+          const subjectFromMeta = (request as any)?._meta?.["openai/subject"];
+          const ownerKey = String(args.ownerKey || subjectFromMeta || sessionId || "default");
           
           // Store reminders in memory
-          userRemindersStore.set(sessionId, {
+          userRemindersStore.set(ownerKey, {
             reminders: args.reminders || [],
             stats: args.stats || {},
             savedAt: Date.now(),
           });
           
-          console.log(`[Save] Saved ${args.reminders?.length || 0} reminders for session ${sessionId}`);
+          console.log(`[Save] Saved ${args.reminders?.length || 0} reminders for owner ${ownerKey}`);
           
           return {
             content: [
@@ -1650,7 +1652,7 @@ async function handleDigestSubscribe(req: IncomingMessage, res: ServerResponse) 
     // Store subscriber
     digestSubscribersStore.set(email.toLowerCase(), {
       email: email.toLowerCase(),
-      odaiSubject: odaiSubject || "unknown",
+      odaiSubject: odaiSubject || undefined,
       subscribedAt: Date.now(),
       timezone: timezone || "America/New_York",
       sendTime: sendTime || "07:00",
@@ -1736,7 +1738,9 @@ async function handleDigestSend(req: IncomingMessage, res: ServerResponse, url: 
   for (const [email, subscriber] of digestSubscribersStore) {
     try {
       // Get reminders for this user
-      const userData = userRemindersStore.get(subscriber.odaiSubject);
+      const userData =
+        userRemindersStore.get(email) ||
+        (subscriber.odaiSubject ? userRemindersStore.get(subscriber.odaiSubject) : undefined);
       const reminders = userData?.reminders || [];
 
       if (reminders.length === 0) {

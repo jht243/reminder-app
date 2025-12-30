@@ -920,7 +920,20 @@ const PROGRESSION_TASKS: Omit<ProgressionTask, 'completed'>[] = [
 
 // Helper to persist state via OpenAI Apps SDK
 const persistState = (reminders: Reminder[], stats: UserStats) => {
-  const state = { reminders, stats, savedAt: Date.now() };
+  let ownerKey: string | undefined;
+  try {
+    const subscribed = localStorage.getItem("digest_subscribed") === "true";
+    const email = localStorage.getItem("digest_email") || "";
+    if (subscribed && email.includes("@")) {
+      ownerKey = email.toLowerCase();
+    }
+  } catch {}
+
+  if (!ownerKey) {
+    ownerKey = (window as any).openai?.toolInput?._meta?.["openai/subject"];
+  }
+
+  const state = { reminders, stats, savedAt: Date.now(), ownerKey };
   
   // 1. Use OpenAI widget state (persists within conversation)
   if ((window as any).openai?.setWidgetState) {
@@ -941,7 +954,7 @@ const persistState = (reminders: Reminder[], stats: UserStats) => {
   }
   
   // 3. Call save tool if available (for cross-session persistence)
-  if ((window as any).openai?.callTool && (window as any).openai?.__enableSaveRemindersTool === true) {
+  if ((window as any).openai?.callTool) {
     try {
       (window as any).openai.callTool("save_reminders", state).catch((e: any) => {
         console.log("[Persist] callTool not available or failed:", e);
@@ -1079,7 +1092,9 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const [pressedFooterButton, setPressedFooterButton] = useState<string | null>(null);
   
   // Daily digest email subscription
-  const [digestEmail, setDigestEmail] = useState("");
+  const [digestEmail, setDigestEmail] = useState(() => {
+    try { return localStorage.getItem("digest_email") || ""; } catch { return ""; }
+  });
   const [digestSubscribed, setDigestSubscribed] = useState<boolean>(() => {
     try { return localStorage.getItem("digest_subscribed") === "true"; } catch { return false; }
   });
@@ -1868,6 +1883,14 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
         try { localStorage.setItem("digest_subscribed", "true"); localStorage.setItem("digest_email", digestEmail); } catch {}
         setToast("📧 Subscribed! Daily digest coming soon.");
         trackEvent("daily_digest_subscribe_success", { email: digestEmail });
+
+        // Immediately sync current reminders to server under this email so cron can find them
+        try {
+          if ((window as any).openai?.callTool) {
+            const state = { reminders, stats, savedAt: Date.now(), ownerKey: digestEmail.toLowerCase() };
+            (window as any).openai.callTool("save_reminders", state).catch(() => {});
+          }
+        } catch {}
       } else {
         setToast(data.error || "Failed to subscribe");
       }
