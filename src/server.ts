@@ -1269,18 +1269,75 @@ async function handleTrackEvent(req: IncomingMessage, res: ServerResponse) {
       body += chunk;
     }
 
-    const { event, data } = JSON.parse(body);
+    const contentLength = req.headers["content-length"];
+    const userAgent = String(req.headers["user-agent"] ?? "");
+    const forwardedFor = String(req.headers["x-forwarded-for"] ?? "");
+    const remoteAddress = (req.socket as any)?.remoteAddress;
+
+    let parsed: any;
+    try {
+      parsed = JSON.parse(body);
+    } catch (parseError: any) {
+      console.error("[TrackEvent] JSON parse error", {
+        error: parseError?.message,
+        bodyLength: body.length,
+        contentLength,
+        userAgent,
+        forwardedFor,
+        remoteAddress,
+        bodySnippet: body.slice(0, 500),
+      });
+
+      logAnalytics("widget_track_ingest_error", {
+        stage: "parse",
+        error: parseError?.message,
+        bodyLength: body.length,
+        contentLength,
+        userAgent,
+      });
+
+      res.writeHead(400).end(JSON.stringify({ error: "Invalid JSON" }));
+      return;
+    }
+
+    const { event, data } = parsed ?? {};
 
     if (!event) {
       res.writeHead(400).end(JSON.stringify({ error: "Missing event name" }));
       return;
     }
 
-    logAnalytics(`widget_${event}`, data || {});
+    const eventName = String(event);
+    const finalEvent = eventName.startsWith("widget_") ? eventName : `widget_${eventName}`;
+    const payload = (data && typeof data === "object") ? data : {};
+
+    // Attach request metadata so we can correlate crashes to client environments.
+    const enriched = {
+      ...payload,
+      _req: {
+        contentLength,
+        userAgent,
+        forwardedFor,
+        remoteAddress,
+      },
+    };
+
+    // Keep this log line compact; details should be in analytics.
+    console.log("[TrackEvent]", finalEvent, {
+      runId: (payload as any)?.runId,
+      t_ms: (payload as any)?.t_ms,
+      bodyLength: body.length,
+    });
+
+    logAnalytics(finalEvent, enriched);
 
     res.writeHead(200).end(JSON.stringify({ success: true }));
   } catch (error) {
     console.error("Track event error:", error);
+    logAnalytics("widget_track_ingest_error", {
+      stage: "handler",
+      error: (error as any)?.message ?? String(error),
+    });
     res.writeHead(500).end(JSON.stringify({ error: "Failed to track event" }));
   }
 }

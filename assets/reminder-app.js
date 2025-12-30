@@ -28848,6 +28848,8 @@ OR just paste a list:
 
 // src/main.tsx
 var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
+var __RUN_ID = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+window.__reminder_widget_run_id = __RUN_ID;
 var __WIDGET_START_MS = typeof performance !== "undefined" && performance.now ? performance.now() : Date.now();
 var __sinceStartMs = () => {
   const now = typeof performance !== "undefined" && performance.now ? performance.now() : Date.now();
@@ -28884,6 +28886,7 @@ var __report = async (event, data) => {
         event,
         data: {
           ...data,
+          runId: __RUN_ID,
           t_ms: __sinceStartMs()
         }
       })
@@ -28891,18 +28894,43 @@ var __report = async (event, data) => {
   } catch {
   }
 };
+var __lastLifecycle = { runId: __RUN_ID };
+var __mark = (phase, extra = {}) => {
+  __lastLifecycle = {
+    ...__lastLifecycle,
+    phase,
+    t_ms: __sinceStartMs(),
+    ...extra
+  };
+};
+__mark("boot", {
+  baseUrl: __getBaseUrl(),
+  hasOpenAI: !!window.openai
+});
+__report("widget_boot", {
+  baseUrl: __getBaseUrl(),
+  hasOpenAI: !!window.openai
+}).catch(() => {
+});
 window.addEventListener(
   "error",
   (ev) => {
     const err = ev?.error;
     __log("[GlobalError]", ev?.message, err);
+    __mark("global_error", {
+      message: ev?.message,
+      filename: ev?.filename,
+      lineno: ev?.lineno,
+      colno: ev?.colno
+    });
     __report("widget_global_error", {
       message: ev?.message,
       filename: ev?.filename,
       lineno: ev?.lineno,
       colno: ev?.colno,
       error: err?.message || String(err || ""),
-      stack: err?.stack
+      stack: err?.stack,
+      lastLifecycle: __lastLifecycle
     });
   },
   true
@@ -28912,16 +28940,41 @@ window.addEventListener(
   (ev) => {
     const reason = ev?.reason;
     __log("[UnhandledRejection]", reason);
+    __mark("unhandled_rejection", {
+      reason: reason?.message || String(reason || "")
+    });
     __report("widget_unhandled_rejection", {
       reason: reason?.message || String(reason || ""),
-      stack: reason?.stack
+      stack: reason?.stack,
+      lastLifecycle: __lastLifecycle
     });
   },
   true
 );
-window.setTimeout(() => __log("[Heartbeat] alive @3s"), 3e3);
-window.setTimeout(() => __log("[Heartbeat] alive @5s"), 5e3);
-window.setTimeout(() => __log("[Heartbeat] alive @7s"), 7e3);
+window.setTimeout(() => {
+  __log("[Heartbeat] alive @3s");
+  __mark("heartbeat", { at: "3s" });
+  __report("widget_heartbeat", { at: "3s", lastLifecycle: __lastLifecycle }).catch(() => {
+  });
+}, 3e3);
+window.setTimeout(() => {
+  __log("[Heartbeat] alive @5s");
+  __mark("heartbeat", { at: "5s" });
+  __report("widget_heartbeat", { at: "5s", lastLifecycle: __lastLifecycle }).catch(() => {
+  });
+}, 5e3);
+window.setTimeout(() => {
+  __log("[Heartbeat] alive @7s");
+  __mark("heartbeat", { at: "7s" });
+  __report("widget_heartbeat", { at: "7s", lastLifecycle: __lastLifecycle }).catch(() => {
+  });
+}, 7e3);
+document.addEventListener("visibilitychange", () => {
+  const state = document.visibilityState;
+  __mark("visibility", { visibilityState: state });
+  __report("widget_visibility", { visibilityState: state, lastLifecycle: __lastLifecycle }).catch(() => {
+  });
+});
 var ErrorBoundary = class extends import_react4.default.Component {
   constructor(props) {
     super(props);
@@ -28932,11 +28985,15 @@ var ErrorBoundary = class extends import_react4.default.Component {
   }
   componentDidCatch(error, errorInfo) {
     console.error("Widget Error Boundary caught error:", error, errorInfo);
+    __mark("react_error_boundary", {
+      error: error?.message || "Unknown error"
+    });
     try {
       __report("crash", {
         error: error?.message || "Unknown error",
         stack: error?.stack,
-        componentStack: errorInfo?.componentStack
+        componentStack: errorInfo?.componentStack,
+        lastLifecycle: __lastLifecycle
       }).catch(() => {
       });
     } catch (e) {
@@ -28998,18 +29055,50 @@ if (!container) {
 }
 var root = (0, import_client.createRoot)(container);
 var __appliedLateHydration = false;
+var __renderCount = 0;
 var renderApp = (data) => {
+  __renderCount += 1;
+  __mark("render", {
+    renderCount: __renderCount,
+    initialDataKeys: data && typeof data === "object" ? Object.keys(data) : []
+  });
+  __report("widget_render", {
+    renderCount: __renderCount,
+    initialDataKeys: data && typeof data === "object" ? Object.keys(data) : [],
+    lastLifecycle: __lastLifecycle
+  }).catch(() => {
+  });
   root.render(
     /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(import_react4.default.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(ErrorBoundary, { children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(App, { initialData: data }) }) })
   );
 };
 var initialData = getHydrationData();
 __log("[Hydration] initialData keys", initialData && typeof initialData === "object" ? Object.keys(initialData) : []);
+__mark("hydration_initial", {
+  initialDataKeys: initialData && typeof initialData === "object" ? Object.keys(initialData) : []
+});
+__report("widget_hydration_initial", {
+  initialDataKeys: initialData && typeof initialData === "object" ? Object.keys(initialData) : [],
+  hasOpenAI: !!window.openai,
+  openaiKeys: window.openai ? Object.keys(window.openai) : [],
+  lastLifecycle: __lastLifecycle
+}).catch(() => {
+});
 renderApp(initialData);
 window.addEventListener("openai:set_globals", (ev) => {
   const globals = ev?.detail?.globals;
   if (globals) {
     console.log("[Hydration] Late event received:", globals);
+    __mark("hydration_late_event", {
+      globalsKeys: globals && typeof globals === "object" ? Object.keys(globals) : [],
+      alreadyApplied: __appliedLateHydration
+    });
+    __report("widget_hydration_late_event", {
+      globalsKeys: globals && typeof globals === "object" ? Object.keys(globals) : [],
+      alreadyApplied: __appliedLateHydration,
+      lastLifecycle: __lastLifecycle
+    }).catch(() => {
+    });
     const candidates = [
       globals.toolOutput,
       globals.structuredContent,
@@ -29024,6 +29113,14 @@ window.addEventListener("openai:set_globals", (ev) => {
           return;
         }
         __appliedLateHydration = true;
+        __mark("hydration_late_apply", {
+          candidateKeys: Object.keys(candidate)
+        });
+        __report("widget_hydration_late_apply", {
+          candidateKeys: Object.keys(candidate),
+          lastLifecycle: __lastLifecycle
+        }).catch(() => {
+        });
         renderApp(candidate);
         return;
       }
