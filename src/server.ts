@@ -749,6 +749,8 @@ const ssePath = "/mcp";
 const postPath = "/mcp/messages";
 const subscribePath = "/api/subscribe";
 const analyticsPath = "/analytics";
+const analyticsJsonPath = "/analytics.json";
+const analyticsCrashJsonPath = "/analytics/crash.json";
 const trackEventPath = "/api/track";
 const healthPath = "/health";
 const domainVerificationPath = "/.well-known/openai-apps-challenge";
@@ -756,7 +758,12 @@ const domainVerificationToken = "X1gWNzpJNaRnK2C8chFlLAGup9c5jHr6-7hTFMrDs-k";
 
 const ANALYTICS_PASSWORD = process.env.ANALYTICS_PASSWORD || "changeme123";
 
-function checkAnalyticsAuth(req: IncomingMessage): boolean {
+function checkAnalyticsAuth(req: IncomingMessage, url?: URL): boolean {
+  const qpKey = url?.searchParams.get("key");
+  if (qpKey && qpKey === ANALYTICS_PASSWORD) {
+    return true;
+  }
+
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Basic ")) {
     return false;
@@ -767,6 +774,39 @@ function checkAnalyticsAuth(req: IncomingMessage): boolean {
   const [username, password] = credentials.split(":");
 
   return username === "admin" && password === ANALYTICS_PASSWORD;
+}
+
+function sanitizeAnalyticsLog(log: AnalyticsEvent): AnalyticsEvent {
+  const out: AnalyticsEvent = { ...log };
+  const redactKeys = [
+    "email",
+    "feedback",
+    "title",
+    "description",
+    "natural_input",
+    "notification_email",
+    "notification_phone",
+    "userLocation",
+    "userAgent",
+    "inferredQuery",
+    "params",
+  ];
+
+  redactKeys.forEach((k) => {
+    if (k in out) {
+      (out as any)[k] = "[redacted]";
+    }
+  });
+
+  // Truncate large strings (stack traces etc) to avoid huge responses.
+  Object.keys(out).forEach((k) => {
+    const v = (out as any)[k];
+    if (typeof v === "string" && v.length > 2000) {
+      (out as any)[k] = v.slice(0, 2000) + "…";
+    }
+  });
+
+  return out;
 }
 
 function humanizeEventName(event: string): string {
@@ -1223,8 +1263,8 @@ function generateAnalyticsDashboard(logs: AnalyticsEvent[], alerts: AlertEntry[]
 </html>`;
 }
 
-async function handleAnalytics(req: IncomingMessage, res: ServerResponse) {
-  if (!checkAnalyticsAuth(req)) {
+async function handleAnalytics(req: IncomingMessage, res: ServerResponse, url: URL) {
+  if (!checkAnalyticsAuth(req, url)) {
     res.writeHead(401, {
       "WWW-Authenticate": 'Basic realm="Analytics Dashboard"',
       "Content-Type": "text/plain",
@@ -1245,6 +1285,77 @@ async function handleAnalytics(req: IncomingMessage, res: ServerResponse) {
   } catch (error) {
     console.error("Analytics error:", error);
     res.writeHead(500).end("Failed to generate analytics");
+  }
+}
+
+async function handleAnalyticsJson(req: IncomingMessage, res: ServerResponse, url: URL) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Headers", "content-type");
+  res.setHeader("Content-Type", "application/json");
+
+  if (!checkAnalyticsAuth(req, url)) {
+    res.writeHead(401).end(JSON.stringify({ error: "Authentication required" }));
+    return;
+  }
+
+  try {
+    const logs = getRecentLogs(7);
+    const alerts = evaluateAlerts(logs);
+    const runId = url.searchParams.get("runId");
+    const filtered = runId ? logs.filter((l) => String((l as any).runId ?? "") === runId) : logs;
+    res.writeHead(200).end(
+      JSON.stringify({
+        ok: true,
+        alerts,
+        logs: filtered,
+      })
+    );
+  } catch (error: any) {
+    console.error("Analytics JSON error:", error);
+    res.writeHead(500).end(JSON.stringify({ error: "Failed to generate analytics" }));
+  }
+}
+
+async function handleAnalyticsCrashJson(req: IncomingMessage, res: ServerResponse, url: URL) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Headers", "content-type");
+  res.setHeader("Content-Type", "application/json");
+
+  // No-auth endpoint, but sanitized + limited scope.
+  try {
+    const logs = getRecentLogs(2);
+    const runId = url.searchParams.get("runId");
+    const filtered = logs
+      .filter((l) => {
+        const e = String(l.event ?? "");
+        // Only include widget lifecycle + crash diagnostics.
+        if (!e.startsWith("widget_")) return false;
+        return (
+          e.includes("crash") ||
+          e.includes("global_error") ||
+          e.includes("unhandled") ||
+          e.includes("track_ingest_error") ||
+          e.includes("boot") ||
+          e.includes("render") ||
+          e.includes("hydration") ||
+          e.includes("heartbeat") ||
+          e.includes("visibility") ||
+          e.includes("load")
+        );
+      })
+      .filter((l) => (runId ? String((l as any).runId ?? "") === runId : true))
+      .slice(0, 500)
+      .map(sanitizeAnalyticsLog);
+
+    res.writeHead(200).end(
+      JSON.stringify({
+        ok: true,
+        logs: filtered,
+      })
+    );
+  } catch (error: any) {
+    console.error("Crash analytics JSON error:", error);
+    res.writeHead(500).end(JSON.stringify({ error: "Failed to generate crash analytics" }));
   }
 }
 
@@ -1685,7 +1796,17 @@ const httpServer = createServer(
     }
 
     if (url.pathname === analyticsPath) {
-      await handleAnalytics(req, res);
+      await handleAnalytics(req, res, url);
+      return;
+    }
+
+    if (url.pathname === analyticsJsonPath) {
+      await handleAnalyticsJson(req, res, url);
+      return;
+    }
+
+    if (url.pathname === analyticsCrashJsonPath) {
+      await handleAnalyticsCrashJson(req, res, url);
       return;
     }
 
