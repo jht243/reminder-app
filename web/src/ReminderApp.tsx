@@ -836,7 +836,7 @@ const PROGRESSION_TASKS: Omit<ProgressionTask, 'completed'>[] = [
   // === ADDING REMINDERS (Tasks 1-5) ===
   {
     id: "first_reminder",
-    name: "Getting Started",
+    name: "Challenge 1: Getting Started",
     description: "Add your first reminder",
     icon: "🎯",
     points: 15,
@@ -844,7 +844,7 @@ const PROGRESSION_TASKS: Omit<ProgressionTask, 'completed'>[] = [
   },
   {
     id: "add_birthday",
-    name: "Birthday Tracker",
+    name: "Challenge 2: Birthday Tracker",
     description: "Add a birthday reminder (include 'birthday' in title)",
     icon: "🎂",
     points: 15,
@@ -852,7 +852,7 @@ const PROGRESSION_TASKS: Omit<ProgressionTask, 'completed'>[] = [
   },
   {
     id: "add_work",
-    name: "Stay Professional",
+    name: "Challenge 3: Stay Professional",
     description: "Add a work reminder (meeting, deadline, project)",
     icon: "💼",
     points: 15,
@@ -860,7 +860,7 @@ const PROGRESSION_TASKS: Omit<ProgressionTask, 'completed'>[] = [
   },
   {
     id: "add_family",
-    name: "Family Matters",
+    name: "Challenge 4: Family Matters",
     description: "Add a family reminder (call mom, visit grandma)",
     icon: "👨‍👩‍👧",
     points: 15,
@@ -868,7 +868,7 @@ const PROGRESSION_TASKS: Omit<ProgressionTask, 'completed'>[] = [
   },
   {
     id: "add_recurring",
-    name: "Habit Builder",
+    name: "Challenge 5: Habit Builder",
     description: "Add a recurring reminder (daily, weekly, etc.)",
     icon: "🔄",
     points: 20,
@@ -877,7 +877,7 @@ const PROGRESSION_TASKS: Omit<ProgressionTask, 'completed'>[] = [
   // === MARK COMPLETE TASKS (Tasks 6-8) ===
   {
     id: "first_complete",
-    name: "Task Master",
+    name: "Challenge 6: Task Master",
     description: "Mark your first reminder as complete",
     icon: "✅",
     points: 20,
@@ -885,7 +885,7 @@ const PROGRESSION_TASKS: Omit<ProgressionTask, 'completed'>[] = [
   },
   {
     id: "complete_3",
-    name: "On a Roll",
+    name: "Challenge 7: On a Roll",
     description: "Mark 3 reminders as complete",
     icon: "🎳",
     points: 25,
@@ -893,7 +893,7 @@ const PROGRESSION_TASKS: Omit<ProgressionTask, 'completed'>[] = [
   },
   {
     id: "complete_5",
-    name: "High Five",
+    name: "Challenge 8: High Five",
     description: "Mark 5 reminders as complete",
     icon: "🖐️",
     points: 30,
@@ -902,7 +902,7 @@ const PROGRESSION_TASKS: Omit<ProgressionTask, 'completed'>[] = [
   // === ADVANCED TASKS (Tasks 9-12) ===
   {
     id: "add_health",
-    name: "Health First",
+    name: "Challenge 9: Health First",
     description: "Add a health reminder (doctor, vitamins, exercise)",
     icon: "💊",
     points: 15,
@@ -910,7 +910,7 @@ const PROGRESSION_TASKS: Omit<ProgressionTask, 'completed'>[] = [
   },
   {
     id: "add_bill",
-    name: "Bill Tracker",
+    name: "Challenge 10: Bill Tracker",
     description: "Add a bill/payment reminder (rent, utilities)",
     icon: "💰",
     points: 15,
@@ -918,7 +918,7 @@ const PROGRESSION_TASKS: Omit<ProgressionTask, 'completed'>[] = [
   },
   {
     id: "start_streak",
-    name: "Streak Starter",
+    name: "Challenge 11: Streak Starter",
     description: "Build a 2-day streak by marking reminders complete daily",
     icon: "🔥",
     points: 30,
@@ -926,7 +926,7 @@ const PROGRESSION_TASKS: Omit<ProgressionTask, 'completed'>[] = [
   },
   {
     id: "week_streak",
-    name: "Week Warrior",
+    name: "Challenge 12: Week Warrior",
     description: "Maintain a 7-day streak",
     icon: "⚡",
     points: 100,

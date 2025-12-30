@@ -26747,7 +26747,7 @@ var PROGRESSION_TASKS = [
   // === ADDING REMINDERS (Tasks 1-5) ===
   {
     id: "first_reminder",
-    name: "Getting Started",
+    name: "Challenge 1: Getting Started",
     description: "Add your first reminder",
     icon: "\u{1F3AF}",
     points: 15,
@@ -26755,7 +26755,7 @@ var PROGRESSION_TASKS = [
   },
   {
     id: "add_birthday",
-    name: "Birthday Tracker",
+    name: "Challenge 2: Birthday Tracker",
     description: "Add a birthday reminder (include 'birthday' in title)",
     icon: "\u{1F382}",
     points: 15,
@@ -26763,7 +26763,7 @@ var PROGRESSION_TASKS = [
   },
   {
     id: "add_work",
-    name: "Stay Professional",
+    name: "Challenge 3: Stay Professional",
     description: "Add a work reminder (meeting, deadline, project)",
     icon: "\u{1F4BC}",
     points: 15,
@@ -26771,7 +26771,7 @@ var PROGRESSION_TASKS = [
   },
   {
     id: "add_family",
-    name: "Family Matters",
+    name: "Challenge 4: Family Matters",
     description: "Add a family reminder (call mom, visit grandma)",
     icon: "\u{1F468}\u200D\u{1F469}\u200D\u{1F467}",
     points: 15,
@@ -26779,7 +26779,7 @@ var PROGRESSION_TASKS = [
   },
   {
     id: "add_recurring",
-    name: "Habit Builder",
+    name: "Challenge 5: Habit Builder",
     description: "Add a recurring reminder (daily, weekly, etc.)",
     icon: "\u{1F504}",
     points: 20,
@@ -26788,7 +26788,7 @@ var PROGRESSION_TASKS = [
   // === MARK COMPLETE TASKS (Tasks 6-8) ===
   {
     id: "first_complete",
-    name: "Task Master",
+    name: "Challenge 6: Task Master",
     description: "Mark your first reminder as complete",
     icon: "\u2705",
     points: 20,
@@ -26796,7 +26796,7 @@ var PROGRESSION_TASKS = [
   },
   {
     id: "complete_3",
-    name: "On a Roll",
+    name: "Challenge 7: On a Roll",
     description: "Mark 3 reminders as complete",
     icon: "\u{1F3B3}",
     points: 25,
@@ -26804,7 +26804,7 @@ var PROGRESSION_TASKS = [
   },
   {
     id: "complete_5",
-    name: "High Five",
+    name: "Challenge 8: High Five",
     description: "Mark 5 reminders as complete",
     icon: "\u{1F590}\uFE0F",
     points: 30,
@@ -26813,7 +26813,7 @@ var PROGRESSION_TASKS = [
   // === ADVANCED TASKS (Tasks 9-12) ===
   {
     id: "add_health",
-    name: "Health First",
+    name: "Challenge 9: Health First",
     description: "Add a health reminder (doctor, vitamins, exercise)",
     icon: "\u{1F48A}",
     points: 15,
@@ -26821,7 +26821,7 @@ var PROGRESSION_TASKS = [
   },
   {
     id: "add_bill",
-    name: "Bill Tracker",
+    name: "Challenge 10: Bill Tracker",
     description: "Add a bill/payment reminder (rent, utilities)",
     icon: "\u{1F4B0}",
     points: 15,
@@ -26829,7 +26829,7 @@ var PROGRESSION_TASKS = [
   },
   {
     id: "start_streak",
-    name: "Streak Starter",
+    name: "Challenge 11: Streak Starter",
     description: "Build a 2-day streak by marking reminders complete daily",
     icon: "\u{1F525}",
     points: 30,
@@ -26837,7 +26837,7 @@ var PROGRESSION_TASKS = [
   },
   {
     id: "week_streak",
-    name: "Week Warrior",
+    name: "Challenge 12: Week Warrior",
     description: "Maintain a 7-day streak",
     icon: "\u26A1",
     points: 100,
