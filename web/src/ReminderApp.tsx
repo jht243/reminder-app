@@ -630,6 +630,20 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
     }
     confidence += 15;
   }
+  // 2a2. Multi-day patterns like "tuesday and thursday to [task]" (days before "to", implied weekly)
+  else if (/\b(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(\s*(,|and)\s*(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))+\s+to\s+/i.test(lower)) {
+    recurrence = "weekly";
+    recurrenceInterval = 1;
+    recurrenceUnit = "weeks";
+    const daysMatch = lower.match(/((?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(?:\s*(?:,|and)\s*(?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))+)\s+to\s+/i);
+    if (daysMatch) {
+      recurrenceDays = extractDays(daysMatch[1]);
+      if (recurrenceDays.length > 0) {
+        dueDate = pickNextDueDateForDays(recurrenceDays, today);
+      }
+    }
+    confidence += 15;
+  }
   // 2b. "every monday/tuesday/etc" = weekly on that day (single day)
   else if (/\bevery\s+(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)\b/i.test(lower)) {
     recurrence = "weekly"; 
@@ -766,6 +780,8 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
     .replace(/\bin\s+\d+\s+(days?|hours?|weeks?|months?)\b/gi, "")
     .replace(/\bon\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/gi, "")
     .replace(/\bon\s+((?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(?:\s*(?:,|and)\s*(?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))*)/gi, "")
+    // Remove "days to" pattern (e.g., "tuesday and thursday to")
+    .replace(/\b((?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(?:\s*(?:,|and)\s*(?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))+)\s+to\s+/gi, "")
     // Remove priority keywords
     .replace(/\burgent\b/gi, "")
     .replace(/\basap\b/gi, "")

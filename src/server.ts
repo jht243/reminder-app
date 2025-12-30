@@ -612,9 +612,14 @@ function createReminderAppServer(): Server {
           ];
           const userText = candidates.find((t) => typeof t === "string" && t.trim().length > 0) || "";
 
-          // Use natural_input if provided, or fallback to userText
-          if (!args.natural_input && userText) {
-            args.natural_input = userText;
+          // Always prefer userText if it looks like a natural language prompt with more context
+          // This handles cases where the LLM extracts just a verb for "title" but userText has full prompt
+          if (userText && userText.trim().length > 0) {
+            const currentNatural = (args.natural_input || "").trim();
+            // Use userText if natural_input is empty OR if userText is longer and contains spaces (more context)
+            if (!currentNatural || (userText.length > currentNatural.length && /\s/.test(userText))) {
+              args.natural_input = userText;
+            }
           }
 
           // Try to infer priority from keywords
