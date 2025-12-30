@@ -26922,6 +26922,7 @@ function ReminderApp({ initialData: initialData2 }) {
   const hydrationAutoCreateAppliedRef = (0, import_react3.useRef)(/* @__PURE__ */ new Set());
   const pendingAutoCreateRef = (0, import_react3.useRef)(null);
   const pendingCompletionRef = (0, import_react3.useRef)(null);
+  const pendingDeleteRef = (0, import_react3.useRef)(null);
   const [editing, setEditing] = (0, import_react3.useState)(null);
   const [search, setSearch] = (0, import_react3.useState)("");
   const [searchExpanded, setSearchExpanded] = (0, import_react3.useState)(false);
@@ -27037,12 +27038,24 @@ function ReminderApp({ initialData: initialData2 }) {
     const t = text.trim();
     const lower = t.toLowerCase();
     const completeMatch = lower.match(/^\s*(mark|set)\s+(it\s+)?(as\s+)?(complete|completed|done)\s+(that\s+)?(i\s+)?(.+)$/i);
-    if (completeMatch && completeMatch[6]) {
-      return { action: "complete", query: completeMatch[6].trim(), prefill: t };
+    if (completeMatch && completeMatch[7]) {
+      return { action: "complete", query: completeMatch[7].trim(), prefill: t };
+    }
+    const iCompletedMatch = lower.match(/^\s*(i\s+)?(just\s+)?(completed|finished|did)\s+(.+)$/i);
+    if (iCompletedMatch && iCompletedMatch[4]) {
+      return { action: "complete", query: iCompletedMatch[4].trim(), prefill: t };
+    }
+    const doneWithMatch = lower.match(/^\s*(i'?m?\s+)?done\s+(with\s+)?(.+)$/i);
+    if (doneWithMatch && doneWithMatch[3]) {
+      return { action: "complete", query: doneWithMatch[3].trim(), prefill: t };
+    }
+    const deleteMatch = lower.match(/^\s*(delete|remove)\s+(the\s+)?(reminder\s+)?(for\s+|to\s+)?(.+)$/i);
+    if (deleteMatch && deleteMatch[5]) {
+      return { action: "delete", query: deleteMatch[5].trim(), prefill: t };
     }
     const uncompleteMatch = lower.match(/^\s*(undo|uncomplete|mark)\s+(it\s+)?(as\s+)?(not\s+complete|incomplete|not\s+done)\s+(that\s+)?(i\s+)?(.+)$/i);
-    if (uncompleteMatch && uncompleteMatch[6]) {
-      return { action: "uncomplete", query: uncompleteMatch[6].trim(), prefill: t };
+    if (uncompleteMatch && uncompleteMatch[7]) {
+      return { action: "uncomplete", query: uncompleteMatch[7].trim(), prefill: t };
     }
     return { action: "create", prefill: t };
   };
@@ -27078,7 +27091,7 @@ function ReminderApp({ initialData: initialData2 }) {
     const actionRaw = typeof initialData2.action === "string" ? initialData2.action : "";
     const completeQueryRaw = typeof initialData2.complete_query === "string" ? initialData2.complete_query : "";
     const infer = prefill ? inferActionFromNaturalInput(prefill) : {};
-    const effectiveAction = actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "create" || actionRaw === "open" ? actionRaw : infer.action;
+    const effectiveAction = actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "create" || actionRaw === "open" || actionRaw === "delete" ? actionRaw : infer.action;
     const effectiveQuery = completeQueryRaw || infer.query || "";
     const signature = JSON.stringify({ prefill, action: effectiveAction || "", query: effectiveQuery });
     if (hydrationAppliedRef.current.has(signature)) return;
@@ -27108,6 +27121,12 @@ function ReminderApp({ initialData: initialData2 }) {
           action: effectiveAction,
           query: query.trim()
         };
+      }
+    }
+    if (effectiveAction === "delete") {
+      const query = effectiveQuery || prefill;
+      if (typeof query === "string" && query.trim()) {
+        pendingDeleteRef.current = { query: query.trim() };
       }
     }
   }, [initialData2]);
@@ -27457,6 +27476,23 @@ function ReminderApp({ initialData: initialData2 }) {
       uncomplete(match);
     }
     pendingCompletionRef.current = null;
+  }, [reminders]);
+  (0, import_react3.useEffect)(() => {
+    const pending = pendingDeleteRef.current;
+    if (!pending) return;
+    const match = bestMatchReminder(pending.query, false);
+    if (!match) {
+      trackEvent("hydration_delete_no_match", {
+        query: pending.query,
+        reminderCount: reminders.length
+      });
+      pendingDeleteRef.current = null;
+      setToast(`No reminder found matching "${pending.query}"`);
+      return;
+    }
+    trackEvent("hydration_delete_apply", { query: pending.query, matchedId: match.id });
+    del(match.id);
+    pendingDeleteRef.current = null;
   }, [reminders]);
   const [snoozePopup, setSnoozePopup] = (0, import_react3.useState)(null);
   const snooze = (r, mins) => {
