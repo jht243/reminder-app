@@ -1076,6 +1076,32 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   
   const [toast, setToast] = useState<string | null>(null);
   const [achievement, setAchievement] = useState<{ name: string; icon: string } | null>(null);
+  const [pressedFooterButton, setPressedFooterButton] = useState<string | null>(null);
+
+  const footerBtnHandlers = (id: string) => ({
+    onPointerDown: () => setPressedFooterButton(id),
+    onPointerUp: () => setPressedFooterButton((cur) => (cur === id ? null : cur)),
+    onPointerCancel: () => setPressedFooterButton((cur) => (cur === id ? null : cur)),
+    onPointerLeave: () => setPressedFooterButton((cur) => (cur === id ? null : cur)),
+  });
+
+  const footerBtnStyle = (
+    id: string,
+    base: React.CSSProperties,
+    pressed: Partial<React.CSSProperties> = {}
+  ): React.CSSProperties => {
+    const isPressed = pressedFooterButton === id;
+    return {
+      ...base,
+      transition: "transform 90ms ease, box-shadow 160ms ease, filter 160ms ease",
+      transform: isPressed ? "scale(0.97)" : "scale(1)",
+      filter: isPressed ? "brightness(0.97)" : "brightness(1)",
+      boxShadow: isPressed
+        ? "0 2px 6px rgba(0,0,0,0.10)"
+        : "0 3px 10px rgba(0,0,0,0.06)",
+      ...(isPressed ? pressed : {}),
+    };
+  };
   
   // Import Modal State
   const [importOpen, setImportOpen] = useState(false);
@@ -3086,49 +3112,59 @@ OR just paste a list:
       }}>
         <button
           onClick={() => window.print()}
-          style={{
+          {...footerBtnHandlers("footer_print")}
+          style={footerBtnStyle("footer_print", {
             display: "flex", alignItems: "center", gap: 6,
             padding: "10px 16px", borderRadius: 50,
             backgroundColor: COLORS.cardAlt, color: COLORS.textSecondary,
             fontSize: 13, fontWeight: 500, cursor: "pointer",
             border: `1px solid ${COLORS.border}`
-          }}
+          })}
         >
           🖨️ Print
         </button>
         <button
           onClick={resetProgress}
-          style={{
+          {...footerBtnHandlers("footer_reset")}
+          style={footerBtnStyle("footer_reset", {
             display: "flex", alignItems: "center", gap: 6,
             padding: "10px 16px", borderRadius: 50,
             backgroundColor: COLORS.cardAlt, color: COLORS.textSecondary,
             fontSize: 13, fontWeight: 500, cursor: "pointer",
             border: `1px solid ${COLORS.border}`
-          }}
+          })}
         >
           🔄 Reset
         </button>
         <button
           onClick={() => window.open("https://buymeacoffee.com/jhteplitsky", "_blank")}
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            padding: "10px 16px", borderRadius: 50,
-            backgroundColor: "#FFDD00", color: "#000",
-            fontSize: 13, fontWeight: 600, cursor: "pointer",
-            border: "none"
-          }}
+          {...footerBtnHandlers("footer_donate")}
+          style={footerBtnStyle(
+            "footer_donate",
+            {
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "10px 16px", borderRadius: 50,
+              backgroundColor: "#FFDD00", color: "#000",
+              fontSize: 13, fontWeight: 600, cursor: "pointer",
+              border: "none"
+            },
+            {
+              filter: "brightness(0.93)",
+            }
+          )}
         >
           ☕ Donate
         </button>
         <button
           onClick={() => window.open("mailto:jonathan@teplitsky.com?subject=Reminder%20App%20Feedback", "_blank")}
-          style={{
+          {...footerBtnHandlers("footer_feedback")}
+          style={footerBtnStyle("footer_feedback", {
             display: "flex", alignItems: "center", gap: 6,
             padding: "10px 16px", borderRadius: 50,
             backgroundColor: COLORS.cardAlt, color: COLORS.textSecondary,
             fontSize: 13, fontWeight: 500, cursor: "pointer",
             border: `1px solid ${COLORS.border}`
-          }}
+          })}
         >
           💬 Feedback
         </button>

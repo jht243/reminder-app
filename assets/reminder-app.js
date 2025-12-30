@@ -26948,6 +26948,24 @@ function ReminderApp({ initialData: initialData2 }) {
   };
   const [toast, setToast] = (0, import_react3.useState)(null);
   const [achievement, setAchievement] = (0, import_react3.useState)(null);
+  const [pressedFooterButton, setPressedFooterButton] = (0, import_react3.useState)(null);
+  const footerBtnHandlers = (id) => ({
+    onPointerDown: () => setPressedFooterButton(id),
+    onPointerUp: () => setPressedFooterButton((cur) => cur === id ? null : cur),
+    onPointerCancel: () => setPressedFooterButton((cur) => cur === id ? null : cur),
+    onPointerLeave: () => setPressedFooterButton((cur) => cur === id ? null : cur)
+  });
+  const footerBtnStyle = (id, base, pressed = {}) => {
+    const isPressed = pressedFooterButton === id;
+    return {
+      ...base,
+      transition: "transform 90ms ease, box-shadow 160ms ease, filter 160ms ease",
+      transform: isPressed ? "scale(0.97)" : "scale(1)",
+      filter: isPressed ? "brightness(0.97)" : "brightness(1)",
+      boxShadow: isPressed ? "0 2px 6px rgba(0,0,0,0.10)" : "0 3px 10px rgba(0,0,0,0.06)",
+      ...isPressed ? pressed : {}
+    };
+  };
   const [importOpen, setImportOpen] = (0, import_react3.useState)(false);
   const [dragActive, setDragActive] = (0, import_react3.useState)(false);
   const [screenshotModal, setScreenshotModal] = (0, import_react3.useState)({ open: false, imageData: null, analyzing: false, progress: 0 });
@@ -28881,7 +28899,8 @@ OR just paste a list:
         "button",
         {
           onClick: () => window.print(),
-          style: {
+          ...footerBtnHandlers("footer_print"),
+          style: footerBtnStyle("footer_print", {
             display: "flex",
             alignItems: "center",
             gap: 6,
@@ -28893,7 +28912,7 @@ OR just paste a list:
             fontWeight: 500,
             cursor: "pointer",
             border: `1px solid ${COLORS.border}`
-          },
+          }),
           children: "\u{1F5A8}\uFE0F Print"
         }
       ),
@@ -28901,7 +28920,8 @@ OR just paste a list:
         "button",
         {
           onClick: resetProgress,
-          style: {
+          ...footerBtnHandlers("footer_reset"),
+          style: footerBtnStyle("footer_reset", {
             display: "flex",
             alignItems: "center",
             gap: 6,
@@ -28913,7 +28933,7 @@ OR just paste a list:
             fontWeight: 500,
             cursor: "pointer",
             border: `1px solid ${COLORS.border}`
-          },
+          }),
           children: "\u{1F504} Reset"
         }
       ),
@@ -28921,19 +28941,26 @@ OR just paste a list:
         "button",
         {
           onClick: () => window.open("https://buymeacoffee.com/jhteplitsky", "_blank"),
-          style: {
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            padding: "10px 16px",
-            borderRadius: 50,
-            backgroundColor: "#FFDD00",
-            color: "#000",
-            fontSize: 13,
-            fontWeight: 600,
-            cursor: "pointer",
-            border: "none"
-          },
+          ...footerBtnHandlers("footer_donate"),
+          style: footerBtnStyle(
+            "footer_donate",
+            {
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "10px 16px",
+              borderRadius: 50,
+              backgroundColor: "#FFDD00",
+              color: "#000",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              border: "none"
+            },
+            {
+              filter: "brightness(0.93)"
+            }
+          ),
           children: "\u2615 Donate"
         }
       ),
@@ -28941,7 +28968,8 @@ OR just paste a list:
         "button",
         {
           onClick: () => window.open("mailto:jonathan@teplitsky.com?subject=Reminder%20App%20Feedback", "_blank"),
-          style: {
+          ...footerBtnHandlers("footer_feedback"),
+          style: footerBtnStyle("footer_feedback", {
             display: "flex",
             alignItems: "center",
             gap: 6,
@@ -28953,7 +28981,7 @@ OR just paste a list:
             fontWeight: 500,
             cursor: "pointer",
             border: `1px solid ${COLORS.border}`
-          },
+          }),
           children: "\u{1F4AC} Feedback"
         }
       )
