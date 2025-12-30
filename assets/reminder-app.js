@@ -26639,16 +26639,6 @@ var parseNaturalLanguage = (input) => {
       recurrenceInterval = 2;
       recurrenceUnit = "days";
       confidence += 5;
-    } else if (/\bfeed\s*(my\s*)?(cat|dog|pet|fish|bird)\b/i.test(lower)) {
-      recurrence = "daily";
-      recurrenceInterval = 1;
-      recurrenceUnit = "days";
-      confidence += 8;
-    } else if (/\bwalk\s*(my\s*)?(dog|puppy)\b/i.test(lower)) {
-      recurrence = "daily";
-      recurrenceInterval = 1;
-      recurrenceUnit = "days";
-      confidence += 8;
     } else if (/\boil\s*change\b/i.test(lower)) {
       recurrence = "custom";
       recurrenceInterval = 3;
@@ -26888,6 +26878,8 @@ function ReminderApp({ initialData: initialData2 }) {
   const [parsed, setParsed] = (0, import_react3.useState)(null);
   const inputRef = (0, import_react3.useRef)(null);
   const hydrationAppliedRef = (0, import_react3.useRef)(/* @__PURE__ */ new Set());
+  const hydrationAutoCreateAppliedRef = (0, import_react3.useRef)(/* @__PURE__ */ new Set());
+  const pendingAutoCreateRef = (0, import_react3.useRef)(null);
   const pendingCompletionRef = (0, import_react3.useRef)(null);
   const [editing, setEditing] = (0, import_react3.useState)(null);
   const [search, setSearch] = (0, import_react3.useState)("");
@@ -27051,6 +27043,10 @@ function ReminderApp({ initialData: initialData2 }) {
         action: effectiveAction || ""
       });
     }
+    const wantsCreate = effectiveAction === "create" || effectiveAction === "open" || !effectiveAction;
+    if (wantsCreate && prefill && prefill.trim()) {
+      pendingAutoCreateRef.current = { signature, text: prefill };
+    }
     if (effectiveAction === "complete" || effectiveAction === "uncomplete") {
       const query = effectiveQuery || prefill;
       if (typeof query === "string" && query.trim()) {
@@ -27061,6 +27057,24 @@ function ReminderApp({ initialData: initialData2 }) {
       }
     }
   }, [initialData2]);
+  (0, import_react3.useEffect)(() => {
+    const pending = pendingAutoCreateRef.current;
+    if (!pending) return;
+    if (hydrationAutoCreateAppliedRef.current.has(pending.signature)) {
+      pendingAutoCreateRef.current = null;
+      return;
+    }
+    if (!input || input.trim() !== pending.text.trim()) return;
+    if (!parsed) return;
+    hydrationAutoCreateAppliedRef.current.add(pending.signature);
+    pendingAutoCreateRef.current = null;
+    trackEvent("hydration_autocreate", {
+      inputLength: input.length,
+      confidence: parsed.confidence,
+      recurrence: parsed.recurrence
+    });
+    createFromParsed();
+  }, [input, parsed]);
   (0, import_react3.useEffect)(() => {
     persistState(reminders, stats);
   }, [reminders, stats]);

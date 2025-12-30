@@ -670,14 +670,8 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
     else if (/\b(gym|workout|exercise)\b/i.test(lower) && recurrence === "none") {
       recurrence = "custom"; recurrenceInterval = 2; recurrenceUnit = "days"; confidence += 5;
     }
-    // Feed pet = daily
-    else if (/\bfeed\s*(my\s*)?(cat|dog|pet|fish|bird)\b/i.test(lower)) {
-      recurrence = "daily"; recurrenceInterval = 1; recurrenceUnit = "days"; confidence += 8;
-    }
-    // Walk dog = daily
-    else if (/\bwalk\s*(my\s*)?(dog|puppy)\b/i.test(lower)) {
-      recurrence = "daily"; recurrenceInterval = 1; recurrenceUnit = "days"; confidence += 8;
-    }
+    // Do NOT infer daily recurrence from pet-related phrases. Users often mean a one-time reminder
+    // (e.g. "feed my dog tomorrow at noon"). Only set recurrence when explicitly requested.
     // Oil change = every 3 months
     else if (/\boil\s*change\b/i.test(lower)) {
       recurrence = "custom"; recurrenceInterval = 3; recurrenceUnit = "months"; confidence += 6;
@@ -990,6 +984,8 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const hydrationAppliedRef = useRef<Set<string>>(new Set());
+  const hydrationAutoCreateAppliedRef = useRef<Set<string>>(new Set());
+  const pendingAutoCreateRef = useRef<{ signature: string; text: string } | null>(null);
   const pendingCompletionRef = useRef<{ action: "complete" | "uncomplete"; query: string } | null>(null);
   
   // Edit mode (only after creation)
@@ -1224,6 +1220,13 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       });
     }
 
+    // Auto-create reminders when hydration indicates creation intent.
+    // This should only run once per unique hydration payload.
+    const wantsCreate = effectiveAction === "create" || effectiveAction === "open" || !effectiveAction;
+    if (wantsCreate && prefill && prefill.trim()) {
+      pendingAutoCreateRef.current = { signature, text: prefill };
+    }
+
     if (effectiveAction === "complete" || effectiveAction === "uncomplete") {
       const query = effectiveQuery || prefill;
       if (typeof query === "string" && query.trim()) {
@@ -1234,6 +1237,28 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       }
     }
   }, [initialData]);
+
+  // Apply auto-create once parsing has produced a ParsedReminder.
+  useEffect(() => {
+    const pending = pendingAutoCreateRef.current;
+    if (!pending) return;
+    if (hydrationAutoCreateAppliedRef.current.has(pending.signature)) {
+      pendingAutoCreateRef.current = null;
+      return;
+    }
+    // Wait until input is actually set and parsing has run.
+    if (!input || input.trim() !== pending.text.trim()) return;
+    if (!parsed) return;
+
+    hydrationAutoCreateAppliedRef.current.add(pending.signature);
+    pendingAutoCreateRef.current = null;
+    trackEvent("hydration_autocreate", {
+      inputLength: input.length,
+      confidence: parsed.confidence,
+      recurrence: parsed.recurrence,
+    });
+    createFromParsed();
+  }, [input, parsed]);
   
   // Persist whenever reminders or stats change
   useEffect(() => {
