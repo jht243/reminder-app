@@ -1226,16 +1226,21 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     const t = text.trim();
     const lower = t.toLowerCase();
 
+    // Helper to strip quotes from extracted query
+    const stripQuotes = (q: string): string => q.replace(/^["']|["']$/g, "").trim();
+
     // Check for explicit "complete" intent
-    // Matches: "completed feeding my cat", "finished feeding my cat", "done feeding my cat"
+    // Matches: "i've completed feeding my cat", "i completed feeding my cat", "completed feeding my cat"
+    // Also: "i have completed X", "i've finished X", "done with X", "finished X"
     // Also: "mark feeding my cat as done", "check off feeding my cat"
-    const completeMatch = lower.match(/^\s*(?:i\s+)?(?:have\s+)?(?:completed|finished|done|checked\s+off)\s+(.+)$/i) ||
+    const completeMatch = lower.match(/^\s*(?:i'?(?:ve|'ve)?\s+)?(?:have\s+)?(?:completed|finished|done(?:\s+with)?|checked\s+off)\s+(.+)$/i) ||
                           lower.match(/^\s*(?:mark|set)\s+(?:task\s+)?(.+?)\s+(?:as\s+)?(?:complete|completed|done|finished)$/i) ||
-                          lower.match(/^\s*(?:remove|delete)\s+(.+?)\s+(?:from\s+reminders|from\s+list)?$/i);
+                          lower.match(/^\s*(?:remove|delete)\s+(.+?)\s+(?:from\s+(?:my\s+)?reminders|from\s+(?:my\s+)?list)?$/i);
     
     if (completeMatch && completeMatch[1]) {
       // Treat "remove/delete" as complete to avoid destructive actions without confirmation
-      return { action: "complete", query: completeMatch[1].trim(), prefill: t };
+      // Strip quotes from the query for better matching
+      return { action: "complete", query: stripQuotes(completeMatch[1].trim()), prefill: t };
     }
 
     const uncompleteMatch = lower.match(/^\s*(undo|uncomplete|mark)\s+(it\s+)?(as\s+)?(not\s+complete|incomplete|not\s+done)\s+(that\s+)?(i\s+)?(.+)$/i);

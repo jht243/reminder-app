@@ -27056,9 +27056,10 @@ function ReminderApp({ initialData: initialData2 }) {
   const inferActionFromNaturalInput = (text) => {
     const t = text.trim();
     const lower = t.toLowerCase();
-    const completeMatch = lower.match(/^\s*(?:i\s+)?(?:have\s+)?(?:completed|finished|done|checked\s+off)\s+(.+)$/i) || lower.match(/^\s*(?:mark|set)\s+(?:task\s+)?(.+?)\s+(?:as\s+)?(?:complete|completed|done|finished)$/i) || lower.match(/^\s*(?:remove|delete)\s+(.+?)\s+(?:from\s+reminders|from\s+list)?$/i);
+    const stripQuotes = (q) => q.replace(/^["']|["']$/g, "").trim();
+    const completeMatch = lower.match(/^\s*(?:i'?(?:ve|'ve)?\s+)?(?:have\s+)?(?:completed|finished|done(?:\s+with)?|checked\s+off)\s+(.+)$/i) || lower.match(/^\s*(?:mark|set)\s+(?:task\s+)?(.+?)\s+(?:as\s+)?(?:complete|completed|done|finished)$/i) || lower.match(/^\s*(?:remove|delete)\s+(.+?)\s+(?:from\s+(?:my\s+)?reminders|from\s+(?:my\s+)?list)?$/i);
     if (completeMatch && completeMatch[1]) {
-      return { action: "complete", query: completeMatch[1].trim(), prefill: t };
+      return { action: "complete", query: stripQuotes(completeMatch[1].trim()), prefill: t };
     }
     const uncompleteMatch = lower.match(/^\s*(undo|uncomplete|mark)\s+(it\s+)?(as\s+)?(not\s+complete|incomplete|not\s+done)\s+(that\s+)?(i\s+)?(.+)$/i);
     if (uncompleteMatch && uncompleteMatch[7]) {
