@@ -1341,16 +1341,28 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     const infer = prefill ? inferActionFromNaturalInput(prefill) : {};
 
     const inferAction = infer.action;
-    const rawIsStrong = actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "create" || actionRaw === "delete";
-    const rawIsOpen = actionRaw === "open";
+    
+    // Determine effective action. Key insight: when user says "delete X", ChatGPT might
+    // send action="create" (since we removed "delete" from enum to avoid popup), so we
+    // must let the inferred action from natural language override "create" when it
+    // detects delete/complete/uncomplete intent.
+    const inferredIsDestructive = inferAction === "delete" || inferAction === "complete" || inferAction === "uncomplete";
+    const rawIsStrongNonCreate = actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "delete";
+    const rawIsCreate = actionRaw === "create";
+    const rawIsOpen = actionRaw === "open" || !actionRaw;
 
-    // Treat action=open as a weak/default hint. If the natural input clearly implies
-    // a stronger intent (delete/complete/uncomplete), prefer that.
-    const effectiveAction = rawIsStrong
+    // Priority:
+    // 1. If server sends complete/uncomplete/delete explicitly, use it
+    // 2. If inferred action is delete/complete/uncomplete, use it (even if server sent "create" or "open")
+    // 3. If server sent "create", use it (only if inferred is also create or undefined)
+    // 4. Otherwise use inferred action
+    const effectiveAction = rawIsStrongNonCreate
       ? actionRaw
-      : rawIsOpen
-        ? (inferAction === "complete" || inferAction === "uncomplete" || inferAction === "delete" ? inferAction : "open")
-        : inferAction;
+      : inferredIsDestructive
+        ? inferAction
+        : rawIsCreate
+          ? "create"
+          : inferAction;
 
     const effectiveQuery =
       effectiveAction === "delete"
@@ -1365,7 +1377,9 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
 
     hydrationAppliedRef.current.add(signature);
 
-    if (prefill) {
+    // Only prefill input for create actions - don't show "delete feed my dog" in input
+    const shouldPrefillInput = effectiveAction === "create" || (!effectiveAction && !inferredIsDestructive);
+    if (prefill && shouldPrefillInput) {
       setInput(prefill);
       try {
         inputRef.current?.focus();
@@ -1381,7 +1395,8 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
 
     // Auto-create reminders when hydration indicates creation intent.
     // This should only run once per unique hydration payload.
-    const wantsCreate = effectiveAction === "create" || !effectiveAction;
+    // IMPORTANT: Do NOT auto-create when action is delete/complete/uncomplete
+    const wantsCreate = effectiveAction === "create" || (!effectiveAction && !inferredIsDestructive);
     if (wantsCreate && prefill && prefill.trim()) {
       pendingAutoCreateRef.current = { signature, text: prefill };
     }
@@ -1782,9 +1797,18 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     setStats(s => ({ ...s, totalPoints: Math.max(0, s.totalPoints - r.pointsAwarded), completedAllTime: Math.max(0, s.completedAllTime - 1) }));
   };
 
+  // Track which completion queries we've already processed
+  const processedCompletionsRef = useRef<Set<string>>(new Set());
+  
   useEffect(() => {
     const pending = pendingCompletionRef.current;
     if (!pending) return;
+    
+    const queryKey = `${pending.action}:${pending.query}`;
+    if (processedCompletionsRef.current.has(queryKey)) {
+      pendingCompletionRef.current = null;
+      return;
+    }
 
     const match = bestMatchReminder(pending.query, pending.action === "uncomplete");
     if (!match) {
@@ -1797,6 +1821,10 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       return;
     }
 
+    // Mark as processed BEFORE performing action
+    processedCompletionsRef.current.add(queryKey);
+    pendingCompletionRef.current = null;
+
     if (pending.action === "complete") {
       trackEvent("hydration_complete_apply", { query: pending.query, matchedId: match.id });
       complete(match);
@@ -1804,16 +1832,26 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       trackEvent("hydration_uncomplete_apply", { query: pending.query, matchedId: match.id });
       uncomplete(match);
     }
-    pendingCompletionRef.current = null;
   }, [reminders]);
   
   // Process pending delete from hydration
+  // Track which delete queries we've already processed to prevent duplicate runs
+  const processedDeletesRef = useRef<Set<string>>(new Set());
+  
   useEffect(() => {
     const pending = pendingDeleteRef.current;
     if (!pending) return;
+    
+    // Prevent processing the same delete twice
+    if (processedDeletesRef.current.has(pending.query)) {
+      pendingDeleteRef.current = null;
+      return;
+    }
 
     const match = bestMatchReminder(pending.query, false);
     if (!match) {
+      // Only show "no match" toast if we haven't already processed this query
+      // (avoids showing error after successful delete triggers re-render)
       trackEvent("hydration_delete_no_match", {
         query: pending.query,
         reminderCount: reminders.length,
@@ -1823,9 +1861,12 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       return;
     }
 
+    // Mark as processed BEFORE calling del() to prevent race condition
+    processedDeletesRef.current.add(pending.query);
+    pendingDeleteRef.current = null;
+    
     trackEvent("hydration_delete_apply", { query: pending.query, matchedId: match.id });
     del(match.id);
-    pendingDeleteRef.current = null;
   }, [reminders]);
   
   // Snooze popup state - stores the reminder being snoozed

@@ -27144,16 +27144,19 @@ function ReminderApp({ initialData: initialData2 }) {
     const deleteQueryRaw = typeof initialData2.delete_query === "string" ? initialData2.delete_query : "";
     const infer = prefill ? inferActionFromNaturalInput(prefill) : {};
     const inferAction = infer.action;
-    const rawIsStrong = actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "create" || actionRaw === "delete";
-    const rawIsOpen = actionRaw === "open";
-    const effectiveAction = rawIsStrong ? actionRaw : rawIsOpen ? inferAction === "complete" || inferAction === "uncomplete" || inferAction === "delete" ? inferAction : "open" : inferAction;
+    const inferredIsDestructive = inferAction === "delete" || inferAction === "complete" || inferAction === "uncomplete";
+    const rawIsStrongNonCreate = actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "delete";
+    const rawIsCreate = actionRaw === "create";
+    const rawIsOpen = actionRaw === "open" || !actionRaw;
+    const effectiveAction = rawIsStrongNonCreate ? actionRaw : inferredIsDestructive ? inferAction : rawIsCreate ? "create" : inferAction;
     const effectiveQuery = effectiveAction === "delete" ? deleteQueryRaw || infer.query || prefill || "" : completeQueryRaw || infer.query || "";
     const signature = JSON.stringify({ prefill, action: effectiveAction || "", query: effectiveQuery });
     if (hydrationAppliedRef.current.has(signature)) return;
     const hasAny = Boolean(prefill) || Boolean(effectiveAction) || Boolean(effectiveQuery);
     if (!hasAny) return;
     hydrationAppliedRef.current.add(signature);
-    if (prefill) {
+    const shouldPrefillInput = effectiveAction === "create" || !effectiveAction && !inferredIsDestructive;
+    if (prefill && shouldPrefillInput) {
       setInput(prefill);
       try {
         inputRef.current?.focus();
@@ -27165,7 +27168,7 @@ function ReminderApp({ initialData: initialData2 }) {
         action: effectiveAction || ""
       });
     }
-    const wantsCreate = effectiveAction === "create" || !effectiveAction;
+    const wantsCreate = effectiveAction === "create" || !effectiveAction && !inferredIsDestructive;
     if (wantsCreate && prefill && prefill.trim()) {
       pendingAutoCreateRef.current = { signature, text: prefill };
     }
@@ -27510,9 +27513,15 @@ function ReminderApp({ initialData: initialData2 }) {
     setReminders((prev) => prev.map((x) => x.id === r.id ? { ...r, completed: false, completedAt: void 0 } : x));
     setStats((s) => ({ ...s, totalPoints: Math.max(0, s.totalPoints - r.pointsAwarded), completedAllTime: Math.max(0, s.completedAllTime - 1) }));
   };
+  const processedCompletionsRef = (0, import_react3.useRef)(/* @__PURE__ */ new Set());
   (0, import_react3.useEffect)(() => {
     const pending = pendingCompletionRef.current;
     if (!pending) return;
+    const queryKey = `${pending.action}:${pending.query}`;
+    if (processedCompletionsRef.current.has(queryKey)) {
+      pendingCompletionRef.current = null;
+      return;
+    }
     const match = bestMatchReminder(pending.query, pending.action === "uncomplete");
     if (!match) {
       trackEvent("hydration_complete_no_match", {
@@ -27523,6 +27532,8 @@ function ReminderApp({ initialData: initialData2 }) {
       pendingCompletionRef.current = null;
       return;
     }
+    processedCompletionsRef.current.add(queryKey);
+    pendingCompletionRef.current = null;
     if (pending.action === "complete") {
       trackEvent("hydration_complete_apply", { query: pending.query, matchedId: match.id });
       complete(match);
@@ -27530,11 +27541,15 @@ function ReminderApp({ initialData: initialData2 }) {
       trackEvent("hydration_uncomplete_apply", { query: pending.query, matchedId: match.id });
       uncomplete(match);
     }
-    pendingCompletionRef.current = null;
   }, [reminders]);
+  const processedDeletesRef = (0, import_react3.useRef)(/* @__PURE__ */ new Set());
   (0, import_react3.useEffect)(() => {
     const pending = pendingDeleteRef.current;
     if (!pending) return;
+    if (processedDeletesRef.current.has(pending.query)) {
+      pendingDeleteRef.current = null;
+      return;
+    }
     const match = bestMatchReminder(pending.query, false);
     if (!match) {
       trackEvent("hydration_delete_no_match", {
@@ -27545,9 +27560,10 @@ function ReminderApp({ initialData: initialData2 }) {
       setToast(`No reminder found matching "${pending.query}"`);
       return;
     }
+    processedDeletesRef.current.add(pending.query);
+    pendingDeleteRef.current = null;
     trackEvent("hydration_delete_apply", { query: pending.query, matchedId: match.id });
     del(match.id);
-    pendingDeleteRef.current = null;
   }, [reminders]);
   const [snoozePopup, setSnoozePopup] = (0, import_react3.useState)(null);
   const snooze = (r, mins) => {
