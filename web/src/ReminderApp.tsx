@@ -1341,28 +1341,16 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     const infer = prefill ? inferActionFromNaturalInput(prefill) : {};
 
     const inferAction = infer.action;
-    
-    // Determine effective action. Key insight: when user says "delete X", ChatGPT might
-    // send action="create" (since we removed "delete" from enum to avoid popup), so we
-    // must let the inferred action from natural language override "create" when it
-    // detects delete/complete/uncomplete intent.
-    const inferredIsDestructive = inferAction === "delete" || inferAction === "complete" || inferAction === "uncomplete";
-    const rawIsStrongNonCreate = actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "delete";
-    const rawIsCreate = actionRaw === "create";
-    const rawIsOpen = actionRaw === "open" || !actionRaw;
+    const rawIsStrong = actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "create" || actionRaw === "delete";
+    const rawIsOpen = actionRaw === "open";
 
-    // Priority:
-    // 1. If server sends complete/uncomplete/delete explicitly, use it
-    // 2. If inferred action is delete/complete/uncomplete, use it (even if server sent "create" or "open")
-    // 3. If server sent "create", use it (only if inferred is also create or undefined)
-    // 4. Otherwise use inferred action
-    const effectiveAction = rawIsStrongNonCreate
+    // Treat action=open as a weak/default hint. If the natural input clearly implies
+    // a stronger intent (delete/complete/uncomplete), prefer that.
+    const effectiveAction = rawIsStrong
       ? actionRaw
-      : inferredIsDestructive
-        ? inferAction
-        : rawIsCreate
-          ? "create"
-          : inferAction;
+      : rawIsOpen
+        ? (inferAction === "complete" || inferAction === "uncomplete" || inferAction === "delete" ? inferAction : "open")
+        : inferAction;
 
     const effectiveQuery =
       effectiveAction === "delete"
@@ -1377,9 +1365,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
 
     hydrationAppliedRef.current.add(signature);
 
-    // Only prefill input for create actions - don't show "delete feed my dog" in input
-    const shouldPrefillInput = effectiveAction === "create" || (!effectiveAction && !inferredIsDestructive);
-    if (prefill && shouldPrefillInput) {
+    if (prefill) {
       setInput(prefill);
       try {
         inputRef.current?.focus();
@@ -1395,8 +1381,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
 
     // Auto-create reminders when hydration indicates creation intent.
     // This should only run once per unique hydration payload.
-    // IMPORTANT: Do NOT auto-create when action is delete/complete/uncomplete
-    const wantsCreate = effectiveAction === "create" || (!effectiveAction && !inferredIsDestructive);
+    const wantsCreate = effectiveAction === "create" || !effectiveAction;
     if (wantsCreate && prefill && prefill.trim()) {
       pendingAutoCreateRef.current = { signature, text: prefill };
     }

@@ -27144,19 +27144,16 @@ function ReminderApp({ initialData: initialData2 }) {
     const deleteQueryRaw = typeof initialData2.delete_query === "string" ? initialData2.delete_query : "";
     const infer = prefill ? inferActionFromNaturalInput(prefill) : {};
     const inferAction = infer.action;
-    const inferredIsDestructive = inferAction === "delete" || inferAction === "complete" || inferAction === "uncomplete";
-    const rawIsStrongNonCreate = actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "delete";
-    const rawIsCreate = actionRaw === "create";
-    const rawIsOpen = actionRaw === "open" || !actionRaw;
-    const effectiveAction = rawIsStrongNonCreate ? actionRaw : inferredIsDestructive ? inferAction : rawIsCreate ? "create" : inferAction;
+    const rawIsStrong = actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "create" || actionRaw === "delete";
+    const rawIsOpen = actionRaw === "open";
+    const effectiveAction = rawIsStrong ? actionRaw : rawIsOpen ? inferAction === "complete" || inferAction === "uncomplete" || inferAction === "delete" ? inferAction : "open" : inferAction;
     const effectiveQuery = effectiveAction === "delete" ? deleteQueryRaw || infer.query || prefill || "" : completeQueryRaw || infer.query || "";
     const signature = JSON.stringify({ prefill, action: effectiveAction || "", query: effectiveQuery });
     if (hydrationAppliedRef.current.has(signature)) return;
     const hasAny = Boolean(prefill) || Boolean(effectiveAction) || Boolean(effectiveQuery);
     if (!hasAny) return;
     hydrationAppliedRef.current.add(signature);
-    const shouldPrefillInput = effectiveAction === "create" || !effectiveAction && !inferredIsDestructive;
-    if (prefill && shouldPrefillInput) {
+    if (prefill) {
       setInput(prefill);
       try {
         inputRef.current?.focus();
@@ -27168,7 +27165,7 @@ function ReminderApp({ initialData: initialData2 }) {
         action: effectiveAction || ""
       });
     }
-    const wantsCreate = effectiveAction === "create" || !effectiveAction && !inferredIsDestructive;
+    const wantsCreate = effectiveAction === "create" || !effectiveAction;
     if (wantsCreate && prefill && prefill.trim()) {
       pendingAutoCreateRef.current = { signature, text: prefill };
     }
