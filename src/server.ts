@@ -196,7 +196,7 @@ function widgetMeta(widget: ReminderWidget, bustCache: boolean = false) {
   return {
     "openai/outputTemplate": templateUri,
     "openai/widgetDescription":
-      "Create Reminders App - An AI-powered reminder app with natural language input. Call this tool immediately with NO arguments to open the widget. If the user is asking to view/list their reminders (in any wording), open the widget immediately. This tool manages reminders inside the widget (not the device/system Reminders app). If the user provides details (e.g. 'Call mom tomorrow at 5pm'), they'll be parsed automatically. The widget handles all reminder management internally. Features gamification with points, streaks, and achievements. Supports recurring reminders, categories, and priority levels.",
+      "Create Reminders App - An AI-powered reminder app with natural language input. Call this tool immediately with NO arguments to open the widget. If the user is asking to view/list their reminders (in any wording), open the widget immediately. This tool manages reminders inside the widget (not the device/system Reminders app). If the user provides details (e.g. 'Call mom tomorrow at 5pm'), they'll be parsed automatically. Users can mark tasks complete inside the widget. Features gamification with points, streaks, and achievements. Supports recurring reminders, categories, and priority levels.",
     "openai/componentDescriptions": {
       "task-input": "Natural language input for creating reminders - just type what you need to remember.",
       "reminder-list": "Organized display of reminders with category filters, search, and sorting.",
@@ -382,7 +382,7 @@ const tools: Tool[] = [
   ...widgets.map((widget) => ({
   name: widget.id,
   description:
-    "Use this tool for Create Reminders App (the widget), not the device/system Reminders app. Call this tool immediately with NO arguments to open the widget for any request to view/list reminders (in any wording). If the user provides reminder details (e.g. 'Call mom tomorrow at 3pm'), pass them to pre-fill. The widget handles all reminder management (including removing reminders) internally.",
+    "Use this tool for Create Reminders App (the widget), not the device/system Reminders app. Call this tool immediately with NO arguments to open the widget for any request to view/list reminders (in any wording). If the user provides reminder details (e.g. 'Call mom tomorrow at 3pm'), pass them to pre-fill. Users can mark tasks complete inside the widget.",
   inputSchema: toolInputSchema,
   outputSchema: {
     type: "object",
