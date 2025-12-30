@@ -1220,10 +1220,23 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     return { action: "create", prefill: t };
   };
 
+  // Filter out token-like strings that aren't actual user input
+  const isValidUserInput = (text: string): boolean => {
+    if (!text || text.length < 2) return false;
+    // Reject strings that look like tokens/hashes (no spaces, long alphanumeric)
+    if (text.length > 20 && !/\s/.test(text) && /^[A-Za-z0-9/+=_-]+$/.test(text)) return false;
+    // Reject base64-like patterns
+    if (/^[A-Za-z0-9+/]{20,}={0,2}$/.test(text)) return false;
+    // Reject UUID-like patterns
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(text)) return false;
+    return true;
+  };
+
   const buildPrefillText = (data: any): string => {
     const natural = typeof data?.natural_input === "string" ? data.natural_input.trim() : "";
-    if (natural) return natural;
+    if (natural && isValidUserInput(natural)) return natural;
     const title = typeof data?.title === "string" ? data.title.trim() : "";
+    if (!isValidUserInput(title)) return "";
     if (!title) return "";
 
     const dueDate = typeof data?.due_date === "string" ? data.due_date.trim() : "";
