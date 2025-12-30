@@ -433,7 +433,7 @@ const tools: Tool[] = [
     securitySchemes: [{ type: "noauth" }],
   },
   annotations: {
-    readOnlyHint: false,
+    readOnlyHint: true,
     destructiveHint: false,
     idempotentHint: true,
     openWorldHint: false,
