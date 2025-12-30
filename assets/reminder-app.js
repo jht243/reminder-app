@@ -28082,7 +28082,10 @@ function ReminderApp({ initialData: initialData2 }) {
       ] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
         "button",
         {
-          onClick: () => setSearchExpanded(true),
+          onClick: () => {
+            setSearchExpanded(true);
+            setFilterStatus("all");
+          },
           style: {
             width: 32,
             height: 32,

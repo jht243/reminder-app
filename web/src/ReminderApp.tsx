@@ -2320,7 +2320,11 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
             </div>
           ) : (
             <button
-              onClick={() => setSearchExpanded(true)}
+              onClick={() => {
+                setSearchExpanded(true);
+                // Automatically switch to "all" tab to ensure user finds their item
+                setFilterStatus("all");
+              }}
               style={{
                 width: 32, height: 32, borderRadius: "50%",
                 border: "none", backgroundColor: COLORS.cardAlt,
