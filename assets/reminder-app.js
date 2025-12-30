@@ -27654,12 +27654,13 @@ function ReminderApp({ initialData: initialData2 }) {
       right: 16,
       padding: "14px 24px",
       borderRadius: 50,
-      backgroundColor: COLORS.primary,
+      backgroundColor: "#1a1a1a",
       color: "#fff",
-      fontWeight: 500,
+      fontWeight: 600,
       fontSize: 14,
       zIndex: 1e3,
-      boxShadow: "0 4px 20px rgba(45,90,61,0.3)"
+      boxShadow: "0 0 0 2px rgba(212,165,116,0.6), 0 4px 24px rgba(0,0,0,0.4)",
+      border: "1px solid rgba(212,165,116,0.5)"
     }, children: toast }),
     achievement && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
       position: "fixed",
