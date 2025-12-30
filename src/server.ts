@@ -780,7 +780,7 @@ const analyticsCrashJsonPath = "/analytics/crash.json";
 const trackEventPath = "/api/track";
 const healthPath = "/health";
 const domainVerificationPath = "/.well-known/openai-apps-challenge";
-const domainVerificationToken = "X1gWNzpJNaRnK2C8chFlLAGup9c5jHr6-7hTFMrDs-k";
+const domainVerificationToken = "0w3TN0qkO5WAqAgnuhLEY2H9ig2uLtHcCrV0pq51lEQ";
 
 const ANALYTICS_PASSWORD = process.env.ANALYTICS_PASSWORD || "changeme123";
 
