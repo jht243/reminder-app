@@ -26496,21 +26496,28 @@ var parseNaturalLanguage = (input) => {
   let recurrenceDays;
   const dayNameToNum = {
     sunday: 0,
+    sundays: 0,
     sun: 0,
     monday: 1,
+    mondays: 1,
     mon: 1,
     tuesday: 2,
+    tuesdays: 2,
     tue: 2,
     tues: 2,
     wednesday: 3,
+    wednesdays: 3,
     wed: 3,
     thursday: 4,
+    thursdays: 4,
     thu: 4,
     thur: 4,
     thurs: 4,
     friday: 5,
+    fridays: 5,
     fri: 5,
     saturday: 6,
+    saturdays: 6,
     sat: 6
   };
   const pickNextDueDateForDays = (days, base) => {
@@ -26527,7 +26534,7 @@ var parseNaturalLanguage = (input) => {
   };
   const extractDays = (text) => {
     const days = [];
-    const dayPattern = /\b(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)\b/gi;
+    const dayPattern = /\b(sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)\b/gi;
     let match;
     while ((match = dayPattern.exec(text)) !== null) {
       const dayNum = dayNameToNum[match[1].toLowerCase()];
@@ -26556,11 +26563,11 @@ var parseNaturalLanguage = (input) => {
       recurrence = num === 1 ? "yearly" : "custom";
     }
     confidence += 15;
-  } else if (/\bevery\s+(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(\s*(,|and)\s*(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))+/i.test(lower)) {
+  } else if (/\bevery\s+(sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)(\s*(,|and)\s*(sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat))+/i.test(lower)) {
     recurrence = "weekly";
     recurrenceInterval = 1;
     recurrenceUnit = "weeks";
-    const daysMatch = lower.match(/every\s+((?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(?:\s*(?:,|and)\s*(?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))*)/i);
+    const daysMatch = lower.match(/every\s+((?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)(?:\s*(?:,|and)\s*(?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat))*)/i);
     if (daysMatch) {
       recurrenceDays = extractDays(daysMatch[1]);
       if (recurrenceDays.length > 0) {
@@ -26568,11 +26575,11 @@ var parseNaturalLanguage = (input) => {
       }
     }
     confidence += 15;
-  } else if (/\bon\s+(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(\s*(,|and)\s*(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))+/i.test(lower)) {
+  } else if (/\bon\s+(sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)(\s*(,|and)\s*(sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat))+/i.test(lower)) {
     recurrence = "weekly";
     recurrenceInterval = 1;
     recurrenceUnit = "weeks";
-    const daysMatch = lower.match(/on\s+((?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(?:\s*(?:,|and)\s*(?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))*)/i);
+    const daysMatch = lower.match(/on\s+((?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)(?:\s*(?:,|and)\s*(?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat))*)/i);
     if (daysMatch) {
       recurrenceDays = extractDays(daysMatch[1]);
       if (recurrenceDays.length > 0) {
@@ -26580,11 +26587,11 @@ var parseNaturalLanguage = (input) => {
       }
     }
     confidence += 15;
-  } else if (/\b(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(\s*(,|and)\s*(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))+\s+to\s+/i.test(lower)) {
+  } else if (/\b(sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)(\s*(,|and)\s*(sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat))+\s+to\s+/i.test(lower)) {
     recurrence = "weekly";
     recurrenceInterval = 1;
     recurrenceUnit = "weeks";
-    const daysMatch = lower.match(/((?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(?:\s*(?:,|and)\s*(?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))+)\s+to\s+/i);
+    const daysMatch = lower.match(/((?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)(?:\s*(?:,|and)\s*(?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat))+)\s+to\s+/i);
     if (daysMatch) {
       recurrenceDays = extractDays(daysMatch[1]);
       if (recurrenceDays.length > 0) {
@@ -26592,11 +26599,11 @@ var parseNaturalLanguage = (input) => {
       }
     }
     confidence += 15;
-  } else if (/\bevery\s+(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)\b/i.test(lower)) {
+  } else if (/\bevery\s+(sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)\b/i.test(lower)) {
     recurrence = "weekly";
     recurrenceInterval = 1;
     recurrenceUnit = "weeks";
-    const singleDayMatch = lower.match(/every\s+(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)\b/i);
+    const singleDayMatch = lower.match(/every\s+(sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)\b/i);
     if (singleDayMatch) {
       const dayNum = dayNameToNum[singleDayMatch[1].toLowerCase()];
       if (dayNum !== void 0) {
@@ -26702,7 +26709,7 @@ var parseNaturalLanguage = (input) => {
   if (category !== "other") confidence += 15;
   const priority = detectPriority(input, dueDate);
   if (priority !== "medium") confidence += 10;
-  let title = input.replace(/^remind\s+me\s+(to\s+)?/gi, "").replace(/^don't\s+forget\s+(to\s+)?/gi, "").replace(/^i\s+need\s+to\s+/gi, "").replace(/^need\s+to\s+/gi, "").replace(/\bevery\s+\d+\s+days?\b/gi, "").replace(/\bevery\s+\d+\s+weeks?\b/gi, "").replace(/\bevery\s+\d+\s+months?\b/gi, "").replace(/\bevery\s+\d+\s+years?\b/gi, "").replace(/\bevery\s+other\s+(day|week|month|year)\b/gi, "").replace(/\bevery\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)(\s*(,|and)\s*(sunday|monday|tuesday|wednesday|thursday|friday|saturday))*/gi, "").replace(/\bevery\s*day\b/gi, "").replace(/\bevery\s*week\b/gi, "").replace(/\bevery\s*month\b/gi, "").replace(/\bevery\s*year\b/gi, "").replace(/\bdaily\b/gi, "").replace(/\bweekly\b/gi, "").replace(/\bmonthly\b/gi, "").replace(/\byearly\b/gi, "").replace(/\bannually\b/gi, "").replace(/\bbi-?weekly\b/gi, "").replace(/\bbi-?monthly\b/gi, "").replace(/\bat\s+\d{1,2}(:\d{2})?\s*(am|pm)?\b/gi, "").replace(/\b\d{1,2}\s*(am|pm)\b/gi, "").replace(/\btoday\b/gi, "").replace(/\btomorrow\b/gi, "").replace(/\btonight\b/gi, "").replace(/\bnext\s+week\b/gi, "").replace(/\bthis\s+weekend\b/gi, "").replace(/\bin\s+\d+\s+(days?|hours?|weeks?|months?)\b/gi, "").replace(/\bon\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/gi, "").replace(/\bon\s+((?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(?:\s*(?:,|and)\s*(?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))*)/gi, "").replace(/\b((?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(?:\s*(?:,|and)\s*(?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))+)\s+to\s+/gi, "").replace(/\burgent\b/gi, "").replace(/\basap\b/gi, "").replace(/\bimmediately\b/gi, "").replace(/\bimportant\b/gi, "").replace(/\bhigh\s+priority\b/gi, "").replace(/\blow\s+priority\b/gi, "").replace(/\bno\s+rush\b/gi, "").replace(/\s+to\s+$/gi, "").replace(/^\s*to\s+/gi, "").replace(/\s+/g, " ").trim();
+  let title = input.replace(/^remind\s+me\s+(to\s+)?/gi, "").replace(/^don't\s+forget\s+(to\s+)?/gi, "").replace(/^i\s+need\s+to\s+/gi, "").replace(/^need\s+to\s+/gi, "").replace(/\bevery\s+\d+\s+days?\b/gi, "").replace(/\bevery\s+\d+\s+weeks?\b/gi, "").replace(/\bevery\s+\d+\s+months?\b/gi, "").replace(/\bevery\s+\d+\s+years?\b/gi, "").replace(/\bevery\s+other\s+(day|week|month|year)\b/gi, "").replace(/\bevery\s+(sundays?|mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?)(\s*(,|and)\s*(sundays?|mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?))*/gi, "").replace(/\bevery\s*day\b/gi, "").replace(/\bevery\s*week\b/gi, "").replace(/\bevery\s*month\b/gi, "").replace(/\bevery\s*year\b/gi, "").replace(/\bdaily\b/gi, "").replace(/\bweekly\b/gi, "").replace(/\bmonthly\b/gi, "").replace(/\byearly\b/gi, "").replace(/\bannually\b/gi, "").replace(/\bbi-?weekly\b/gi, "").replace(/\bbi-?monthly\b/gi, "").replace(/\bat\s+\d{1,2}(:\d{2})?\s*(am|pm)?\b/gi, "").replace(/\b\d{1,2}\s*(am|pm)\b/gi, "").replace(/\btoday\b/gi, "").replace(/\btomorrow\b/gi, "").replace(/\btonight\b/gi, "").replace(/\bnext\s+week\b/gi, "").replace(/\bthis\s+weekend\b/gi, "").replace(/\bin\s+\d+\s+(days?|hours?|weeks?|months?)\b/gi, "").replace(/\bon\s+(sundays?|mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?)\b/gi, "").replace(/\bon\s+((?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)(?:\s*(?:,|and)\s*(?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat))*)/gi, "").replace(/\b((?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)(?:\s*(?:,|and)\s*(?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat))+)\s+to\s+/gi, "").replace(/\burgent\b/gi, "").replace(/\basap\b/gi, "").replace(/\bimmediately\b/gi, "").replace(/\bimportant\b/gi, "").replace(/\bhigh\s+priority\b/gi, "").replace(/\blow\s+priority\b/gi, "").replace(/\bno\s+rush\b/gi, "").replace(/\s+to\s+$/gi, "").replace(/^\s*to\s+/gi, "").replace(/\s+/g, " ").trim();
   if (title && title.length > 0) {
     title = title.charAt(0).toUpperCase() + title.slice(1);
     confidence += 25;
