@@ -1077,6 +1077,13 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const [toast, setToast] = useState<string | null>(null);
   const [achievement, setAchievement] = useState<{ name: string; icon: string } | null>(null);
   const [pressedFooterButton, setPressedFooterButton] = useState<string | null>(null);
+  
+  // Daily digest email subscription
+  const [digestEmail, setDigestEmail] = useState("");
+  const [digestSubscribed, setDigestSubscribed] = useState<boolean>(() => {
+    try { return localStorage.getItem("digest_subscribed") === "true"; } catch { return false; }
+  });
+  const [digestLoading, setDigestLoading] = useState(false);
 
   const footerBtnHandlers = (id: string) => ({
     onPointerDown: () => setPressedFooterButton(id),
@@ -1838,6 +1845,38 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     trackEvent("delete_reminder", { id });
     setReminders(prev => prev.filter(r => r.id !== id)); 
     setToast("Deleted"); 
+  };
+  
+  // Subscribe to daily digest email
+  const subscribeToDigest = async () => {
+    if (!digestEmail || !digestEmail.includes("@")) {
+      setToast("Please enter a valid email");
+      return;
+    }
+    setDigestLoading(true);
+    try {
+      const odaiSubject = (window as any).openai?.toolInput?._meta?.["openai/subject"] || "unknown";
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const res = await fetch("https://reminder-app-3pz5.onrender.com/api/daily-digest/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: digestEmail, odaiSubject, timezone, sendTime: "07:00" }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setDigestSubscribed(true);
+        try { localStorage.setItem("digest_subscribed", "true"); localStorage.setItem("digest_email", digestEmail); } catch {}
+        setToast("📧 Subscribed! Daily digest coming soon.");
+        trackEvent("daily_digest_subscribe_success", { email: digestEmail });
+      } else {
+        setToast(data.error || "Failed to subscribe");
+      }
+    } catch (err: any) {
+      setToast("Failed to subscribe: " + (err.message || "Unknown error"));
+      trackEvent("daily_digest_subscribe_error", { error: err.message });
+    } finally {
+      setDigestLoading(false);
+    }
   };
   
   // Reset all progress (for debugging/fresh start)
@@ -3096,6 +3135,80 @@ OR just paste a list:
         <div style={{ fontSize: 11, color: COLORS.textMuted, marginTop: 10 }}>
           📸 Upload a screenshot of your existing reminders to import them instantly
         </div>
+      </div>
+
+      {/* Daily Digest Email Subscription */}
+      <div style={{ 
+        marginTop: 16, 
+        padding: 20, 
+        backgroundColor: COLORS.card, 
+        borderRadius: cardRadius, 
+        boxShadow: cardShadow,
+        border: `1px solid ${COLORS.primary}30`
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+          <span style={{ fontSize: 20 }}>📧</span>
+          <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.textMain }}>Daily Reminder Digest</div>
+        </div>
+        {digestSubscribed ? (
+          <div style={{ 
+            padding: "12px 16px", 
+            backgroundColor: `${COLORS.primary}15`, 
+            borderRadius: 8, 
+            color: COLORS.primary,
+            fontSize: 13,
+            display: "flex",
+            alignItems: "center",
+            gap: 8
+          }}>
+            ✓ You're subscribed! Check your inbox each morning for your daily reminders.
+          </div>
+        ) : (
+          <>
+            <div style={{ fontSize: 12, color: COLORS.textSecondary, marginBottom: 12 }}>
+              Get a daily email with your reminders due today. Never miss a task again!
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={digestEmail}
+                onChange={(e) => setDigestEmail(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && subscribeToDigest()}
+                style={{
+                  flex: 1,
+                  padding: "10px 14px",
+                  borderRadius: 8,
+                  border: `1px solid ${COLORS.border}`,
+                  backgroundColor: COLORS.cardAlt,
+                  color: COLORS.textMain,
+                  fontSize: 13,
+                  outline: "none"
+                }}
+              />
+              <button
+                onClick={subscribeToDigest}
+                disabled={digestLoading}
+                style={{
+                  padding: "10px 20px",
+                  borderRadius: 8,
+                  backgroundColor: COLORS.primary,
+                  color: "white",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  border: "none",
+                  cursor: digestLoading ? "wait" : "pointer",
+                  opacity: digestLoading ? 0.7 : 1
+                }}
+              >
+                {digestLoading ? "..." : "Subscribe"}
+              </button>
+            </div>
+            <div style={{ fontSize: 10, color: COLORS.textMuted, marginTop: 8 }}>
+              We'll send your digest at 7am in your timezone. Unsubscribe anytime.
+            </div>
+          </>
+        )}
       </div>
 
       {/* Footer Buttons */}

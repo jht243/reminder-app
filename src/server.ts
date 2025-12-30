@@ -29,6 +29,7 @@ import {
   type Tool,
 } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
+import { Resend } from "resend";
 
 type ReminderWidget = {
   id: string;
@@ -333,6 +334,19 @@ const toolInputParser = z.object({
 
 // Storage for user reminders (in-memory, persists during server lifetime)
 const userRemindersStore: Map<string, { reminders: any[], stats: any, savedAt: number }> = new Map();
+
+// Storage for daily digest email subscribers
+type DigestSubscriber = {
+  email: string;
+  odaiSubject: string; // OpenAI user subject ID for linking reminders
+  subscribedAt: number;
+  timezone?: string;
+  sendTime?: string; // HH:MM format, default "07:00"
+};
+const digestSubscribersStore: Map<string, DigestSubscriber> = new Map(); // keyed by email
+
+// Initialize Resend client
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 // Save reminders tool schema
 const saveRemindersSchema = {
@@ -790,6 +804,9 @@ const sessions = new Map<string, SessionRecord>();
 const ssePath = "/mcp";
 const postPath = "/mcp/messages";
 const subscribePath = "/api/subscribe";
+const digestSubscribePath = "/api/daily-digest/subscribe";
+const digestUnsubscribePath = "/api/daily-digest/unsubscribe";
+const digestSendPath = "/api/daily-digest/send";
 const analyticsPath = "/analytics";
 const analyticsJsonPath = "/analytics.json";
 const analyticsCrashJsonPath = "/analytics/crash.json";
@@ -1495,6 +1512,270 @@ async function handleTrackEvent(req: IncomingMessage, res: ServerResponse) {
   }
 }
 
+// ============ Daily Digest Email Functions (Resend) ============
+
+function generateDailyDigestHtml(reminders: any[], userName?: string): string {
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  
+  // Filter reminders due today or overdue
+  const todayReminders = reminders.filter((r: any) => {
+    if (r.completed) return false;
+    if (!r.dueDate) return false;
+    return r.dueDate <= todayStr;
+  });
+  
+  const upcomingReminders = reminders.filter((r: any) => {
+    if (r.completed) return false;
+    if (!r.dueDate) return false;
+    return r.dueDate > todayStr && r.dueDate <= new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  });
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr + 'T00:00:00');
+    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  };
+
+  const priorityColors: Record<string, string> = {
+    urgent: '#dc2626',
+    high: '#ea580c',
+    medium: '#ca8a04',
+    low: '#16a34a',
+  };
+
+  const renderReminder = (r: any) => {
+    const priorityColor = priorityColors[r.priority] || '#6b7280';
+    const dueInfo = r.dueDate ? `Due: ${formatDate(r.dueDate)}${r.dueTime ? ` at ${r.dueTime}` : ''}` : '';
+    return `
+      <tr>
+        <td style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">
+          <div style="font-weight: 600; color: #1f2937; margin-bottom: 4px;">${r.title || r.text || 'Untitled'}</div>
+          <div style="font-size: 13px; color: #6b7280;">
+            ${dueInfo}
+            ${r.priority ? `<span style="display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 12px; background: ${priorityColor}20; color: ${priorityColor}; font-size: 11px; font-weight: 600;">${r.priority.toUpperCase()}</span>` : ''}
+          </div>
+        </td>
+      </tr>
+    `;
+  };
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f3f4f6;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px 12px 0 0; padding: 24px; text-align: center;">
+      <h1 style="margin: 0; color: white; font-size: 24px;">📋 Your Daily Reminders</h1>
+      <p style="margin: 8px 0 0; color: rgba(255,255,255,0.9); font-size: 14px;">${today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
+    </div>
+    
+    <div style="background: white; border-radius: 0 0 12px 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+      ${todayReminders.length > 0 ? `
+        <div style="padding: 16px 16px 8px; background: #fef3c7; border-bottom: 1px solid #fcd34d;">
+          <h2 style="margin: 0; font-size: 16px; color: #92400e;">⚡ Due Today (${todayReminders.length})</h2>
+        </div>
+        <table style="width: 100%; border-collapse: collapse;">
+          ${todayReminders.map(renderReminder).join('')}
+        </table>
+      ` : `
+        <div style="padding: 24px; text-align: center; color: #6b7280;">
+          <div style="font-size: 48px; margin-bottom: 8px;">🎉</div>
+          <p style="margin: 0;">No reminders due today!</p>
+        </div>
+      `}
+      
+      ${upcomingReminders.length > 0 ? `
+        <div style="padding: 16px 16px 8px; background: #f0fdf4; border-top: 1px solid #e5e7eb;">
+          <h2 style="margin: 0; font-size: 16px; color: #166534;">📅 Coming Up This Week (${upcomingReminders.length})</h2>
+        </div>
+        <table style="width: 100%; border-collapse: collapse;">
+          ${upcomingReminders.slice(0, 5).map(renderReminder).join('')}
+          ${upcomingReminders.length > 5 ? `<tr><td style="padding: 12px 16px; text-align: center; color: #6b7280; font-size: 13px;">+ ${upcomingReminders.length - 5} more</td></tr>` : ''}
+        </table>
+      ` : ''}
+      
+      <div style="padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+        <p style="margin: 0 0 12px; color: #6b7280; font-size: 13px;">Open ChatGPT and say "show me my reminders" to manage your tasks</p>
+        <p style="margin: 0; color: #9ca3af; font-size: 11px;">
+          You're receiving this because you subscribed to daily reminders.<br>
+          <a href="#unsubscribe" style="color: #6b7280;">Unsubscribe</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  `.trim();
+}
+
+async function handleDigestSubscribe(req: IncomingMessage, res: ServerResponse) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Headers", "content-type");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Content-Type", "application/json");
+
+  if (req.method === "OPTIONS") {
+    res.writeHead(204).end();
+    return;
+  }
+
+  if (req.method !== "POST") {
+    res.writeHead(405).end(JSON.stringify({ error: "Method not allowed" }));
+    return;
+  }
+
+  try {
+    let body = "";
+    for await (const chunk of req) {
+      body += chunk;
+    }
+
+    const parsed = JSON.parse(body);
+    const { email, odaiSubject, timezone, sendTime } = parsed;
+
+    if (!email || !email.includes("@")) {
+      res.writeHead(400).end(JSON.stringify({ error: "Invalid email address" }));
+      return;
+    }
+
+    if (!resend) {
+      res.writeHead(500).end(JSON.stringify({ error: "Email service not configured (RESEND_API_KEY missing)" }));
+      return;
+    }
+
+    // Store subscriber
+    digestSubscribersStore.set(email.toLowerCase(), {
+      email: email.toLowerCase(),
+      odaiSubject: odaiSubject || "unknown",
+      subscribedAt: Date.now(),
+      timezone: timezone || "America/New_York",
+      sendTime: sendTime || "07:00",
+    });
+
+    console.log("[DailyDigest] New subscriber:", email, { odaiSubject, timezone, sendTime });
+    logAnalytics("daily_digest_subscribe", { email, timezone, sendTime });
+
+    res.writeHead(200).end(JSON.stringify({
+      success: true,
+      message: "You're subscribed! You'll receive your daily reminder digest each morning.",
+    }));
+  } catch (error: any) {
+    console.error("[DailyDigest] Subscribe error:", error);
+    res.writeHead(500).end(JSON.stringify({ error: error.message || "Failed to subscribe" }));
+  }
+}
+
+async function handleDigestUnsubscribe(req: IncomingMessage, res: ServerResponse) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Headers", "content-type");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Content-Type", "application/json");
+
+  if (req.method === "OPTIONS") {
+    res.writeHead(204).end();
+    return;
+  }
+
+  if (req.method !== "POST") {
+    res.writeHead(405).end(JSON.stringify({ error: "Method not allowed" }));
+    return;
+  }
+
+  try {
+    let body = "";
+    for await (const chunk of req) {
+      body += chunk;
+    }
+
+    const { email } = JSON.parse(body);
+
+    if (!email) {
+      res.writeHead(400).end(JSON.stringify({ error: "Email required" }));
+      return;
+    }
+
+    const existed = digestSubscribersStore.delete(email.toLowerCase());
+    console.log("[DailyDigest] Unsubscribe:", email, { existed });
+    logAnalytics("daily_digest_unsubscribe", { email, existed });
+
+    res.writeHead(200).end(JSON.stringify({
+      success: true,
+      message: existed ? "You've been unsubscribed from daily digests." : "Email not found in subscriber list.",
+    }));
+  } catch (error: any) {
+    console.error("[DailyDigest] Unsubscribe error:", error);
+    res.writeHead(500).end(JSON.stringify({ error: error.message || "Failed to unsubscribe" }));
+  }
+}
+
+async function handleDigestSend(req: IncomingMessage, res: ServerResponse, url: URL) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Content-Type", "application/json");
+
+  // Protect with a secret key for cron jobs
+  const cronSecret = process.env.CRON_SECRET || "cron-secret-changeme";
+  const providedSecret = url.searchParams.get("secret") || req.headers["x-cron-secret"];
+
+  if (providedSecret !== cronSecret) {
+    res.writeHead(401).end(JSON.stringify({ error: "Unauthorized" }));
+    return;
+  }
+
+  if (!resend) {
+    res.writeHead(500).end(JSON.stringify({ error: "Email service not configured" }));
+    return;
+  }
+
+  const results: { email: string; success: boolean; error?: string }[] = [];
+  const fromEmail = process.env.RESEND_FROM_EMAIL || "reminders@resend.dev";
+
+  for (const [email, subscriber] of digestSubscribersStore) {
+    try {
+      // Get reminders for this user
+      const userData = userRemindersStore.get(subscriber.odaiSubject);
+      const reminders = userData?.reminders || [];
+
+      if (reminders.length === 0) {
+        console.log("[DailyDigest] Skipping", email, "- no reminders");
+        results.push({ email, success: true, error: "No reminders to send" });
+        continue;
+      }
+
+      const html = generateDailyDigestHtml(reminders);
+
+      const { data, error } = await resend.emails.send({
+        from: fromEmail,
+        to: email,
+        subject: `📋 Your Daily Reminders - ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`,
+        html,
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      console.log("[DailyDigest] Sent to", email, "id:", data?.id);
+      logAnalytics("daily_digest_sent", { email, reminderCount: reminders.length });
+      results.push({ email, success: true });
+    } catch (error: any) {
+      console.error("[DailyDigest] Failed to send to", email, error);
+      logAnalytics("daily_digest_send_error", { email, error: error.message });
+      results.push({ email, success: false, error: error.message });
+    }
+  }
+
+  res.writeHead(200).end(JSON.stringify({
+    success: true,
+    sent: results.filter(r => r.success).length,
+    failed: results.filter(r => !r.success).length,
+    results,
+  }));
+}
+
 // Buttondown API integration
 async function subscribeToButtondown(email: string, topicId: string, topicName: string) {
   const BUTTONDOWN_API_KEY = process.env.BUTTONDOWN_API_KEY;
@@ -1834,6 +2115,21 @@ const httpServer = createServer(
 
     if (url.pathname === subscribePath) {
       await handleSubscribe(req, res);
+      return;
+    }
+
+    if (url.pathname === digestSubscribePath) {
+      await handleDigestSubscribe(req, res);
+      return;
+    }
+
+    if (url.pathname === digestUnsubscribePath) {
+      await handleDigestUnsubscribe(req, res);
+      return;
+    }
+
+    if (url.pathname === digestSendPath) {
+      await handleDigestSend(req, res, url);
       return;
     }
 
