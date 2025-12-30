@@ -932,12 +932,19 @@ const loadInitialState = (initialData: any): { reminders: Reminder[], stats: Use
   };
   
   // Priority 1: initialData from server (hydration)
+  // IMPORTANT: Do not let empty server hydration wipe local state. Only treat server reminders
+  // as authoritative if the server explicitly has saved data or if reminders are non-empty.
   if (initialData?.reminders && Array.isArray(initialData.reminders)) {
-    console.log("[Load] Using initialData from server:", initialData.reminders.length, "reminders");
-    return {
-      reminders: initialData.reminders,
-      stats: initialData.stats || defaultStats
-    };
+    const hasSavedData = initialData?.has_saved_data === true;
+    const len = initialData.reminders.length;
+    if (hasSavedData || len > 0) {
+      console.log("[Load] Using initialData from server:", len, "reminders", { hasSavedData });
+      return {
+        reminders: initialData.reminders,
+        stats: initialData.stats || defaultStats
+      };
+    }
+    console.log("[Load] Ignoring empty initialData from server (avoiding wipe)");
   }
   
   // Priority 2: Check window.openai widget state

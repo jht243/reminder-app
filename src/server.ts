@@ -668,6 +668,7 @@ function createReminderAppServer(): Server {
         // Try to load saved reminders for this session
         const sessionId = (request as any)._meta?.sessionId || "default";
         const savedData = userRemindersStore.get(sessionId);
+        const hasSavedData = !!(savedData && Array.isArray(savedData.reminders) && savedData.reminders.length > 0);
         
         // Build structured content once so we can log it and return it.
         // For the reminder app, expose fields relevant to reminder details
@@ -676,9 +677,14 @@ function createReminderAppServer(): Server {
           timestamp: new Date().toISOString(),
           ...args,
           input_source: usedDefaults ? "default" : "user",
-          // Include saved reminders for hydration
-          reminders: savedData?.reminders || [],
-          stats: savedData?.stats || null,
+          has_saved_data: hasSavedData,
+          // Only include reminders/stats if we actually have them.
+          ...(hasSavedData
+            ? {
+                reminders: savedData?.reminders || [],
+                stats: savedData?.stats || null,
+              }
+            : {}),
           // Summary + follow-ups for natural language UX
           summary: computeSummary(args),
           suggested_followups: [

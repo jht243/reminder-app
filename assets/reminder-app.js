@@ -26842,11 +26842,16 @@ var loadInitialState = (initialData2) => {
     completedTasks: []
   };
   if (initialData2?.reminders && Array.isArray(initialData2.reminders)) {
-    console.log("[Load] Using initialData from server:", initialData2.reminders.length, "reminders");
-    return {
-      reminders: initialData2.reminders,
-      stats: initialData2.stats || defaultStats
-    };
+    const hasSavedData = initialData2?.has_saved_data === true;
+    const len = initialData2.reminders.length;
+    if (hasSavedData || len > 0) {
+      console.log("[Load] Using initialData from server:", len, "reminders", { hasSavedData });
+      return {
+        reminders: initialData2.reminders,
+        stats: initialData2.stats || defaultStats
+      };
+    }
+    console.log("[Load] Ignoring empty initialData from server (avoiding wipe)");
   }
   try {
     const widgetState = window.openai?.widgetState;
