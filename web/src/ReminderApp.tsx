@@ -1225,13 +1225,22 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const inferActionFromNaturalInput = (text: string): { action?: "create" | "complete" | "uncomplete"; query?: string; prefill?: string } => {
     const t = text.trim();
     const lower = t.toLowerCase();
-    const completeMatch = lower.match(/^\s*(mark|set)\s+(it\s+)?(as\s+)?(complete|completed|done)\s+(that\s+)?(i\s+)?(.+)$/i);
-    if (completeMatch && completeMatch[6]) {
-      return { action: "complete", query: completeMatch[6].trim(), prefill: t };
+
+    // Check for explicit "complete" intent
+    // Matches: "completed feeding my cat", "finished feeding my cat", "done feeding my cat"
+    // Also: "mark feeding my cat as done", "check off feeding my cat"
+    const completeMatch = lower.match(/^\s*(?:i\s+)?(?:have\s+)?(?:completed|finished|done|checked\s+off)\s+(.+)$/i) ||
+                          lower.match(/^\s*(?:mark|set)\s+(?:task\s+)?(.+?)\s+(?:as\s+)?(?:complete|completed|done|finished)$/i) ||
+                          lower.match(/^\s*(?:remove|delete)\s+(.+?)\s+(?:from\s+reminders|from\s+list)?$/i);
+    
+    if (completeMatch && completeMatch[1]) {
+      // Treat "remove/delete" as complete to avoid destructive actions without confirmation
+      return { action: "complete", query: completeMatch[1].trim(), prefill: t };
     }
+
     const uncompleteMatch = lower.match(/^\s*(undo|uncomplete|mark)\s+(it\s+)?(as\s+)?(not\s+complete|incomplete|not\s+done)\s+(that\s+)?(i\s+)?(.+)$/i);
-    if (uncompleteMatch && uncompleteMatch[6]) {
-      return { action: "uncomplete", query: uncompleteMatch[6].trim(), prefill: t };
+    if (uncompleteMatch && uncompleteMatch[7]) {
+      return { action: "uncomplete", query: uncompleteMatch[7].trim(), prefill: t };
     }
     return { action: "create", prefill: t };
   };
@@ -1306,6 +1315,32 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     if (!hasAny) return;
 
     hydrationAppliedRef.current.add(signature);
+
+    // Execute hydration action
+    if (effectiveAction === "complete" && effectiveQuery) {
+      const target = bestMatchReminder(effectiveQuery, false);
+      if (target) {
+        complete(target);
+        setToast(`Marked "${target.title}" as complete`);
+        trackEvent("hydration_complete", { query: effectiveQuery, found: true });
+        // Clear input since we handled the action
+        setInput("");
+        return; // Done
+      } else {
+        // Fallback: If we can't find the item to complete, just prefill the input
+        // so the user can see what was intended or create a new one
+        trackEvent("hydration_complete", { query: effectiveQuery, found: false });
+      }
+    } else if (effectiveAction === "uncomplete" && effectiveQuery) {
+      const target = bestMatchReminder(effectiveQuery, true);
+      if (target) {
+        uncomplete(target);
+        setToast(`Marked "${target.title}" as incomplete`);
+        trackEvent("hydration_uncomplete", { query: effectiveQuery, found: true });
+        setInput("");
+        return;
+      }
+    }
 
     if (prefill) {
       setInput(prefill);
