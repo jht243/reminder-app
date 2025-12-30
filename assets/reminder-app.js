@@ -26914,6 +26914,13 @@ function ReminderApp({ initialData: initialData2 }) {
   const [sortAsc, setSortAsc] = (0, import_react3.useState)(true);
   const [quickFilter, setQuickFilter] = (0, import_react3.useState)("all");
   const [collapsedSections, setCollapsedSections] = (0, import_react3.useState)(/* @__PURE__ */ new Set());
+  const resetCategoryFilteringToShowNewItems = () => {
+    setFilterCategory("all");
+    setQuickFilter((prev) => {
+      const isCategory = Object.prototype.hasOwnProperty.call(CATEGORY_CONFIG, prev);
+      return isCategory ? "all" : prev;
+    });
+  };
   const [viewedTasks, setViewedTasks] = (0, import_react3.useState)({});
   const [recentlyCompletedIds, setRecentlyCompletedIds] = (0, import_react3.useState)({});
   const isVisibleCompleted = (r) => {
@@ -26969,6 +26976,7 @@ function ReminderApp({ initialData: initialData2 }) {
         pointsAwarded: 0
       }));
       setReminders((prev) => [...prev, ...newReminders]);
+      resetCategoryFilteringToShowNewItems();
       setImportOpen(false);
       setToast(`Imported ${newReminders.length} reminders!`);
     };
@@ -27282,6 +27290,7 @@ function ReminderApp({ initialData: initialData2 }) {
         };
       });
       setReminders((prev) => [...prev, ...newReminders]);
+      resetCategoryFilteringToShowNewItems();
       setInput("");
       setParsed(null);
       setToast(`Created ${newReminders.length} reminders!`);
@@ -27306,6 +27315,7 @@ function ReminderApp({ initialData: initialData2 }) {
         pointsAwarded: 0
       };
       setReminders((prev) => [...prev, newReminder]);
+      resetCategoryFilteringToShowNewItems();
       setInput("");
       setParsed(null);
       const recurrenceText = formatRecurrence(parsed);
@@ -27538,6 +27548,7 @@ function ReminderApp({ initialData: initialData2 }) {
       };
     });
     setReminders((prev) => [...prev, ...newReminders]);
+    resetCategoryFilteringToShowNewItems();
     setToast(`Generated ${newReminders.length} sample reminders!`);
   };
   const handleScreenshotUpload = async (e) => {
@@ -27594,11 +27605,11 @@ function ReminderApp({ initialData: initialData2 }) {
         }
         if (newReminders.length > 0) {
           setReminders((prev) => [...prev, ...newReminders]);
+          resetCategoryFilteringToShowNewItems();
           setScreenshotModal({ open: false, imageData: null, analyzing: false, progress: 0 });
           setToast(`\u2705 Added ${newReminders.length} tasks from screenshot!`);
         } else {
-          setScreenshotModal((prev) => ({ ...prev, analyzing: false }));
-          setToast("No tasks found in screenshot. Try a clearer image.");
+          setToast("No tasks found in screenshot.");
         }
       } catch (error) {
         setScreenshotModal((prev) => ({ ...prev, analyzing: false }));

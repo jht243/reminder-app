@@ -1031,6 +1031,14 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   // Modern quick filter - single active chip
   const [quickFilter, setQuickFilter] = useState<"all" | "urgent" | "today" | "overdue" | "completed" | Category>("all");
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+
+  const resetCategoryFilteringToShowNewItems = () => {
+    setFilterCategory("all");
+    setQuickFilter((prev) => {
+      const isCategory = Object.prototype.hasOwnProperty.call(CATEGORY_CONFIG, prev);
+      return isCategory ? "all" : prev;
+    });
+  };
   
   // Track when tasks were first viewed (for glow effect)
   const [viewedTasks, setViewedTasks] = useState<Record<string, number>>({});
@@ -1116,6 +1124,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       }));
       
       setReminders(prev => [...prev, ...newReminders]);
+      resetCategoryFilteringToShowNewItems();
       setImportOpen(false);
       setToast(`Imported ${newReminders.length} reminders!`);
       
@@ -1520,6 +1529,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
         };
       });
       setReminders(prev => [...prev, ...newReminders]);
+      resetCategoryFilteringToShowNewItems();
       setInput("");
       setParsed(null);
       setToast(`Created ${newReminders.length} reminders!`);
@@ -1542,6 +1552,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
         pointsAwarded: 0
       };
       setReminders(prev => [...prev, newReminder]);
+      resetCategoryFilteringToShowNewItems();
       setInput("");
       setParsed(null);
       
@@ -1796,6 +1807,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     });
 
     setReminders(prev => [...prev, ...newReminders]);
+    resetCategoryFilteringToShowNewItems();
     setToast(`Generated ${newReminders.length} sample reminders!`);
   };
 
@@ -1868,11 +1880,11 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
         
         if (newReminders.length > 0) {
           setReminders(prev => [...prev, ...newReminders]);
+          resetCategoryFilteringToShowNewItems();
           setScreenshotModal({ open: false, imageData: null, analyzing: false, progress: 0 });
           setToast(`✅ Added ${newReminders.length} tasks from screenshot!`);
         } else {
-          setScreenshotModal(prev => ({ ...prev, analyzing: false }));
-          setToast("No tasks found in screenshot. Try a clearer image.");
+          setToast("No tasks found in screenshot.");
         }
       } catch (error) {
         setScreenshotModal(prev => ({ ...prev, analyzing: false }));
