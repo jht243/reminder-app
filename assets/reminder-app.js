@@ -27096,9 +27096,13 @@ function ReminderApp({ initialData: initialData2 }) {
     const prefill = buildPrefillText(initialData2);
     const actionRaw = typeof initialData2.action === "string" ? initialData2.action : "";
     const completeQueryRaw = typeof initialData2.complete_query === "string" ? initialData2.complete_query : "";
+    const deleteQueryRaw = typeof initialData2.delete_query === "string" ? initialData2.delete_query : "";
     const infer = prefill ? inferActionFromNaturalInput(prefill) : {};
-    const effectiveAction = actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "create" || actionRaw === "open" || actionRaw === "delete" ? actionRaw : infer.action;
-    const effectiveQuery = completeQueryRaw || infer.query || "";
+    const inferAction = infer.action;
+    const rawIsStrong = actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "create" || actionRaw === "delete";
+    const rawIsOpen = actionRaw === "open";
+    const effectiveAction = rawIsStrong ? actionRaw : rawIsOpen ? inferAction === "complete" || inferAction === "uncomplete" || inferAction === "delete" ? inferAction : "open" : inferAction;
+    const effectiveQuery = effectiveAction === "delete" ? deleteQueryRaw || infer.query || prefill || "" : completeQueryRaw || infer.query || "";
     const signature = JSON.stringify({ prefill, action: effectiveAction || "", query: effectiveQuery });
     if (hydrationAppliedRef.current.has(signature)) return;
     const hasAny = Boolean(prefill) || Boolean(effectiveAction) || Boolean(effectiveQuery);

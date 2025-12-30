@@ -1289,12 +1289,25 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     const prefill = buildPrefillText(initialData);
     const actionRaw = typeof initialData.action === "string" ? initialData.action : "";
     const completeQueryRaw = typeof initialData.complete_query === "string" ? initialData.complete_query : "";
+    const deleteQueryRaw = typeof (initialData as any).delete_query === "string" ? (initialData as any).delete_query : "";
     const infer = prefill ? inferActionFromNaturalInput(prefill) : {};
-    const effectiveAction =
-      actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "create" || actionRaw === "open" || actionRaw === "delete"
-        ? actionRaw
-        : infer.action;
-    const effectiveQuery = completeQueryRaw || infer.query || "";
+
+    const inferAction = infer.action;
+    const rawIsStrong = actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "create" || actionRaw === "delete";
+    const rawIsOpen = actionRaw === "open";
+
+    // Treat action=open as a weak/default hint. If the natural input clearly implies
+    // a stronger intent (delete/complete/uncomplete), prefer that.
+    const effectiveAction = rawIsStrong
+      ? actionRaw
+      : rawIsOpen
+        ? (inferAction === "complete" || inferAction === "uncomplete" || inferAction === "delete" ? inferAction : "open")
+        : inferAction;
+
+    const effectiveQuery =
+      effectiveAction === "delete"
+        ? (deleteQueryRaw || infer.query || prefill || "")
+        : (completeQueryRaw || infer.query || "");
 
     const signature = JSON.stringify({ prefill, action: effectiveAction || "", query: effectiveQuery });
     if (hydrationAppliedRef.current.has(signature)) return;
