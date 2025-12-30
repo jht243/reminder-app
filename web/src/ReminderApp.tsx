@@ -948,6 +948,14 @@ const persistState = (reminders: Reminder[], stats: UserStats) => {
 
 // Helper to load initial state
 const loadInitialState = (initialData: any): { reminders: Reminder[], stats: UserStats } => {
+  const coerceReminders = (value: any): Reminder[] => {
+    if (Array.isArray(value)) return value as Reminder[];
+    if (value && typeof value === "object" && Array.isArray((value as any).reminders)) {
+      return (value as any).reminders as Reminder[];
+    }
+    return [];
+  };
+
   const defaultStats: UserStats = {
     totalPoints: 0, currentStreak: 0, longestStreak: 0, lastActiveDate: null,
     completedAllTime: 0, level: 1, achievements: [...DEFAULT_ACHIEVEMENTS],
@@ -959,12 +967,13 @@ const loadInitialState = (initialData: any): { reminders: Reminder[], stats: Use
   // as authoritative if the server explicitly has saved data or if reminders are non-empty.
   if (initialData?.reminders && Array.isArray(initialData.reminders)) {
     const hasSavedData = initialData?.has_saved_data === true;
-    const len = initialData.reminders.length;
+    const remindersFromServer = coerceReminders(initialData.reminders);
+    const len = remindersFromServer.length;
     if (hasSavedData || len > 0) {
       console.log("[Load] Using initialData from server:", len, "reminders", { hasSavedData });
       return {
-        reminders: initialData.reminders,
-        stats: initialData.stats || defaultStats
+        reminders: remindersFromServer,
+        stats: (initialData.stats && typeof initialData.stats === "object") ? initialData.stats : defaultStats
       };
     }
     console.log("[Load] Ignoring empty initialData from server (avoiding wipe)");
@@ -973,11 +982,12 @@ const loadInitialState = (initialData: any): { reminders: Reminder[], stats: Use
   // Priority 2: Check window.openai widget state
   try {
     const widgetState = (window as any).openai?.widgetState;
-    if (widgetState?.reminders && Array.isArray(widgetState.reminders)) {
-      console.log("[Load] Using widget state:", widgetState.reminders.length, "reminders");
+    const remindersFromWidget = coerceReminders(widgetState?.reminders ?? widgetState);
+    if (remindersFromWidget.length > 0) {
+      console.log("[Load] Using widget state:", remindersFromWidget.length, "reminders");
       return {
-        reminders: widgetState.reminders,
-        stats: widgetState.stats || defaultStats
+        reminders: remindersFromWidget,
+        stats: (widgetState?.stats && typeof widgetState.stats === "object") ? widgetState.stats : defaultStats
       };
     }
   } catch (e) {}
@@ -987,11 +997,13 @@ const loadInitialState = (initialData: any): { reminders: Reminder[], stats: Use
     const savedReminders = localStorage.getItem(STORAGE_KEY);
     const savedStats = localStorage.getItem(STATS_KEY);
     if (savedReminders) {
-      const reminders = JSON.parse(savedReminders);
+      const parsed = JSON.parse(savedReminders);
+      const reminders = coerceReminders(parsed);
+      const statsFromParsed = (parsed && typeof parsed === "object") ? (parsed as any).stats : null;
       console.log("[Load] Using localStorage:", reminders.length, "reminders");
       return {
         reminders,
-        stats: savedStats ? JSON.parse(savedStats) : defaultStats
+        stats: (savedStats ? JSON.parse(savedStats) : (statsFromParsed && typeof statsFromParsed === "object" ? statsFromParsed : defaultStats))
       };
     }
   } catch (e) {}
@@ -1004,7 +1016,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   // Load initial state from best available source
   const initial = useMemo(() => loadInitialState(initialData), []);
   
-  const [reminders, setReminders] = useState<Reminder[]>(initial.reminders);
+  const [reminders, setReminders] = useState<Reminder[]>(Array.isArray(initial.reminders) ? initial.reminders : []);
   const [stats, setStats] = useState<UserStats>(initial.stats);
   
   // AI-first: single input field
