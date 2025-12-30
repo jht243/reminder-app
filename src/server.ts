@@ -196,7 +196,7 @@ function widgetMeta(widget: ReminderWidget, bustCache: boolean = false) {
   return {
     "openai/outputTemplate": templateUri,
     "openai/widgetDescription":
-      "Create Reminders App - An AI-powered reminder app with natural language input. Call this tool immediately with NO arguments to open the widget. If the user is asking to view/list their reminders (in any wording), open the widget immediately. This tool manages reminders inside the widget (not the device/system Reminders app). If the user provides details (e.g. 'Call mom tomorrow at 5pm'), they'll be parsed automatically. You can also manage reminders inside this widget (complete, uncomplete, delete/remove) using phrases like 'delete feed cat' or 'I completed feed cat'. Features gamification with points, streaks, and achievements. Supports recurring reminders, categories, and priority levels.",
+      "Create Reminders App - An AI-powered reminder app with natural language input. Call this tool immediately with NO arguments to open the widget. If the user is asking to view/list their reminders (in any wording), open the widget immediately. This tool manages reminders inside the widget (not the device/system Reminders app). If the user provides details (e.g. 'Call mom tomorrow at 5pm'), they'll be parsed automatically. The widget handles all reminder management internally. Features gamification with points, streaks, and achievements. Supports recurring reminders, categories, and priority levels.",
     "openai/componentDescriptions": {
       "task-input": "Natural language input for creating reminders - just type what you need to remember.",
       "reminder-list": "Organized display of reminders with category filters, search, and sorting.",
@@ -224,9 +224,7 @@ function widgetMeta(widget: ReminderWidget, bustCache: boolean = false) {
       { "user": "Remind me to call mom tomorrow at 3pm", "assistant": "Opening Create Reminders App. I've added 'Call mom' for tomorrow at 3pm." },
       { "user": "I need to buy groceries, pay rent on Friday, and schedule a dentist appointment", "assistant": "Opening Create Reminders App. I've added 3 reminders for you." },
       { "user": "Set a daily reminder to take vitamins at 9am", "assistant": "Done! I've created a daily recurring reminder for vitamins at 9am." },
-      { "user": "Delete the reminder feed cat", "assistant": "Opening Create Reminders App. I'll remove 'feed cat' from your reminders." },
-      { "user": "Remove feed cat", "assistant": "Opening Create Reminders App. I'll remove 'feed cat' from your reminders." },
-      { "user": "I completed feed cat, remove it", "assistant": "Opening Create Reminders App. I'll mark 'feed cat' complete and remove it." },
+      { "user": "I finished the grocery shopping", "assistant": "Opening Create Reminders App. I'll mark that complete." },
       { "user": "What tasks do I have this week?", "assistant": "Here are your reminders for this week in Create Reminders App." },
     ],
     "openai/starterPrompts": [
@@ -235,9 +233,7 @@ function widgetMeta(widget: ReminderWidget, bustCache: boolean = false) {
       "Remind me to call mom tomorrow at 5pm",
       "Add: Buy groceries, Pay bills Friday, Call dentist",
       "Set a daily reminder to take vitamins",
-      "Delete the reminder feed cat",
-      "Remove feed cat",
-      "I completed feed cat",
+      "I finished my task",
       "What tasks do I have today?",
       "Help me stay organized with reminders",
       "Create a reminder for my meeting next Monday",
@@ -305,16 +301,12 @@ const toolInputSchema = {
     natural_input: { type: "string", description: "Natural language input like 'remind me to call mom tomorrow at 3pm'." },
     action: {
       type: "string",
-      enum: ["open", "create", "complete", "uncomplete", "delete"],
-      description: "Optional intent for the widget to apply on open. 'open'/'create' prefill input, 'complete' marks a reminder complete, 'uncomplete' reverses completion, 'delete' removes a matching reminder.",
+      enum: ["open", "create", "complete", "uncomplete"],
+      description: "Optional intent for the widget to apply on open. 'open'/'create' prefill input, 'complete' marks a reminder complete, 'uncomplete' reverses completion.",
     },
     complete_query: {
       type: "string",
       description: "If action is 'complete' or 'uncomplete', this is the reminder title/query to match (e.g. 'mailed the check to my landlord').",
-    },
-    delete_query: {
-      type: "string",
-      description: "If action is 'delete', this is the reminder title/query to match.",
     },
   },
   required: [],
@@ -335,9 +327,8 @@ const toolInputParser = z.object({
   notification_email: z.string().optional(),
   notification_phone: z.string().optional(),
   natural_input: z.string().optional(),
-  action: z.enum(["open", "create", "complete", "uncomplete", "delete"]).optional(),
+  action: z.enum(["open", "create", "complete", "uncomplete"]).optional(),
   complete_query: z.string().optional(),
-  delete_query: z.string().optional(),
 });
 
 // Storage for user reminders (in-memory, persists during server lifetime)
@@ -391,7 +382,7 @@ const tools: Tool[] = [
   ...widgets.map((widget) => ({
   name: widget.id,
   description:
-    "Use this tool for Create Reminders App (the widget), not the device/system Reminders app. Call this tool immediately with NO arguments to open the widget for any request to view/list reminders (in any wording). If the user provides reminder details (e.g. 'Call mom tomorrow at 3pm'), pass them to pre-fill. If the user wants to manage existing reminders inside the widget, use action=complete/uncomplete/delete (e.g. 'delete feed cat', 'remove feed cat', 'I completed feed cat').",
+    "Use this tool for Create Reminders App (the widget), not the device/system Reminders app. Call this tool immediately with NO arguments to open the widget for any request to view/list reminders (in any wording). If the user provides reminder details (e.g. 'Call mom tomorrow at 3pm'), pass them to pre-fill. The widget handles all reminder management (including removing reminders) internally.",
   inputSchema: toolInputSchema,
   outputSchema: {
     type: "object",
@@ -407,7 +398,6 @@ const tools: Tool[] = [
       natural_input: { type: "string" },
       action: { type: "string" },
       complete_query: { type: "string" },
-      delete_query: { type: "string" },
       input_source: { type: "string", enum: ["user", "default"] },
       summary: {
         type: "object",
