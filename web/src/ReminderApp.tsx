@@ -981,6 +981,9 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const [input, setInput] = useState("");
   const [parsed, setParsed] = useState<ParsedReminder | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const hydrationAppliedRef = useRef<Set<string>>(new Set());
+  const pendingCompletionRef = useRef<{ action: "complete" | "uncomplete"; query: string } | null>(null);
   
   // Edit mode (only after creation)
   const [editing, setEditing] = useState<Reminder | null>(null);
@@ -1113,6 +1116,117 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       hasStats: !!stats.totalPoints,
     });
   }, []); // Only on mount
+
+  const normalizeQuery = (q: string) =>
+    q
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  const bestMatchReminder = (
+    query: string,
+    desiredCompleted: boolean
+  ): Reminder | null => {
+    const nq = normalizeQuery(query);
+    if (!nq) return null;
+    const candidates = reminders.filter((r) => r.completed === desiredCompleted);
+    let best: { r: Reminder; score: number } | null = null;
+    for (const r of candidates) {
+      const nr = normalizeQuery(r.title);
+      if (!nr) continue;
+      if (nr === nq) return r;
+      if (nr.includes(nq) || nq.includes(nr)) {
+        const score = Math.min(nr.length, nq.length) / Math.max(nr.length, nq.length);
+        if (!best || score > best.score) best = { r, score };
+      }
+    }
+    return best ? best.r : null;
+  };
+
+  const inferActionFromNaturalInput = (text: string): { action?: "create" | "complete" | "uncomplete"; query?: string; prefill?: string } => {
+    const t = text.trim();
+    const lower = t.toLowerCase();
+    const completeMatch = lower.match(/^\s*(mark|set)\s+(it\s+)?(as\s+)?(complete|completed|done)\s+(that\s+)?(i\s+)?(.+)$/i);
+    if (completeMatch && completeMatch[6]) {
+      return { action: "complete", query: completeMatch[6].trim(), prefill: t };
+    }
+    const uncompleteMatch = lower.match(/^\s*(undo|uncomplete|mark)\s+(it\s+)?(as\s+)?(not\s+complete|incomplete|not\s+done)\s+(that\s+)?(i\s+)?(.+)$/i);
+    if (uncompleteMatch && uncompleteMatch[6]) {
+      return { action: "uncomplete", query: uncompleteMatch[6].trim(), prefill: t };
+    }
+    return { action: "create", prefill: t };
+  };
+
+  const buildPrefillText = (data: any): string => {
+    const natural = typeof data?.natural_input === "string" ? data.natural_input.trim() : "";
+    if (natural) return natural;
+    const title = typeof data?.title === "string" ? data.title.trim() : "";
+    if (!title) return "";
+
+    const dueDate = typeof data?.due_date === "string" ? data.due_date.trim() : "";
+    const dueTime = typeof data?.due_time === "string" ? data.due_time.trim() : "";
+    const recurrence = typeof data?.recurrence === "string" ? data.recurrence.trim() : "";
+
+    const parts: string[] = [];
+    parts.push(`remind me to ${title}`);
+    if (recurrence && recurrence !== "none") {
+      parts.push(recurrence);
+    }
+    if (dueDate) {
+      parts.push(`on ${dueDate}`);
+    }
+    if (dueTime) {
+      parts.push(`at ${dueTime}`);
+    }
+    return parts.join(" ");
+  };
+
+  useEffect(() => {
+    if (!initialData || typeof initialData !== "object") return;
+
+    const prefill = buildPrefillText(initialData);
+    const actionRaw = typeof initialData.action === "string" ? initialData.action : "";
+    const completeQueryRaw = typeof initialData.complete_query === "string" ? initialData.complete_query : "";
+    const infer = prefill ? inferActionFromNaturalInput(prefill) : {};
+    const effectiveAction =
+      actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "create" || actionRaw === "open"
+        ? actionRaw
+        : infer.action;
+    const effectiveQuery = completeQueryRaw || infer.query || "";
+
+    const signature = JSON.stringify({ prefill, action: effectiveAction || "", query: effectiveQuery });
+    if (hydrationAppliedRef.current.has(signature)) return;
+
+    const hasAny = Boolean(prefill) || Boolean(effectiveAction) || Boolean(effectiveQuery);
+    if (!hasAny) return;
+
+    hydrationAppliedRef.current.add(signature);
+
+    if (prefill) {
+      setInput(prefill);
+      try {
+        inputRef.current?.focus();
+        inputRef.current?.setSelectionRange(prefill.length, prefill.length);
+      } catch {
+        // ignore
+      }
+      trackEvent("hydration_prefill", {
+        hasNaturalInput: !!initialData?.natural_input,
+        action: effectiveAction || "",
+      });
+    }
+
+    if (effectiveAction === "complete" || effectiveAction === "uncomplete") {
+      const query = effectiveQuery || prefill;
+      if (typeof query === "string" && query.trim()) {
+        pendingCompletionRef.current = {
+          action: effectiveAction,
+          query: query.trim(),
+        };
+      }
+    }
+  }, [initialData]);
   
   // Persist whenever reminders or stats change
   useEffect(() => {
@@ -1467,6 +1581,31 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     setReminders(prev => prev.map(x => x.id === r.id ? { ...r, completed: false, completedAt: undefined } : x));
     setStats(s => ({ ...s, totalPoints: Math.max(0, s.totalPoints - r.pointsAwarded), completedAllTime: Math.max(0, s.completedAllTime - 1) }));
   };
+
+  useEffect(() => {
+    const pending = pendingCompletionRef.current;
+    if (!pending) return;
+
+    const match = bestMatchReminder(pending.query, pending.action === "uncomplete");
+    if (!match) {
+      trackEvent("hydration_complete_no_match", {
+        action: pending.action,
+        query: pending.query,
+        reminderCount: reminders.length,
+      });
+      pendingCompletionRef.current = null;
+      return;
+    }
+
+    if (pending.action === "complete") {
+      trackEvent("hydration_complete_apply", { query: pending.query, matchedId: match.id });
+      complete(match);
+    } else {
+      trackEvent("hydration_uncomplete_apply", { query: pending.query, matchedId: match.id });
+      uncomplete(match);
+    }
+    pendingCompletionRef.current = null;
+  }, [reminders]);
   
   // Snooze popup state - stores the reminder being snoozed
   const [snoozePopup, setSnoozePopup] = useState<Reminder | null>(null);

@@ -26882,6 +26882,8 @@ function ReminderApp({ initialData: initialData2 }) {
   const [input, setInput] = (0, import_react3.useState)("");
   const [parsed, setParsed] = (0, import_react3.useState)(null);
   const inputRef = (0, import_react3.useRef)(null);
+  const hydrationAppliedRef = (0, import_react3.useRef)(/* @__PURE__ */ new Set());
+  const pendingCompletionRef = (0, import_react3.useRef)(null);
   const [editing, setEditing] = (0, import_react3.useState)(null);
   const [search, setSearch] = (0, import_react3.useState)("");
   const [searchExpanded, setSearchExpanded] = (0, import_react3.useState)(false);
@@ -26968,6 +26970,92 @@ function ReminderApp({ initialData: initialData2 }) {
       hasStats: !!stats.totalPoints
     });
   }, []);
+  const normalizeQuery = (q) => q.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+  const bestMatchReminder = (query, desiredCompleted) => {
+    const nq = normalizeQuery(query);
+    if (!nq) return null;
+    const candidates = reminders.filter((r) => r.completed === desiredCompleted);
+    let best = null;
+    for (const r of candidates) {
+      const nr = normalizeQuery(r.title);
+      if (!nr) continue;
+      if (nr === nq) return r;
+      if (nr.includes(nq) || nq.includes(nr)) {
+        const score = Math.min(nr.length, nq.length) / Math.max(nr.length, nq.length);
+        if (!best || score > best.score) best = { r, score };
+      }
+    }
+    return best ? best.r : null;
+  };
+  const inferActionFromNaturalInput = (text) => {
+    const t = text.trim();
+    const lower = t.toLowerCase();
+    const completeMatch = lower.match(/^\s*(mark|set)\s+(it\s+)?(as\s+)?(complete|completed|done)\s+(that\s+)?(i\s+)?(.+)$/i);
+    if (completeMatch && completeMatch[6]) {
+      return { action: "complete", query: completeMatch[6].trim(), prefill: t };
+    }
+    const uncompleteMatch = lower.match(/^\s*(undo|uncomplete|mark)\s+(it\s+)?(as\s+)?(not\s+complete|incomplete|not\s+done)\s+(that\s+)?(i\s+)?(.+)$/i);
+    if (uncompleteMatch && uncompleteMatch[6]) {
+      return { action: "uncomplete", query: uncompleteMatch[6].trim(), prefill: t };
+    }
+    return { action: "create", prefill: t };
+  };
+  const buildPrefillText = (data) => {
+    const natural = typeof data?.natural_input === "string" ? data.natural_input.trim() : "";
+    if (natural) return natural;
+    const title = typeof data?.title === "string" ? data.title.trim() : "";
+    if (!title) return "";
+    const dueDate = typeof data?.due_date === "string" ? data.due_date.trim() : "";
+    const dueTime = typeof data?.due_time === "string" ? data.due_time.trim() : "";
+    const recurrence = typeof data?.recurrence === "string" ? data.recurrence.trim() : "";
+    const parts = [];
+    parts.push(`remind me to ${title}`);
+    if (recurrence && recurrence !== "none") {
+      parts.push(recurrence);
+    }
+    if (dueDate) {
+      parts.push(`on ${dueDate}`);
+    }
+    if (dueTime) {
+      parts.push(`at ${dueTime}`);
+    }
+    return parts.join(" ");
+  };
+  (0, import_react3.useEffect)(() => {
+    if (!initialData2 || typeof initialData2 !== "object") return;
+    const prefill = buildPrefillText(initialData2);
+    const actionRaw = typeof initialData2.action === "string" ? initialData2.action : "";
+    const completeQueryRaw = typeof initialData2.complete_query === "string" ? initialData2.complete_query : "";
+    const infer = prefill ? inferActionFromNaturalInput(prefill) : {};
+    const effectiveAction = actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "create" || actionRaw === "open" ? actionRaw : infer.action;
+    const effectiveQuery = completeQueryRaw || infer.query || "";
+    const signature = JSON.stringify({ prefill, action: effectiveAction || "", query: effectiveQuery });
+    if (hydrationAppliedRef.current.has(signature)) return;
+    const hasAny = Boolean(prefill) || Boolean(effectiveAction) || Boolean(effectiveQuery);
+    if (!hasAny) return;
+    hydrationAppliedRef.current.add(signature);
+    if (prefill) {
+      setInput(prefill);
+      try {
+        inputRef.current?.focus();
+        inputRef.current?.setSelectionRange(prefill.length, prefill.length);
+      } catch {
+      }
+      trackEvent("hydration_prefill", {
+        hasNaturalInput: !!initialData2?.natural_input,
+        action: effectiveAction || ""
+      });
+    }
+    if (effectiveAction === "complete" || effectiveAction === "uncomplete") {
+      const query = effectiveQuery || prefill;
+      if (typeof query === "string" && query.trim()) {
+        pendingCompletionRef.current = {
+          action: effectiveAction,
+          query: query.trim()
+        };
+      }
+    }
+  }, [initialData2]);
   (0, import_react3.useEffect)(() => {
     persistState(reminders, stats);
   }, [reminders, stats]);
@@ -27273,6 +27361,28 @@ function ReminderApp({ initialData: initialData2 }) {
     setReminders((prev) => prev.map((x) => x.id === r.id ? { ...r, completed: false, completedAt: void 0 } : x));
     setStats((s) => ({ ...s, totalPoints: Math.max(0, s.totalPoints - r.pointsAwarded), completedAllTime: Math.max(0, s.completedAllTime - 1) }));
   };
+  (0, import_react3.useEffect)(() => {
+    const pending = pendingCompletionRef.current;
+    if (!pending) return;
+    const match = bestMatchReminder(pending.query, pending.action === "uncomplete");
+    if (!match) {
+      trackEvent("hydration_complete_no_match", {
+        action: pending.action,
+        query: pending.query,
+        reminderCount: reminders.length
+      });
+      pendingCompletionRef.current = null;
+      return;
+    }
+    if (pending.action === "complete") {
+      trackEvent("hydration_complete_apply", { query: pending.query, matchedId: match.id });
+      complete(match);
+    } else {
+      trackEvent("hydration_uncomplete_apply", { query: pending.query, matchedId: match.id });
+      uncomplete(match);
+    }
+    pendingCompletionRef.current = null;
+  }, [reminders]);
   const [snoozePopup, setSnoozePopup] = (0, import_react3.useState)(null);
   const snooze = (r, mins) => {
     const now = /* @__PURE__ */ new Date();
@@ -29056,8 +29166,10 @@ if (!container) {
 var root = (0, import_client.createRoot)(container);
 var __appliedLateHydration = false;
 var __renderCount = 0;
+var __currentInitialData = null;
 var renderApp = (data) => {
   __renderCount += 1;
+  __currentInitialData = data;
   __mark("render", {
     renderCount: __renderCount,
     initialDataKeys: data && typeof data === "object" ? Object.keys(data) : []
@@ -29065,6 +29177,11 @@ var renderApp = (data) => {
   __report("widget_render", {
     renderCount: __renderCount,
     initialDataKeys: data && typeof data === "object" ? Object.keys(data) : [],
+    hydrationPrefill: {
+      hasNaturalInput: !!(data && typeof data === "object" && data.natural_input),
+      hasAction: !!(data && typeof data === "object" && data.action),
+      hasCompleteQuery: !!(data && typeof data === "object" && data.complete_query)
+    },
     lastLifecycle: __lastLifecycle
   }).catch(() => {
   });
@@ -29073,12 +29190,18 @@ var renderApp = (data) => {
   );
 };
 var initialData = getHydrationData();
+__currentInitialData = initialData;
 __log("[Hydration] initialData keys", initialData && typeof initialData === "object" ? Object.keys(initialData) : []);
 __mark("hydration_initial", {
   initialDataKeys: initialData && typeof initialData === "object" ? Object.keys(initialData) : []
 });
 __report("widget_hydration_initial", {
   initialDataKeys: initialData && typeof initialData === "object" ? Object.keys(initialData) : [],
+  hydrationPrefill: {
+    hasNaturalInput: !!(initialData && typeof initialData === "object" && initialData.natural_input),
+    hasAction: !!(initialData && typeof initialData === "object" && initialData.action),
+    hasCompleteQuery: !!(initialData && typeof initialData === "object" && initialData.complete_query)
+  },
   hasOpenAI: !!window.openai,
   openaiKeys: window.openai ? Object.keys(window.openai) : [],
   lastLifecycle: __lastLifecycle
@@ -29107,21 +29230,32 @@ window.addEventListener("openai:set_globals", (ev) => {
     ];
     for (const candidate of candidates) {
       if (candidate && typeof candidate === "object" && Object.keys(candidate).length > 0) {
-        console.log("[Hydration] Re-rendering with late data:", candidate);
         if (__appliedLateHydration) {
           __log("[Hydration] Ignoring additional late hydration (already applied once)");
           return;
         }
+        const merged = {
+          ...typeof __currentInitialData === "object" && __currentInitialData ? __currentInitialData : {},
+          ...candidate
+        };
+        console.log("[Hydration] Re-rendering with late data (merged overlay):", merged);
         __appliedLateHydration = true;
         __mark("hydration_late_apply", {
-          candidateKeys: Object.keys(candidate)
+          candidateKeys: Object.keys(candidate),
+          mergedKeys: Object.keys(merged)
         });
         __report("widget_hydration_late_apply", {
           candidateKeys: Object.keys(candidate),
+          mergedKeys: Object.keys(merged),
+          hydrationPrefill: {
+            hasNaturalInput: !!merged.natural_input,
+            hasAction: !!merged.action,
+            hasCompleteQuery: !!merged.complete_query
+          },
           lastLifecycle: __lastLifecycle
         }).catch(() => {
         });
-        renderApp(candidate);
+        renderApp(merged);
         return;
       }
     }

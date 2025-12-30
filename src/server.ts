@@ -292,6 +292,15 @@ const toolInputSchema = {
     notification_email: { type: "string", description: "Email for notifications." },
     notification_phone: { type: "string", description: "Phone for SMS notifications." },
     natural_input: { type: "string", description: "Natural language input like 'remind me to call mom tomorrow at 3pm'." },
+    action: {
+      type: "string",
+      enum: ["open", "create", "complete", "uncomplete"],
+      description: "Optional intent for the widget to apply on open. 'open'/'create' prefill input, 'complete' marks a reminder complete, 'uncomplete' reverses completion.",
+    },
+    complete_query: {
+      type: "string",
+      description: "If action is 'complete' or 'uncomplete', this is the reminder title/query to match (e.g. 'mailed the check to my landlord').",
+    },
   },
   required: [],
   additionalProperties: false,
@@ -310,6 +319,8 @@ const toolInputParser = z.object({
   notification_email: z.string().optional(),
   notification_phone: z.string().optional(),
   natural_input: z.string().optional(),
+  action: z.enum(["open", "create", "complete", "uncomplete"]).optional(),
+  complete_query: z.string().optional(),
 });
 
 // Storage for user reminders (in-memory, persists during server lifetime)
@@ -376,6 +387,9 @@ const tools: Tool[] = [
       priority: { type: "string" },
       recurrence: { type: "string" },
       notification: { type: "string" },
+      natural_input: { type: "string" },
+      action: { type: "string" },
+      complete_query: { type: "string" },
       input_source: { type: "string", enum: ["user", "default"] },
       summary: {
         type: "object",

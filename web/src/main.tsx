@@ -266,9 +266,11 @@ const root = createRoot(container);
 
 let __appliedLateHydration = false;
 let __renderCount = 0;
+let __currentInitialData: any = null;
 
 const renderApp = (data: any) => {
   __renderCount += 1;
+  __currentInitialData = data;
   __mark("render", {
     renderCount: __renderCount,
     initialDataKeys: data && typeof data === "object" ? Object.keys(data) : [],
@@ -276,6 +278,11 @@ const renderApp = (data: any) => {
   __report("widget_render", {
     renderCount: __renderCount,
     initialDataKeys: data && typeof data === "object" ? Object.keys(data) : [],
+    hydrationPrefill: {
+      hasNaturalInput: !!(data && typeof data === "object" && (data as any).natural_input),
+      hasAction: !!(data && typeof data === "object" && (data as any).action),
+      hasCompleteQuery: !!(data && typeof data === "object" && (data as any).complete_query),
+    },
     lastLifecycle: __lastLifecycle,
   }).catch(() => {});
 
@@ -290,12 +297,18 @@ const renderApp = (data: any) => {
 
 // Initial render
 const initialData = getHydrationData();
+__currentInitialData = initialData;
 __log("[Hydration] initialData keys", initialData && typeof initialData === "object" ? Object.keys(initialData) : []);
 __mark("hydration_initial", {
   initialDataKeys: initialData && typeof initialData === "object" ? Object.keys(initialData) : [],
 });
 __report("widget_hydration_initial", {
   initialDataKeys: initialData && typeof initialData === "object" ? Object.keys(initialData) : [],
+  hydrationPrefill: {
+    hasNaturalInput: !!(initialData && typeof initialData === "object" && (initialData as any).natural_input),
+    hasAction: !!(initialData && typeof initialData === "object" && (initialData as any).action),
+    hasCompleteQuery: !!(initialData && typeof initialData === "object" && (initialData as any).complete_query),
+  },
   hasOpenAI: !!(window as any).openai,
   openaiKeys: (window as any).openai ? Object.keys((window as any).openai) : [],
   lastLifecycle: __lastLifecycle,
@@ -326,24 +339,37 @@ window.addEventListener('openai:set_globals', (ev: any) => {
     ];
     
     for (const candidate of candidates) {
-       if (candidate && typeof candidate === 'object' && Object.keys(candidate).length > 0) {
-          console.log("[Hydration] Re-rendering with late data:", candidate);
-          // Apply late hydration at most once to avoid repeated remounts and analytics spam.
-          if (__appliedLateHydration) {
-            __log("[Hydration] Ignoring additional late hydration (already applied once)");
-            return;
-          }
-          __appliedLateHydration = true;
-          __mark("hydration_late_apply", {
-            candidateKeys: Object.keys(candidate),
-          });
-          __report("widget_hydration_late_apply", {
-            candidateKeys: Object.keys(candidate),
-            lastLifecycle: __lastLifecycle,
-          }).catch(() => {});
-          renderApp(candidate);
+      if (candidate && typeof candidate === 'object' && Object.keys(candidate).length > 0) {
+        // Apply late hydration at most once to avoid repeated remounts and analytics spam.
+        if (__appliedLateHydration) {
+          __log("[Hydration] Ignoring additional late hydration (already applied once)");
           return;
-       }
+        }
+
+        const merged = {
+          ...(typeof __currentInitialData === "object" && __currentInitialData ? __currentInitialData : {}),
+          ...(candidate as any),
+        };
+
+        console.log("[Hydration] Re-rendering with late data (merged overlay):", merged);
+        __appliedLateHydration = true;
+        __mark("hydration_late_apply", {
+          candidateKeys: Object.keys(candidate),
+          mergedKeys: Object.keys(merged),
+        });
+        __report("widget_hydration_late_apply", {
+          candidateKeys: Object.keys(candidate),
+          mergedKeys: Object.keys(merged),
+          hydrationPrefill: {
+            hasNaturalInput: !!(merged as any).natural_input,
+            hasAction: !!(merged as any).action,
+            hasCompleteQuery: !!(merged as any).complete_query,
+          },
+          lastLifecycle: __lastLifecycle,
+        }).catch(() => {});
+        renderApp(merged);
+        return;
+      }
     }
   }
 });
