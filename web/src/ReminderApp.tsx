@@ -550,6 +550,19 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
     friday: 5, fri: 5,
     saturday: 6, sat: 6
   };
+
+  const pickNextDueDateForDays = (days: number[], base: Date): string => {
+    const baseDay = base.getDay();
+    let bestDiff: number | null = null;
+    for (const d of days) {
+      const diff = (d - baseDay + 7) % 7;
+      if (bestDiff === null || diff < bestDiff) bestDiff = diff;
+    }
+    const next = new Date(base);
+    next.setDate(next.getDate() + (bestDiff ?? 0));
+    const formatLocalDate = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return formatLocalDate(next);
+  };
   
   // Helper to extract day numbers from text
   const extractDays = (text: string): number[] => {
@@ -596,6 +609,21 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
     const daysMatch = lower.match(/every\s+((?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(?:\s*(?:,|and)\s*(?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))*)/i);
     if (daysMatch) {
       recurrenceDays = extractDays(daysMatch[1]);
+    }
+    confidence += 15;
+  }
+  // 2a. Multi-day weekly patterns like "on tuesday and thursday" (implied weekly recurrence)
+  else if (/\bon\s+(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(\s*(,|and)\s*(sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))+/i.test(lower)) {
+    recurrence = "weekly";
+    recurrenceInterval = 1;
+    recurrenceUnit = "weeks";
+    const daysMatch = lower.match(/on\s+((?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(?:\s*(?:,|and)\s*(?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))*)/i);
+    if (daysMatch) {
+      recurrenceDays = extractDays(daysMatch[1]);
+      if (recurrenceDays.length > 0) {
+        // Prefer the nearest upcoming recurrence day (relative to today), rather than a single parsed weekday.
+        dueDate = pickNextDueDateForDays(recurrenceDays, today);
+      }
     }
     confidence += 15;
   }
@@ -731,6 +759,7 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
     .replace(/\bthis\s+weekend\b/gi, "")
     .replace(/\bin\s+\d+\s+(days?|hours?|weeks?|months?)\b/gi, "")
     .replace(/\bon\s+(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/gi, "")
+    .replace(/\bon\s+((?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat)(?:\s*(?:,|and)\s*(?:sunday|sun|monday|mon|tuesday|tue|tues|wednesday|wed|thursday|thu|thur|thurs|friday|fri|saturday|sat))*)/gi, "")
     // Remove priority keywords
     .replace(/\burgent\b/gi, "")
     .replace(/\basap\b/gi, "")
@@ -1170,10 +1199,23 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     const dueDate = typeof data?.due_date === "string" ? data.due_date.trim() : "";
     const dueTime = typeof data?.due_time === "string" ? data.due_time.trim() : "";
     const recurrence = typeof data?.recurrence === "string" ? data.recurrence.trim() : "";
+    const recurrenceDays = Array.isArray((data as any)?.recurrence_days)
+      ? ((data as any).recurrence_days as any[])
+          .map((n) => Number(n))
+          .filter((n) => Number.isFinite(n) && n >= 0 && n <= 6)
+      : undefined;
 
     const parts: string[] = [];
     parts.push(`remind me to ${title}`);
-    if (recurrence && recurrence !== "none") {
+    if (recurrenceDays && recurrenceDays.length > 0) {
+      const dayNumToName = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+      const daysText = recurrenceDays
+        .slice()
+        .sort((a, b) => a - b)
+        .map((d) => dayNumToName[d])
+        .join(" and ");
+      parts.push(`on ${daysText}`);
+    } else if (recurrence && recurrence !== "none") {
       parts.push(recurrence);
     }
     if (dueDate) {
