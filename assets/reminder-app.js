@@ -26826,19 +26826,7 @@ var PROGRESSION_TASKS = [
   }
 ];
 var persistState = (reminders, stats) => {
-  let ownerKey;
-  try {
-    const subscribed = localStorage.getItem("digest_subscribed") === "true";
-    const email = localStorage.getItem("digest_email") || "";
-    if (subscribed && email.includes("@")) {
-      ownerKey = email.toLowerCase();
-    }
-  } catch {
-  }
-  if (!ownerKey) {
-    ownerKey = window.openai?.toolInput?._meta?.["openai/subject"];
-  }
-  const state = { reminders, stats, savedAt: Date.now(), ownerKey };
+  const state = { reminders, stats, savedAt: Date.now() };
   if (window.openai?.setWidgetState) {
     try {
       window.openai.setWidgetState(state);
@@ -26853,7 +26841,7 @@ var persistState = (reminders, stats) => {
   } catch (e) {
     console.error("[Persist] localStorage error:", e);
   }
-  if (window.openai?.callTool) {
+  if (window.openai?.callTool && window.openai?.__enableSaveRemindersTool === true) {
     try {
       window.openai.callTool("save_reminders", state).catch((e) => {
         console.log("[Persist] callTool not available or failed:", e);
@@ -26934,7 +26922,6 @@ function ReminderApp({ initialData: initialData2 }) {
   const hydrationAutoCreateAppliedRef = (0, import_react3.useRef)(/* @__PURE__ */ new Set());
   const pendingAutoCreateRef = (0, import_react3.useRef)(null);
   const pendingCompletionRef = (0, import_react3.useRef)(null);
-  const pendingDeleteRef = (0, import_react3.useRef)(null);
   const [editing, setEditing] = (0, import_react3.useState)(null);
   const [search, setSearch] = (0, import_react3.useState)("");
   const [searchExpanded, setSearchExpanded] = (0, import_react3.useState)(false);
@@ -26960,43 +26947,11 @@ function ReminderApp({ initialData: initialData2 }) {
   };
   const [toast, setToast] = (0, import_react3.useState)(null);
   const [achievement, setAchievement] = (0, import_react3.useState)(null);
-  const [pressedFooterButton, setPressedFooterButton] = (0, import_react3.useState)(null);
-  const [digestEmail, setDigestEmail] = (0, import_react3.useState)(() => {
-    try {
-      return localStorage.getItem("digest_email") || "";
-    } catch {
-      return "";
-    }
-  });
-  const [digestSubscribed, setDigestSubscribed] = (0, import_react3.useState)(() => {
-    try {
-      return localStorage.getItem("digest_subscribed") === "true";
-    } catch {
-      return false;
-    }
-  });
-  const [digestLoading, setDigestLoading] = (0, import_react3.useState)(false);
-  const footerBtnHandlers = (id) => ({
-    onPointerDown: () => setPressedFooterButton(id),
-    onPointerUp: () => setPressedFooterButton((cur) => cur === id ? null : cur),
-    onPointerCancel: () => setPressedFooterButton((cur) => cur === id ? null : cur),
-    onPointerLeave: () => setPressedFooterButton((cur) => cur === id ? null : cur)
-  });
-  const footerBtnStyle = (id, base, pressed = {}) => {
-    const isPressed = pressedFooterButton === id;
-    return {
-      ...base,
-      transition: "transform 90ms ease, box-shadow 160ms ease, filter 160ms ease",
-      transform: isPressed ? "scale(0.97)" : "scale(1)",
-      filter: isPressed ? "brightness(0.97)" : "brightness(1)",
-      boxShadow: isPressed ? "0 2px 6px rgba(0,0,0,0.10)" : "0 3px 10px rgba(0,0,0,0.06)",
-      ...isPressed ? pressed : {}
-    };
-  };
   const [importOpen, setImportOpen] = (0, import_react3.useState)(false);
   const [dragActive, setDragActive] = (0, import_react3.useState)(false);
   const [screenshotModal, setScreenshotModal] = (0, import_react3.useState)({ open: false, imageData: null, analyzing: false, progress: 0 });
   const [celebrationDismissed, setCelebrationDismissed] = (0, import_react3.useState)(false);
+  const [feedbackModal, setFeedbackModal] = (0, import_react3.useState)({ open: false, text: "", status: "", sending: false });
   const handleFileUpload = (e) => {
     e.preventDefault();
     setDragActive(false);
@@ -27079,42 +27034,24 @@ function ReminderApp({ initialData: initialData2 }) {
     }
     return best ? best.r : null;
   };
-  const isLikelyOpaqueToken = (value) => {
-    const t = value.trim();
-    if (t.length < 40) return false;
-    if (/\s/.test(t)) return false;
-    return /^[A-Za-z0-9/_\-+=.]+$/.test(t);
-  };
   const inferActionFromNaturalInput = (text) => {
     const t = text.trim();
     const lower = t.toLowerCase();
     const completeMatch = lower.match(/^\s*(mark|set)\s+(it\s+)?(as\s+)?(complete|completed|done)\s+(that\s+)?(i\s+)?(.+)$/i);
-    if (completeMatch && completeMatch[7]) {
-      return { action: "complete", query: completeMatch[7].trim(), prefill: t };
-    }
-    const iCompletedMatch = lower.match(/^\s*(i\s+)?(just\s+)?(completed|finished|did)\s+(.+)$/i);
-    if (iCompletedMatch && iCompletedMatch[4]) {
-      return { action: "complete", query: iCompletedMatch[4].trim(), prefill: t };
-    }
-    const doneWithMatch = lower.match(/^\s*(i'?m?\s+)?done\s+(with\s+)?(.+)$/i);
-    if (doneWithMatch && doneWithMatch[3]) {
-      return { action: "complete", query: doneWithMatch[3].trim(), prefill: t };
-    }
-    const deleteMatch = lower.match(/^\s*(delete|remove)\s+(the\s+)?(reminder\s+)?(for\s+|to\s+)?(.+)$/i);
-    if (deleteMatch && deleteMatch[5]) {
-      return { action: "delete", query: deleteMatch[5].trim(), prefill: t };
+    if (completeMatch && completeMatch[6]) {
+      return { action: "complete", query: completeMatch[6].trim(), prefill: t };
     }
     const uncompleteMatch = lower.match(/^\s*(undo|uncomplete|mark)\s+(it\s+)?(as\s+)?(not\s+complete|incomplete|not\s+done)\s+(that\s+)?(i\s+)?(.+)$/i);
-    if (uncompleteMatch && uncompleteMatch[7]) {
-      return { action: "uncomplete", query: uncompleteMatch[7].trim(), prefill: t };
+    if (uncompleteMatch && uncompleteMatch[6]) {
+      return { action: "uncomplete", query: uncompleteMatch[6].trim(), prefill: t };
     }
     return { action: "create", prefill: t };
   };
   const buildPrefillText = (data) => {
     const natural = typeof data?.natural_input === "string" ? data.natural_input.trim() : "";
-    if (natural && !isLikelyOpaqueToken(natural)) return natural;
+    if (natural) return natural;
     const title = typeof data?.title === "string" ? data.title.trim() : "";
-    if (!title || isLikelyOpaqueToken(title)) return "";
+    if (!title) return "";
     const dueDate = typeof data?.due_date === "string" ? data.due_date.trim() : "";
     const dueTime = typeof data?.due_time === "string" ? data.due_time.trim() : "";
     const recurrence = typeof data?.recurrence === "string" ? data.recurrence.trim() : "";
@@ -27141,13 +27078,9 @@ function ReminderApp({ initialData: initialData2 }) {
     const prefill = buildPrefillText(initialData2);
     const actionRaw = typeof initialData2.action === "string" ? initialData2.action : "";
     const completeQueryRaw = typeof initialData2.complete_query === "string" ? initialData2.complete_query : "";
-    const deleteQueryRaw = typeof initialData2.delete_query === "string" ? initialData2.delete_query : "";
     const infer = prefill ? inferActionFromNaturalInput(prefill) : {};
-    const inferAction = infer.action;
-    const rawIsStrong = actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "create" || actionRaw === "delete";
-    const rawIsOpen = actionRaw === "open";
-    const effectiveAction = rawIsStrong ? actionRaw : rawIsOpen ? inferAction === "complete" || inferAction === "uncomplete" || inferAction === "delete" ? inferAction : "open" : inferAction;
-    const effectiveQuery = effectiveAction === "delete" ? deleteQueryRaw || infer.query || prefill || "" : completeQueryRaw || infer.query || "";
+    const effectiveAction = actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "create" || actionRaw === "open" ? actionRaw : infer.action;
+    const effectiveQuery = completeQueryRaw || infer.query || "";
     const signature = JSON.stringify({ prefill, action: effectiveAction || "", query: effectiveQuery });
     if (hydrationAppliedRef.current.has(signature)) return;
     const hasAny = Boolean(prefill) || Boolean(effectiveAction) || Boolean(effectiveQuery);
@@ -27165,7 +27098,7 @@ function ReminderApp({ initialData: initialData2 }) {
         action: effectiveAction || ""
       });
     }
-    const wantsCreate = effectiveAction === "create" || !effectiveAction;
+    const wantsCreate = effectiveAction === "create" || effectiveAction === "open" || !effectiveAction;
     if (wantsCreate && prefill && prefill.trim()) {
       pendingAutoCreateRef.current = { signature, text: prefill };
     }
@@ -27176,12 +27109,6 @@ function ReminderApp({ initialData: initialData2 }) {
           action: effectiveAction,
           query: query.trim()
         };
-      }
-    }
-    if (effectiveAction === "delete") {
-      const query = effectiveQuery || prefill;
-      if (typeof query === "string" && query.trim()) {
-        pendingDeleteRef.current = { query: query.trim() };
       }
     }
   }, [initialData2]);
@@ -27510,15 +27437,9 @@ function ReminderApp({ initialData: initialData2 }) {
     setReminders((prev) => prev.map((x) => x.id === r.id ? { ...r, completed: false, completedAt: void 0 } : x));
     setStats((s) => ({ ...s, totalPoints: Math.max(0, s.totalPoints - r.pointsAwarded), completedAllTime: Math.max(0, s.completedAllTime - 1) }));
   };
-  const processedCompletionsRef = (0, import_react3.useRef)(/* @__PURE__ */ new Set());
   (0, import_react3.useEffect)(() => {
     const pending = pendingCompletionRef.current;
     if (!pending) return;
-    const queryKey = `${pending.action}:${pending.query}`;
-    if (processedCompletionsRef.current.has(queryKey)) {
-      pendingCompletionRef.current = null;
-      return;
-    }
     const match = bestMatchReminder(pending.query, pending.action === "uncomplete");
     if (!match) {
       trackEvent("hydration_complete_no_match", {
@@ -27529,8 +27450,6 @@ function ReminderApp({ initialData: initialData2 }) {
       pendingCompletionRef.current = null;
       return;
     }
-    processedCompletionsRef.current.add(queryKey);
-    pendingCompletionRef.current = null;
     if (pending.action === "complete") {
       trackEvent("hydration_complete_apply", { query: pending.query, matchedId: match.id });
       complete(match);
@@ -27538,29 +27457,7 @@ function ReminderApp({ initialData: initialData2 }) {
       trackEvent("hydration_uncomplete_apply", { query: pending.query, matchedId: match.id });
       uncomplete(match);
     }
-  }, [reminders]);
-  const processedDeletesRef = (0, import_react3.useRef)(/* @__PURE__ */ new Set());
-  (0, import_react3.useEffect)(() => {
-    const pending = pendingDeleteRef.current;
-    if (!pending) return;
-    if (processedDeletesRef.current.has(pending.query)) {
-      pendingDeleteRef.current = null;
-      return;
-    }
-    const match = bestMatchReminder(pending.query, false);
-    if (!match) {
-      trackEvent("hydration_delete_no_match", {
-        query: pending.query,
-        reminderCount: reminders.length
-      });
-      pendingDeleteRef.current = null;
-      setToast(`No reminder found matching "${pending.query}"`);
-      return;
-    }
-    processedDeletesRef.current.add(pending.query);
-    pendingDeleteRef.current = null;
-    trackEvent("hydration_delete_apply", { query: pending.query, matchedId: match.id });
-    del(match.id);
+    pendingCompletionRef.current = null;
   }, [reminders]);
   const [snoozePopup, setSnoozePopup] = (0, import_react3.useState)(null);
   const snooze = (r, mins) => {
@@ -27588,48 +27485,6 @@ function ReminderApp({ initialData: initialData2 }) {
     setReminders((prev) => prev.filter((r) => r.id !== id));
     setToast("Deleted");
   };
-  const subscribeToDigest = async () => {
-    if (!digestEmail || !digestEmail.includes("@")) {
-      setToast("Please enter a valid email");
-      return;
-    }
-    setDigestLoading(true);
-    try {
-      const odaiSubject = window.openai?.toolInput?._meta?.["openai/subject"] || "unknown";
-      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const res = await fetch("https://reminder-app-3pz5.onrender.com/api/daily-digest/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: digestEmail, odaiSubject, timezone, sendTime: "07:00" })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setDigestSubscribed(true);
-        try {
-          localStorage.setItem("digest_subscribed", "true");
-          localStorage.setItem("digest_email", digestEmail);
-        } catch {
-        }
-        setToast("\u{1F4E7} Subscribed! Daily digest coming soon.");
-        trackEvent("daily_digest_subscribe_success", { email: digestEmail });
-        try {
-          if (window.openai?.callTool) {
-            const state = { reminders, stats, savedAt: Date.now(), ownerKey: digestEmail.toLowerCase() };
-            window.openai.callTool("save_reminders", state).catch(() => {
-            });
-          }
-        } catch {
-        }
-      } else {
-        setToast(data.error || "Failed to subscribe");
-      }
-    } catch (err) {
-      setToast("Failed to subscribe: " + (err.message || "Unknown error"));
-      trackEvent("daily_digest_subscribe_error", { error: err.message });
-    } finally {
-      setDigestLoading(false);
-    }
-  };
   const resetProgress = () => {
     trackEvent("reset_progress", { reminderCount: reminders.length, totalPoints: stats.totalPoints });
     localStorage.removeItem(STORAGE_KEY);
@@ -27648,6 +27503,46 @@ function ReminderApp({ initialData: initialData2 }) {
     });
     setToast("Progress reset! Start fresh.");
     console.log("[Reset] All progress cleared");
+  };
+  const submitFeedback = async () => {
+    const feedback = feedbackModal.text.trim();
+    if (!feedback) {
+      setFeedbackModal((prev) => ({ ...prev, status: "Please enter feedback." }));
+      return;
+    }
+    setFeedbackModal((prev) => ({ ...prev, sending: true, status: "Sending\u2026" }));
+    trackEvent("user_feedback", { feedback });
+    const TRACK_ENDPOINTS = [
+      "https://reminder-app-open-ai.onrender.com/api/track",
+      "/api/track"
+    ];
+    try {
+      let ok = false;
+      for (const url of TRACK_ENDPOINTS) {
+        try {
+          const resp = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            mode: "cors",
+            body: JSON.stringify({ event: "widget_user_feedback", feedback })
+          });
+          if (resp && resp.ok) {
+            ok = true;
+            break;
+          }
+        } catch (_) {
+        }
+      }
+      if (ok) {
+        setFeedbackModal({ open: false, text: "", status: "", sending: false });
+        setToast("Thanks for your feedback!");
+      } else {
+        setFeedbackModal((prev) => ({ ...prev, status: "Failed to send. Please try again.", sending: false }));
+      }
+    } catch (err) {
+      console.error("Feedback submission error", err);
+      setFeedbackModal((prev) => ({ ...prev, status: "Failed to send. Please try again.", sending: false }));
+    }
   };
   const generate40Reminders = () => {
     const sampleTasks = [
@@ -28968,73 +28863,6 @@ OR just paste a list:
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
       marginTop: 16,
-      padding: 20,
-      backgroundColor: COLORS.card,
-      borderRadius: cardRadius,
-      boxShadow: cardShadow,
-      border: `1px solid ${COLORS.primary}30`
-    }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { style: { fontSize: 20 }, children: "\u{1F4E7}" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 14, fontWeight: 600, color: COLORS.textMain }, children: "Daily Reminder Digest" })
-      ] }),
-      digestSubscribed ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: {
-        padding: "12px 16px",
-        backgroundColor: `${COLORS.primary}15`,
-        borderRadius: 8,
-        color: COLORS.primary,
-        fontSize: 13,
-        display: "flex",
-        alignItems: "center",
-        gap: 8
-      }, children: "\u2713 You're subscribed! Check your inbox each morning for your daily reminders." }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 12, color: COLORS.textSecondary, marginBottom: 12 }, children: "Get a daily email with your reminders due today. Never miss a task again!" }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 8 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-            "input",
-            {
-              type: "email",
-              placeholder: "Enter your email",
-              value: digestEmail,
-              onChange: (e) => setDigestEmail(e.target.value),
-              onKeyDown: (e) => e.key === "Enter" && subscribeToDigest(),
-              style: {
-                flex: 1,
-                padding: "10px 14px",
-                borderRadius: 8,
-                border: `1px solid ${COLORS.border}`,
-                backgroundColor: COLORS.cardAlt,
-                color: COLORS.textMain,
-                fontSize: 13,
-                outline: "none"
-              }
-            }
-          ),
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-            "button",
-            {
-              onClick: subscribeToDigest,
-              disabled: digestLoading,
-              style: {
-                padding: "10px 20px",
-                borderRadius: 8,
-                backgroundColor: COLORS.primary,
-                color: "white",
-                fontSize: 13,
-                fontWeight: 600,
-                border: "none",
-                cursor: digestLoading ? "wait" : "pointer",
-                opacity: digestLoading ? 0.7 : 1
-              },
-              children: digestLoading ? "..." : "Subscribe"
-            }
-          )
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { fontSize: 10, color: COLORS.textMuted, marginTop: 8 }, children: "We'll send your digest at 7am in your timezone. Unsubscribe anytime." })
-      ] })
-    ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: {
-      marginTop: 16,
       padding: "14px 20px",
       backgroundColor: COLORS.card,
       borderRadius: cardRadius,
@@ -29048,8 +28876,7 @@ OR just paste a list:
         "button",
         {
           onClick: () => window.print(),
-          ...footerBtnHandlers("footer_print"),
-          style: footerBtnStyle("footer_print", {
+          style: {
             display: "flex",
             alignItems: "center",
             gap: 6,
@@ -29061,7 +28888,7 @@ OR just paste a list:
             fontWeight: 500,
             cursor: "pointer",
             border: `1px solid ${COLORS.border}`
-          }),
+          },
           children: "\u{1F5A8}\uFE0F Print"
         }
       ),
@@ -29069,8 +28896,7 @@ OR just paste a list:
         "button",
         {
           onClick: resetProgress,
-          ...footerBtnHandlers("footer_reset"),
-          style: footerBtnStyle("footer_reset", {
+          style: {
             display: "flex",
             alignItems: "center",
             gap: 6,
@@ -29082,7 +28908,7 @@ OR just paste a list:
             fontWeight: 500,
             cursor: "pointer",
             border: `1px solid ${COLORS.border}`
-          }),
+          },
           children: "\u{1F504} Reset"
         }
       ),
@@ -29090,35 +28916,27 @@ OR just paste a list:
         "button",
         {
           onClick: () => window.open("https://buymeacoffee.com/jhteplitsky", "_blank"),
-          ...footerBtnHandlers("footer_donate"),
-          style: footerBtnStyle(
-            "footer_donate",
-            {
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "10px 16px",
-              borderRadius: 50,
-              backgroundColor: "#FFDD00",
-              color: "#000",
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: "pointer",
-              border: "none"
-            },
-            {
-              filter: "brightness(0.93)"
-            }
-          ),
+          style: {
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "10px 16px",
+            borderRadius: 50,
+            backgroundColor: "#FFDD00",
+            color: "#000",
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: "pointer",
+            border: "none"
+          },
           children: "\u2615 Donate"
         }
       ),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
         "button",
         {
-          onClick: () => window.open("mailto:jonathan@teplitsky.com?subject=Reminder%20App%20Feedback", "_blank"),
-          ...footerBtnHandlers("footer_feedback"),
-          style: footerBtnStyle("footer_feedback", {
+          onClick: () => setFeedbackModal({ open: true, text: "", status: "", sending: false }),
+          style: {
             display: "flex",
             alignItems: "center",
             gap: 6,
@@ -29130,11 +28948,59 @@ OR just paste a list:
             fontWeight: 500,
             cursor: "pointer",
             border: `1px solid ${COLORS.border}`
-          }),
+          },
           children: "\u{1F4AC} Feedback"
         }
       )
     ] }),
+    feedbackModal.open && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      "div",
+      {
+        onClick: (e) => {
+          if (e.target === e.currentTarget) setFeedbackModal((prev) => ({ ...prev, open: false }));
+        },
+        style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16 },
+        children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 24, width: "100%", maxWidth: 420, padding: 24, boxShadow: "0 16px 48px rgba(0,0,0,0.15)" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { style: { margin: 0, fontSize: 18, fontWeight: 600, color: COLORS.textMain }, children: "Share Feedback" }),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { onClick: () => setFeedbackModal((prev) => ({ ...prev, open: false })), style: { width: 36, height: 36, borderRadius: "50%", border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 18, color: COLORS.textMuted }) })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { margin: "0 0 16px", fontSize: 14, color: COLORS.textSecondary }, children: "Tell us what worked or what could be improved." }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+            "textarea",
+            {
+              value: feedbackModal.text,
+              onChange: (e) => setFeedbackModal((prev) => ({ ...prev, text: e.target.value, status: "" })),
+              onKeyDown: (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === "Enter") submitFeedback();
+              },
+              placeholder: "Your feedback...",
+              style: { width: "100%", minHeight: 120, padding: 14, borderRadius: 14, border: "none", backgroundColor: COLORS.inputBg, fontSize: 15, color: COLORS.textMain, resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }
+            }
+          ),
+          feedbackModal.status && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { style: { margin: "12px 0 0", fontSize: 13, color: feedbackModal.status.includes("Failed") || feedbackModal.status.includes("Please") ? "#ef4444" : COLORS.textSecondary }, children: feedbackModal.status }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", gap: 12, marginTop: 16, justifyContent: "flex-end" }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              "button",
+              {
+                onClick: () => setFeedbackModal((prev) => ({ ...prev, open: false })),
+                style: { padding: "10px 18px", borderRadius: 50, backgroundColor: COLORS.inputBg, color: COLORS.textSecondary, fontSize: 14, fontWeight: 500, cursor: "pointer", border: "none" },
+                children: "Cancel"
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+              "button",
+              {
+                onClick: submitFeedback,
+                disabled: feedbackModal.sending,
+                style: { padding: "10px 18px", borderRadius: 50, backgroundColor: COLORS.primary, color: "#fff", fontSize: 14, fontWeight: 600, cursor: feedbackModal.sending ? "not-allowed" : "pointer", border: "none", opacity: feedbackModal.sending ? 0.7 : 1 },
+                children: feedbackModal.sending ? "Sending\u2026" : "Send"
+              }
+            )
+          ] })
+        ] })
+      }
+    ),
     editing && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16, overflowY: "auto" }, children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { backgroundColor: COLORS.card, borderRadius: 24, width: "100%", maxWidth: 420, padding: 24, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 16px 48px rgba(0,0,0,0.15)" }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }, children: [
         /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", { style: { margin: 0, fontSize: 18, fontWeight: 600, color: COLORS.textMain }, children: "Edit Reminder" }),

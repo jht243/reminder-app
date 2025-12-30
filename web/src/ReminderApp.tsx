@@ -920,20 +920,7 @@ const PROGRESSION_TASKS: Omit<ProgressionTask, 'completed'>[] = [
 
 // Helper to persist state via OpenAI Apps SDK
 const persistState = (reminders: Reminder[], stats: UserStats) => {
-  let ownerKey: string | undefined;
-  try {
-    const subscribed = localStorage.getItem("digest_subscribed") === "true";
-    const email = localStorage.getItem("digest_email") || "";
-    if (subscribed && email.includes("@")) {
-      ownerKey = email.toLowerCase();
-    }
-  } catch {}
-
-  if (!ownerKey) {
-    ownerKey = (window as any).openai?.toolInput?._meta?.["openai/subject"];
-  }
-
-  const state = { reminders, stats, savedAt: Date.now(), ownerKey };
+  const state = { reminders, stats, savedAt: Date.now() };
   
   // 1. Use OpenAI widget state (persists within conversation)
   if ((window as any).openai?.setWidgetState) {
@@ -954,7 +941,7 @@ const persistState = (reminders: Reminder[], stats: UserStats) => {
   }
   
   // 3. Call save tool if available (for cross-session persistence)
-  if ((window as any).openai?.callTool) {
+  if ((window as any).openai?.callTool && (window as any).openai?.__enableSaveRemindersTool === true) {
     try {
       (window as any).openai.callTool("save_reminders", state).catch((e: any) => {
         console.log("[Persist] callTool not available or failed:", e);
@@ -1047,7 +1034,6 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const hydrationAutoCreateAppliedRef = useRef<Set<string>>(new Set());
   const pendingAutoCreateRef = useRef<{ signature: string; text: string } | null>(null);
   const pendingCompletionRef = useRef<{ action: "complete" | "uncomplete"; query: string } | null>(null);
-  const pendingDeleteRef = useRef<{ query: string } | null>(null);
   
   // Edit mode (only after creation)
   const [editing, setEditing] = useState<Reminder | null>(null);
@@ -1089,41 +1075,6 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   
   const [toast, setToast] = useState<string | null>(null);
   const [achievement, setAchievement] = useState<{ name: string; icon: string } | null>(null);
-  const [pressedFooterButton, setPressedFooterButton] = useState<string | null>(null);
-  
-  // Daily digest email subscription
-  const [digestEmail, setDigestEmail] = useState(() => {
-    try { return localStorage.getItem("digest_email") || ""; } catch { return ""; }
-  });
-  const [digestSubscribed, setDigestSubscribed] = useState<boolean>(() => {
-    try { return localStorage.getItem("digest_subscribed") === "true"; } catch { return false; }
-  });
-  const [digestLoading, setDigestLoading] = useState(false);
-
-  const footerBtnHandlers = (id: string) => ({
-    onPointerDown: () => setPressedFooterButton(id),
-    onPointerUp: () => setPressedFooterButton((cur) => (cur === id ? null : cur)),
-    onPointerCancel: () => setPressedFooterButton((cur) => (cur === id ? null : cur)),
-    onPointerLeave: () => setPressedFooterButton((cur) => (cur === id ? null : cur)),
-  });
-
-  const footerBtnStyle = (
-    id: string,
-    base: React.CSSProperties,
-    pressed: Partial<React.CSSProperties> = {}
-  ): React.CSSProperties => {
-    const isPressed = pressedFooterButton === id;
-    return {
-      ...base,
-      transition: "transform 90ms ease, box-shadow 160ms ease, filter 160ms ease",
-      transform: isPressed ? "scale(0.97)" : "scale(1)",
-      filter: isPressed ? "brightness(0.97)" : "brightness(1)",
-      boxShadow: isPressed
-        ? "0 2px 6px rgba(0,0,0,0.10)"
-        : "0 3px 10px rgba(0,0,0,0.06)",
-      ...(isPressed ? pressed : {}),
-    };
-  };
   
   // Import Modal State
   const [importOpen, setImportOpen] = useState(false);
@@ -1139,6 +1090,9 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   
   // Celebration popup - only show once per completion cycle
   const [celebrationDismissed, setCelebrationDismissed] = useState(false);
+  
+  // Feedback Modal State
+  const [feedbackModal, setFeedbackModal] = useState<{ open: boolean; text: string; status: string; sending: boolean }>({ open: false, text: "", status: "", sending: false });
 
   // File Upload Handler
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
@@ -1252,53 +1206,25 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     return best ? best.r : null;
   };
 
-  const isLikelyOpaqueToken = (value: string) => {
-    const t = value.trim();
-    if (t.length < 40) return false;
-    if (/\s/.test(t)) return false;
-    return /^[A-Za-z0-9/_\-+=.]+$/.test(t);
-  };
-
-  const inferActionFromNaturalInput = (text: string): { action?: "create" | "complete" | "uncomplete" | "delete"; query?: string; prefill?: string } => {
+  const inferActionFromNaturalInput = (text: string): { action?: "create" | "complete" | "uncomplete"; query?: string; prefill?: string } => {
     const t = text.trim();
     const lower = t.toLowerCase();
-    
-    // "mark as complete X" / "set as done X"
     const completeMatch = lower.match(/^\s*(mark|set)\s+(it\s+)?(as\s+)?(complete|completed|done)\s+(that\s+)?(i\s+)?(.+)$/i);
-    if (completeMatch && completeMatch[7]) {
-      return { action: "complete", query: completeMatch[7].trim(), prefill: t };
+    if (completeMatch && completeMatch[6]) {
+      return { action: "complete", query: completeMatch[6].trim(), prefill: t };
     }
-    
-    // "i completed X" / "i finished X" / "i did X" / "i'm done with X" / "just finished X"
-    const iCompletedMatch = lower.match(/^\s*(i\s+)?(just\s+)?(completed|finished|did)\s+(.+)$/i);
-    if (iCompletedMatch && iCompletedMatch[4]) {
-      return { action: "complete", query: iCompletedMatch[4].trim(), prefill: t };
-    }
-    const doneWithMatch = lower.match(/^\s*(i'?m?\s+)?done\s+(with\s+)?(.+)$/i);
-    if (doneWithMatch && doneWithMatch[3]) {
-      return { action: "complete", query: doneWithMatch[3].trim(), prefill: t };
-    }
-    
-    // "delete X" / "remove X"
-    const deleteMatch = lower.match(/^\s*(delete|remove)\s+(the\s+)?(reminder\s+)?(for\s+|to\s+)?(.+)$/i);
-    if (deleteMatch && deleteMatch[5]) {
-      return { action: "delete", query: deleteMatch[5].trim(), prefill: t };
-    }
-    
-    // "undo/uncomplete/mark as not complete X"
     const uncompleteMatch = lower.match(/^\s*(undo|uncomplete|mark)\s+(it\s+)?(as\s+)?(not\s+complete|incomplete|not\s+done)\s+(that\s+)?(i\s+)?(.+)$/i);
-    if (uncompleteMatch && uncompleteMatch[7]) {
-      return { action: "uncomplete", query: uncompleteMatch[7].trim(), prefill: t };
+    if (uncompleteMatch && uncompleteMatch[6]) {
+      return { action: "uncomplete", query: uncompleteMatch[6].trim(), prefill: t };
     }
-    
     return { action: "create", prefill: t };
   };
 
   const buildPrefillText = (data: any): string => {
     const natural = typeof data?.natural_input === "string" ? data.natural_input.trim() : "";
-    if (natural && !isLikelyOpaqueToken(natural)) return natural;
+    if (natural) return natural;
     const title = typeof data?.title === "string" ? data.title.trim() : "";
-    if (!title || isLikelyOpaqueToken(title)) return "";
+    if (!title) return "";
 
     const dueDate = typeof data?.due_date === "string" ? data.due_date.trim() : "";
     const dueTime = typeof data?.due_time === "string" ? data.due_time.trim() : "";
@@ -1337,25 +1263,12 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     const prefill = buildPrefillText(initialData);
     const actionRaw = typeof initialData.action === "string" ? initialData.action : "";
     const completeQueryRaw = typeof initialData.complete_query === "string" ? initialData.complete_query : "";
-    const deleteQueryRaw = typeof (initialData as any).delete_query === "string" ? (initialData as any).delete_query : "";
     const infer = prefill ? inferActionFromNaturalInput(prefill) : {};
-
-    const inferAction = infer.action;
-    const rawIsStrong = actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "create" || actionRaw === "delete";
-    const rawIsOpen = actionRaw === "open";
-
-    // Treat action=open as a weak/default hint. If the natural input clearly implies
-    // a stronger intent (delete/complete/uncomplete), prefer that.
-    const effectiveAction = rawIsStrong
-      ? actionRaw
-      : rawIsOpen
-        ? (inferAction === "complete" || inferAction === "uncomplete" || inferAction === "delete" ? inferAction : "open")
-        : inferAction;
-
-    const effectiveQuery =
-      effectiveAction === "delete"
-        ? (deleteQueryRaw || infer.query || prefill || "")
-        : (completeQueryRaw || infer.query || "");
+    const effectiveAction =
+      actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "create" || actionRaw === "open"
+        ? actionRaw
+        : infer.action;
+    const effectiveQuery = completeQueryRaw || infer.query || "";
 
     const signature = JSON.stringify({ prefill, action: effectiveAction || "", query: effectiveQuery });
     if (hydrationAppliedRef.current.has(signature)) return;
@@ -1381,7 +1294,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
 
     // Auto-create reminders when hydration indicates creation intent.
     // This should only run once per unique hydration payload.
-    const wantsCreate = effectiveAction === "create" || !effectiveAction;
+    const wantsCreate = effectiveAction === "create" || effectiveAction === "open" || !effectiveAction;
     if (wantsCreate && prefill && prefill.trim()) {
       pendingAutoCreateRef.current = { signature, text: prefill };
     }
@@ -1393,13 +1306,6 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
           action: effectiveAction,
           query: query.trim(),
         };
-      }
-    }
-    
-    if (effectiveAction === "delete") {
-      const query = effectiveQuery || prefill;
-      if (typeof query === "string" && query.trim()) {
-        pendingDeleteRef.current = { query: query.trim() };
       }
     }
   }, [initialData]);
@@ -1782,18 +1688,9 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     setStats(s => ({ ...s, totalPoints: Math.max(0, s.totalPoints - r.pointsAwarded), completedAllTime: Math.max(0, s.completedAllTime - 1) }));
   };
 
-  // Track which completion queries we've already processed
-  const processedCompletionsRef = useRef<Set<string>>(new Set());
-  
   useEffect(() => {
     const pending = pendingCompletionRef.current;
     if (!pending) return;
-    
-    const queryKey = `${pending.action}:${pending.query}`;
-    if (processedCompletionsRef.current.has(queryKey)) {
-      pendingCompletionRef.current = null;
-      return;
-    }
 
     const match = bestMatchReminder(pending.query, pending.action === "uncomplete");
     if (!match) {
@@ -1806,10 +1703,6 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       return;
     }
 
-    // Mark as processed BEFORE performing action
-    processedCompletionsRef.current.add(queryKey);
-    pendingCompletionRef.current = null;
-
     if (pending.action === "complete") {
       trackEvent("hydration_complete_apply", { query: pending.query, matchedId: match.id });
       complete(match);
@@ -1817,41 +1710,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       trackEvent("hydration_uncomplete_apply", { query: pending.query, matchedId: match.id });
       uncomplete(match);
     }
-  }, [reminders]);
-  
-  // Process pending delete from hydration
-  // Track which delete queries we've already processed to prevent duplicate runs
-  const processedDeletesRef = useRef<Set<string>>(new Set());
-  
-  useEffect(() => {
-    const pending = pendingDeleteRef.current;
-    if (!pending) return;
-    
-    // Prevent processing the same delete twice
-    if (processedDeletesRef.current.has(pending.query)) {
-      pendingDeleteRef.current = null;
-      return;
-    }
-
-    const match = bestMatchReminder(pending.query, false);
-    if (!match) {
-      // Only show "no match" toast if we haven't already processed this query
-      // (avoids showing error after successful delete triggers re-render)
-      trackEvent("hydration_delete_no_match", {
-        query: pending.query,
-        reminderCount: reminders.length,
-      });
-      pendingDeleteRef.current = null;
-      setToast(`No reminder found matching "${pending.query}"`);
-      return;
-    }
-
-    // Mark as processed BEFORE calling del() to prevent race condition
-    processedDeletesRef.current.add(pending.query);
-    pendingDeleteRef.current = null;
-    
-    trackEvent("hydration_delete_apply", { query: pending.query, matchedId: match.id });
-    del(match.id);
+    pendingCompletionRef.current = null;
   }, [reminders]);
   
   // Snooze popup state - stores the reminder being snoozed
@@ -1888,46 +1747,6 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     setToast("Deleted"); 
   };
   
-  // Subscribe to daily digest email
-  const subscribeToDigest = async () => {
-    if (!digestEmail || !digestEmail.includes("@")) {
-      setToast("Please enter a valid email");
-      return;
-    }
-    setDigestLoading(true);
-    try {
-      const odaiSubject = (window as any).openai?.toolInput?._meta?.["openai/subject"] || "unknown";
-      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const res = await fetch("https://reminder-app-3pz5.onrender.com/api/daily-digest/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: digestEmail, odaiSubject, timezone, sendTime: "07:00" }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setDigestSubscribed(true);
-        try { localStorage.setItem("digest_subscribed", "true"); localStorage.setItem("digest_email", digestEmail); } catch {}
-        setToast("📧 Subscribed! Daily digest coming soon.");
-        trackEvent("daily_digest_subscribe_success", { email: digestEmail });
-
-        // Immediately sync current reminders to server under this email so cron can find them
-        try {
-          if ((window as any).openai?.callTool) {
-            const state = { reminders, stats, savedAt: Date.now(), ownerKey: digestEmail.toLowerCase() };
-            (window as any).openai.callTool("save_reminders", state).catch(() => {});
-          }
-        } catch {}
-      } else {
-        setToast(data.error || "Failed to subscribe");
-      }
-    } catch (err: any) {
-      setToast("Failed to subscribe: " + (err.message || "Unknown error"));
-      trackEvent("daily_digest_subscribe_error", { error: err.message });
-    } finally {
-      setDigestLoading(false);
-    }
-  };
-  
   // Reset all progress (for debugging/fresh start)
   const resetProgress = () => {
     trackEvent("reset_progress", { reminderCount: reminders.length, totalPoints: stats.totalPoints });
@@ -1942,6 +1761,46 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     });
     setToast("Progress reset! Start fresh.");
     console.log("[Reset] All progress cleared");
+  };
+
+  // Submit user feedback to backend
+  const submitFeedback = async () => {
+    const feedback = feedbackModal.text.trim();
+    if (!feedback) {
+      setFeedbackModal(prev => ({ ...prev, status: "Please enter feedback." }));
+      return;
+    }
+    setFeedbackModal(prev => ({ ...prev, sending: true, status: "Sending…" }));
+    trackEvent("user_feedback", { feedback });
+    
+    const TRACK_ENDPOINTS = [
+      "https://reminder-app-open-ai.onrender.com/api/track",
+      "/api/track",
+    ];
+    
+    try {
+      let ok = false;
+      for (const url of TRACK_ENDPOINTS) {
+        try {
+          const resp = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            mode: "cors",
+            body: JSON.stringify({ event: "widget_user_feedback", feedback }),
+          });
+          if (resp && resp.ok) { ok = true; break; }
+        } catch (_) { /* try next endpoint */ }
+      }
+      if (ok) {
+        setFeedbackModal({ open: false, text: "", status: "", sending: false });
+        setToast("Thanks for your feedback!");
+      } else {
+        setFeedbackModal(prev => ({ ...prev, status: "Failed to send. Please try again.", sending: false }));
+      }
+    } catch (err) {
+      console.error("Feedback submission error", err);
+      setFeedbackModal(prev => ({ ...prev, status: "Failed to send. Please try again.", sending: false }));
+    }
   };
 
   // Generate 40 sample reminders for testing
@@ -3186,80 +3045,6 @@ OR just paste a list:
         </div>
       </div>
 
-      {/* Daily Digest Email Subscription */}
-      <div style={{ 
-        marginTop: 16, 
-        padding: 20, 
-        backgroundColor: COLORS.card, 
-        borderRadius: cardRadius, 
-        boxShadow: cardShadow,
-        border: `1px solid ${COLORS.primary}30`
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-          <span style={{ fontSize: 20 }}>📧</span>
-          <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.textMain }}>Daily Reminder Digest</div>
-        </div>
-        {digestSubscribed ? (
-          <div style={{ 
-            padding: "12px 16px", 
-            backgroundColor: `${COLORS.primary}15`, 
-            borderRadius: 8, 
-            color: COLORS.primary,
-            fontSize: 13,
-            display: "flex",
-            alignItems: "center",
-            gap: 8
-          }}>
-            ✓ You're subscribed! Check your inbox each morning for your daily reminders.
-          </div>
-        ) : (
-          <>
-            <div style={{ fontSize: 12, color: COLORS.textSecondary, marginBottom: 12 }}>
-              Get a daily email with your reminders due today. Never miss a task again!
-            </div>
-            <div style={{ display: "flex", gap: 8 }}>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                value={digestEmail}
-                onChange={(e) => setDigestEmail(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && subscribeToDigest()}
-                style={{
-                  flex: 1,
-                  padding: "10px 14px",
-                  borderRadius: 8,
-                  border: `1px solid ${COLORS.border}`,
-                  backgroundColor: COLORS.cardAlt,
-                  color: COLORS.textMain,
-                  fontSize: 13,
-                  outline: "none"
-                }}
-              />
-              <button
-                onClick={subscribeToDigest}
-                disabled={digestLoading}
-                style={{
-                  padding: "10px 20px",
-                  borderRadius: 8,
-                  backgroundColor: COLORS.primary,
-                  color: "white",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  border: "none",
-                  cursor: digestLoading ? "wait" : "pointer",
-                  opacity: digestLoading ? 0.7 : 1
-                }}
-              >
-                {digestLoading ? "..." : "Subscribe"}
-              </button>
-            </div>
-            <div style={{ fontSize: 10, color: COLORS.textMuted, marginTop: 8 }}>
-              We'll send your digest at 7am in your timezone. Unsubscribe anytime.
-            </div>
-          </>
-        )}
-      </div>
-
       {/* Footer Buttons */}
       <div style={{ 
         marginTop: 16, 
@@ -3274,63 +3059,94 @@ OR just paste a list:
       }}>
         <button
           onClick={() => window.print()}
-          {...footerBtnHandlers("footer_print")}
-          style={footerBtnStyle("footer_print", {
+          style={{
             display: "flex", alignItems: "center", gap: 6,
             padding: "10px 16px", borderRadius: 50,
             backgroundColor: COLORS.cardAlt, color: COLORS.textSecondary,
             fontSize: 13, fontWeight: 500, cursor: "pointer",
             border: `1px solid ${COLORS.border}`
-          })}
+          }}
         >
           🖨️ Print
         </button>
         <button
           onClick={resetProgress}
-          {...footerBtnHandlers("footer_reset")}
-          style={footerBtnStyle("footer_reset", {
+          style={{
             display: "flex", alignItems: "center", gap: 6,
             padding: "10px 16px", borderRadius: 50,
             backgroundColor: COLORS.cardAlt, color: COLORS.textSecondary,
             fontSize: 13, fontWeight: 500, cursor: "pointer",
             border: `1px solid ${COLORS.border}`
-          })}
+          }}
         >
           🔄 Reset
         </button>
         <button
           onClick={() => window.open("https://buymeacoffee.com/jhteplitsky", "_blank")}
-          {...footerBtnHandlers("footer_donate")}
-          style={footerBtnStyle(
-            "footer_donate",
-            {
-              display: "flex", alignItems: "center", gap: 6,
-              padding: "10px 16px", borderRadius: 50,
-              backgroundColor: "#FFDD00", color: "#000",
-              fontSize: 13, fontWeight: 600, cursor: "pointer",
-              border: "none"
-            },
-            {
-              filter: "brightness(0.93)",
-            }
-          )}
+          style={{
+            display: "flex", alignItems: "center", gap: 6,
+            padding: "10px 16px", borderRadius: 50,
+            backgroundColor: "#FFDD00", color: "#000",
+            fontSize: 13, fontWeight: 600, cursor: "pointer",
+            border: "none"
+          }}
         >
           ☕ Donate
         </button>
         <button
-          onClick={() => window.open("mailto:jonathan@teplitsky.com?subject=Reminder%20App%20Feedback", "_blank")}
-          {...footerBtnHandlers("footer_feedback")}
-          style={footerBtnStyle("footer_feedback", {
+          onClick={() => setFeedbackModal({ open: true, text: "", status: "", sending: false })}
+          style={{
             display: "flex", alignItems: "center", gap: 6,
             padding: "10px 16px", borderRadius: 50,
             backgroundColor: COLORS.cardAlt, color: COLORS.textSecondary,
             fontSize: 13, fontWeight: 500, cursor: "pointer",
             border: `1px solid ${COLORS.border}`
-          })}
+          }}
         >
           💬 Feedback
         </button>
       </div>
+
+      {/* Feedback Modal */}
+      {feedbackModal.open && (
+        <div 
+          onClick={(e) => { if (e.target === e.currentTarget) setFeedbackModal(prev => ({ ...prev, open: false })); }}
+          style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 16 }}
+        >
+          <div style={{ backgroundColor: COLORS.card, borderRadius: 24, width: "100%", maxWidth: 420, padding: 24, boxShadow: "0 16px 48px rgba(0,0,0,0.15)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: COLORS.textMain }}>Share Feedback</h2>
+              <button onClick={() => setFeedbackModal(prev => ({ ...prev, open: false }))} style={{ width: 36, height: 36, borderRadius: "50%", border: "none", backgroundColor: COLORS.inputBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><X size={18} color={COLORS.textMuted} /></button>
+            </div>
+            <p style={{ margin: "0 0 16px", fontSize: 14, color: COLORS.textSecondary }}>Tell us what worked or what could be improved.</p>
+            <textarea
+              value={feedbackModal.text}
+              onChange={(e) => setFeedbackModal(prev => ({ ...prev, text: e.target.value, status: "" }))}
+              onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") submitFeedback(); }}
+              placeholder="Your feedback..."
+              style={{ width: "100%", minHeight: 120, padding: 14, borderRadius: 14, border: "none", backgroundColor: COLORS.inputBg, fontSize: 15, color: COLORS.textMain, resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
+            />
+            {feedbackModal.status && (
+              <p style={{ margin: "12px 0 0", fontSize: 13, color: feedbackModal.status.includes("Failed") || feedbackModal.status.includes("Please") ? "#ef4444" : COLORS.textSecondary }}>{feedbackModal.status}</p>
+            )}
+            <div style={{ display: "flex", gap: 12, marginTop: 16, justifyContent: "flex-end" }}>
+              <button
+                onClick={() => setFeedbackModal(prev => ({ ...prev, open: false }))}
+                style={{ padding: "10px 18px", borderRadius: 50, backgroundColor: COLORS.inputBg, color: COLORS.textSecondary, fontSize: 14, fontWeight: 500, cursor: "pointer", border: "none" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitFeedback}
+                disabled={feedbackModal.sending}
+                style={{ padding: "10px 18px", borderRadius: 50, backgroundColor: COLORS.primary, color: "#fff", fontSize: 14, fontWeight: 600, cursor: feedbackModal.sending ? "not-allowed" : "pointer", border: "none", opacity: feedbackModal.sending ? 0.7 : 1 }}
+              >
+                {feedbackModal.sending ? "Sending…" : "Send"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit Modal - modern style */}
       {editing && (
