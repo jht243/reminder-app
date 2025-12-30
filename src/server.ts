@@ -196,7 +196,7 @@ function widgetMeta(widget: ReminderWidget, bustCache: boolean = false) {
   return {
     "openai/outputTemplate": templateUri,
     "openai/widgetDescription":
-      "Create Reminders App - An AI-powered reminder app with natural language input. No input is required to open the app: prompts like 'create a reminder', 'open the reminder app', or 'show my reminders' should open the widget immediately. If you do provide details (e.g. 'Call mom tomorrow at 5pm'), they'll be parsed automatically. Features gamification with points, streaks, and achievements. Supports recurring reminders, categories, and priority levels.",
+      "Create Reminders App - An AI-powered reminder app with natural language input. No input is required to open the app: prompts like 'create a reminder', 'open the reminder app', or 'show my reminders' should open the widget immediately. If you provide details (e.g. 'Call mom tomorrow at 5pm'), they'll be parsed automatically. You can also manage reminders inside this widget (complete, uncomplete, delete/remove) using phrases like 'delete feed cat' or 'I completed feed cat'. This tool manages reminders inside the widget (not the device/system Reminders app). Features gamification with points, streaks, and achievements. Supports recurring reminders, categories, and priority levels.",
     "openai/componentDescriptions": {
       "task-input": "Natural language input for creating reminders - just type what you need to remember.",
       "reminder-list": "Organized display of reminders with category filters, search, and sorting.",
@@ -224,6 +224,9 @@ function widgetMeta(widget: ReminderWidget, bustCache: boolean = false) {
       { "user": "Remind me to call mom tomorrow at 3pm", "assistant": "Opening Create Reminders App. I've added 'Call mom' for tomorrow at 3pm." },
       { "user": "I need to buy groceries, pay rent on Friday, and schedule a dentist appointment", "assistant": "Opening Create Reminders App. I've added 3 reminders for you." },
       { "user": "Set a daily reminder to take vitamins at 9am", "assistant": "Done! I've created a daily recurring reminder for vitamins at 9am." },
+      { "user": "Delete the reminder feed cat", "assistant": "Opening Create Reminders App. I'll remove 'feed cat' from your reminders." },
+      { "user": "Remove feed cat", "assistant": "Opening Create Reminders App. I'll remove 'feed cat' from your reminders." },
+      { "user": "I completed feed cat, remove it", "assistant": "Opening Create Reminders App. I'll mark 'feed cat' complete and remove it." },
       { "user": "What tasks do I have this week?", "assistant": "Here are your reminders for this week in Create Reminders App." },
     ],
     "openai/starterPrompts": [
@@ -232,6 +235,9 @@ function widgetMeta(widget: ReminderWidget, bustCache: boolean = false) {
       "Remind me to call mom tomorrow at 5pm",
       "Add: Buy groceries, Pay bills Friday, Call dentist",
       "Set a daily reminder to take vitamins",
+      "Delete the reminder feed cat",
+      "Remove feed cat",
+      "I completed feed cat",
       "What tasks do I have today?",
       "Help me stay organized with reminders",
       "Create a reminder for my meeting next Monday",
@@ -385,7 +391,7 @@ const tools: Tool[] = [
   ...widgets.map((widget) => ({
   name: widget.id,
   description:
-    "Open Create Reminders App. No input is required: prompts like 'create a reminder', 'open the reminder app', or 'show my reminders' should open the widget immediately. If the user provides reminder details (e.g. 'Call mom tomorrow at 3pm'), they will be parsed and pre-filled. Use this tool to create, view, and manage reminders (search/filter, recurring, snooze, gamification).",
+    "Open Create Reminders App and manage reminders inside the widget. No input is required: prompts like 'create a reminder', 'open the reminder app', or 'show my reminders' should open the widget immediately. If the user provides reminder details (e.g. 'Call mom tomorrow at 3pm'), they will be parsed and pre-filled. If the user wants to manage existing reminders, use action=complete/uncomplete/delete (e.g. 'delete feed cat', 'remove feed cat', 'I completed feed cat'). This tool manages reminders inside the widget (not the device/system Reminders app).",
   inputSchema: toolInputSchema,
   outputSchema: {
     type: "object",
@@ -401,6 +407,7 @@ const tools: Tool[] = [
       natural_input: { type: "string" },
       action: { type: "string" },
       complete_query: { type: "string" },
+      delete_query: { type: "string" },
       input_source: { type: "string", enum: ["user", "default"] },
       summary: {
         type: "object",
@@ -426,7 +433,7 @@ const tools: Tool[] = [
     securitySchemes: [{ type: "noauth" }],
   },
   annotations: {
-    readOnlyHint: true,
+    readOnlyHint: false,
     destructiveHint: false,
     idempotentHint: true,
     openWorldHint: false,
