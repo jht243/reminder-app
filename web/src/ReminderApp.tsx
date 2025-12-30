@@ -1229,24 +1229,56 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     // Helper to strip quotes from extracted query
     const stripQuotes = (q: string): string => q.replace(/^["']|["']$/g, "").trim();
 
-    // Check for explicit "complete" intent
-    // Matches: "i've completed feeding my cat", "i completed feeding my cat", "completed feeding my cat"
-    // Also: "i have completed X", "i've finished X", "done with X", "finished X"
-    // Also: "mark feeding my cat as done", "check off feeding my cat"
-    const completeMatch = lower.match(/^\s*(?:i'?(?:ve|'ve)?\s+)?(?:have\s+)?(?:completed|finished|done(?:\s+with)?|checked\s+off)\s+(.+)$/i) ||
-                          lower.match(/^\s*(?:mark|set)\s+(?:task\s+)?(.+?)\s+(?:as\s+)?(?:complete|completed|done|finished)$/i) ||
-                          lower.match(/^\s*(?:remove|delete)\s+(.+?)\s+(?:from\s+(?:my\s+)?reminders|from\s+(?:my\s+)?list)?$/i);
+    // ========================================
+    // COMPLETION INTENT DETECTION
+    // ========================================
+    // Priority: Detect "complete/done/remove/delete" actions FIRST before falling back to "create"
+    // These patterns should catch any intent to mark something as complete or remove it
     
-    if (completeMatch && completeMatch[1]) {
-      // Treat "remove/delete" as complete to avoid destructive actions without confirmation
-      // Strip quotes from the query for better matching
-      return { action: "complete", query: stripQuotes(completeMatch[1].trim()), prefill: t };
+    // Pattern 1: "i've completed X", "i completed X", "completed X", "i have completed X"
+    // Also: "i've finished X", "finished X", "done with X", "i'm done with X"
+    const completedPattern = lower.match(/^\s*(?:i(?:'ve|'ve|'m|\s+have|\s+am)?\s+)?(?:completed|finished|done(?:\s+with)?|checked\s+off)\s+(.+)$/i);
+    if (completedPattern && completedPattern[1]) {
+      return { action: "complete", query: stripQuotes(completedPattern[1].trim()), prefill: t };
     }
 
-    const uncompleteMatch = lower.match(/^\s*(undo|uncomplete|mark)\s+(it\s+)?(as\s+)?(not\s+complete|incomplete|not\s+done)\s+(that\s+)?(i\s+)?(.+)$/i);
-    if (uncompleteMatch && uncompleteMatch[7]) {
-      return { action: "uncomplete", query: uncompleteMatch[7].trim(), prefill: t };
+    // Pattern 2: "mark X as done/complete", "set X as done/complete"
+    const markAsPattern = lower.match(/^\s*(?:mark|set)\s+(.+?)\s+(?:as\s+)?(?:complete|completed|done|finished)$/i);
+    if (markAsPattern && markAsPattern[1]) {
+      return { action: "complete", query: stripQuotes(markAsPattern[1].trim()), prefill: t };
     }
+
+    // Pattern 3: "remove X" or "delete X" (with or without "from reminders/list")
+    // This is the key fix: (.+) is greedy and captures everything after remove/delete
+    const removePattern = lower.match(/^\s*(?:remove|delete)\s+(.+?)(?:\s+from\s+(?:my\s+)?(?:reminders|list|tasks))?$/i);
+    if (removePattern && removePattern[1]) {
+      return { action: "complete", query: stripQuotes(removePattern[1].trim()), prefill: t };
+    }
+
+    // Pattern 4: "check off X"
+    const checkOffPattern = lower.match(/^\s*check\s+off\s+(.+)$/i);
+    if (checkOffPattern && checkOffPattern[1]) {
+      return { action: "complete", query: stripQuotes(checkOffPattern[1].trim()), prefill: t };
+    }
+
+    // Pattern 5: "X is done" or "X is complete"
+    const isDonePattern = lower.match(/^\s*(.+?)\s+is\s+(?:done|complete|completed|finished)$/i);
+    if (isDonePattern && isDonePattern[1]) {
+      return { action: "complete", query: stripQuotes(isDonePattern[1].trim()), prefill: t };
+    }
+
+    // ========================================
+    // UNCOMPLETE INTENT DETECTION
+    // ========================================
+    const uncompleteMatch = lower.match(/^\s*(?:undo|uncomplete|uncheck|restore)\s+(.+)$/i) ||
+                            lower.match(/^\s*(?:mark|set)\s+(.+?)\s+(?:as\s+)?(?:not\s+complete|incomplete|not\s+done|undone)$/i);
+    if (uncompleteMatch && uncompleteMatch[1]) {
+      return { action: "uncomplete", query: stripQuotes(uncompleteMatch[1].trim()), prefill: t };
+    }
+
+    // ========================================
+    // DEFAULT: CREATE NEW REMINDER
+    // ========================================
     return { action: "create", prefill: t };
   };
 

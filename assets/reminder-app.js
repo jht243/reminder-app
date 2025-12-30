@@ -27057,13 +27057,29 @@ function ReminderApp({ initialData: initialData2 }) {
     const t = text.trim();
     const lower = t.toLowerCase();
     const stripQuotes = (q) => q.replace(/^["']|["']$/g, "").trim();
-    const completeMatch = lower.match(/^\s*(?:i'?(?:ve|'ve)?\s+)?(?:have\s+)?(?:completed|finished|done(?:\s+with)?|checked\s+off)\s+(.+)$/i) || lower.match(/^\s*(?:mark|set)\s+(?:task\s+)?(.+?)\s+(?:as\s+)?(?:complete|completed|done|finished)$/i) || lower.match(/^\s*(?:remove|delete)\s+(.+?)\s+(?:from\s+(?:my\s+)?reminders|from\s+(?:my\s+)?list)?$/i);
-    if (completeMatch && completeMatch[1]) {
-      return { action: "complete", query: stripQuotes(completeMatch[1].trim()), prefill: t };
+    const completedPattern = lower.match(/^\s*(?:i(?:'ve|'ve|'m|\s+have|\s+am)?\s+)?(?:completed|finished|done(?:\s+with)?|checked\s+off)\s+(.+)$/i);
+    if (completedPattern && completedPattern[1]) {
+      return { action: "complete", query: stripQuotes(completedPattern[1].trim()), prefill: t };
     }
-    const uncompleteMatch = lower.match(/^\s*(undo|uncomplete|mark)\s+(it\s+)?(as\s+)?(not\s+complete|incomplete|not\s+done)\s+(that\s+)?(i\s+)?(.+)$/i);
-    if (uncompleteMatch && uncompleteMatch[7]) {
-      return { action: "uncomplete", query: uncompleteMatch[7].trim(), prefill: t };
+    const markAsPattern = lower.match(/^\s*(?:mark|set)\s+(.+?)\s+(?:as\s+)?(?:complete|completed|done|finished)$/i);
+    if (markAsPattern && markAsPattern[1]) {
+      return { action: "complete", query: stripQuotes(markAsPattern[1].trim()), prefill: t };
+    }
+    const removePattern = lower.match(/^\s*(?:remove|delete)\s+(.+?)(?:\s+from\s+(?:my\s+)?(?:reminders|list|tasks))?$/i);
+    if (removePattern && removePattern[1]) {
+      return { action: "complete", query: stripQuotes(removePattern[1].trim()), prefill: t };
+    }
+    const checkOffPattern = lower.match(/^\s*check\s+off\s+(.+)$/i);
+    if (checkOffPattern && checkOffPattern[1]) {
+      return { action: "complete", query: stripQuotes(checkOffPattern[1].trim()), prefill: t };
+    }
+    const isDonePattern = lower.match(/^\s*(.+?)\s+is\s+(?:done|complete|completed|finished)$/i);
+    if (isDonePattern && isDonePattern[1]) {
+      return { action: "complete", query: stripQuotes(isDonePattern[1].trim()), prefill: t };
+    }
+    const uncompleteMatch = lower.match(/^\s*(?:undo|uncomplete|uncheck|restore)\s+(.+)$/i) || lower.match(/^\s*(?:mark|set)\s+(.+?)\s+(?:as\s+)?(?:not\s+complete|incomplete|not\s+done|undone)$/i);
+    if (uncompleteMatch && uncompleteMatch[1]) {
+      return { action: "uncomplete", query: stripQuotes(uncompleteMatch[1].trim()), prefill: t };
     }
     return { action: "create", prefill: t };
   };
