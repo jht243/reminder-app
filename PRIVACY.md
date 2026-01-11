@@ -67,7 +67,7 @@ We may update this policy periodically. Significant changes will be noted in the
 ## Contact
 
 For privacy questions or data deletion requests:
-- **Email**: support@layer3labs.com
+- **Email**: support@layer3labs.io
 - **Deletion requests**: Include the UTC timestamp of your ChatGPT session; we will delete associated logs within 7 business days.
 
 ---
