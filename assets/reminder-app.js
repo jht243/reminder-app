@@ -26709,7 +26709,7 @@ var parseNaturalLanguage = (input) => {
   if (category !== "other") confidence += 15;
   const priority = detectPriority(input, dueDate);
   if (priority !== "medium") confidence += 10;
-  let title = input.replace(/^remind\s+me\s+(to\s+)?/gi, "").replace(/^don't\s+forget\s+(to\s+)?/gi, "").replace(/^i\s+need\s+to\s+/gi, "").replace(/^need\s+to\s+/gi, "").replace(/\bevery\s+\d+\s+days?\b/gi, "").replace(/\bevery\s+\d+\s+weeks?\b/gi, "").replace(/\bevery\s+\d+\s+months?\b/gi, "").replace(/\bevery\s+\d+\s+years?\b/gi, "").replace(/\bevery\s+other\s+(day|week|month|year)\b/gi, "").replace(/\bevery\s+(sundays?|mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?)(\s*(,|and)\s*(sundays?|mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?))*/gi, "").replace(/\bevery\s*day\b/gi, "").replace(/\bevery\s*week\b/gi, "").replace(/\bevery\s*month\b/gi, "").replace(/\bevery\s*year\b/gi, "").replace(/\bdaily\b/gi, "").replace(/\bweekly\b/gi, "").replace(/\bmonthly\b/gi, "").replace(/\byearly\b/gi, "").replace(/\bannually\b/gi, "").replace(/\bbi-?weekly\b/gi, "").replace(/\bbi-?monthly\b/gi, "").replace(/\bat\s+\d{1,2}(:\d{2})?\s*(am|pm)?\b/gi, "").replace(/\b\d{1,2}\s*(am|pm)\b/gi, "").replace(/\btoday\b/gi, "").replace(/\btomorrow\b/gi, "").replace(/\btonight\b/gi, "").replace(/\bnext\s+week\b/gi, "").replace(/\bthis\s+weekend\b/gi, "").replace(/\bin\s+\d+\s+(days?|hours?|weeks?|months?)\b/gi, "").replace(/\bon\s+(sundays?|mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?)\b/gi, "").replace(/\bon\s+((?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)(?:\s*(?:,|and)\s*(?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat))*)/gi, "").replace(/\b((?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)(?:\s*(?:,|and)\s*(?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat))+)\s+to\s+/gi, "").replace(/\burgent\b/gi, "").replace(/\basap\b/gi, "").replace(/\bimmediately\b/gi, "").replace(/\bimportant\b/gi, "").replace(/\bhigh\s+priority\b/gi, "").replace(/\blow\s+priority\b/gi, "").replace(/\bno\s+rush\b/gi, "").replace(/\s+to\s+$/gi, "").replace(/^\s*to\s+/gi, "").replace(/\s+/g, " ").trim();
+  let title = input.replace(/^(add|set|create)\s+a?\s*reminders?\s+(to\s+|for\s+)?/gi, "").replace(/^a?\s*reminders?\s+(to\s+|for\s+)/gi, "").replace(/^remind\s+me\s+(to\s+)?/gi, "").replace(/^don't\s+forget\s+(to\s+)?/gi, "").replace(/^i\s+need\s+to\s+/gi, "").replace(/^need\s+to\s+/gi, "").replace(/\bevery\s+\d+\s+days?\b/gi, "").replace(/\bevery\s+\d+\s+weeks?\b/gi, "").replace(/\bevery\s+\d+\s+months?\b/gi, "").replace(/\bevery\s+\d+\s+years?\b/gi, "").replace(/\bevery\s+other\s+(day|week|month|year)\b/gi, "").replace(/\bevery\s+(sundays?|mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?)(\s*(,|and)\s*(sundays?|mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?))*/gi, "").replace(/\bevery\s*day\b/gi, "").replace(/\bevery\s*week\b/gi, "").replace(/\bevery\s*month\b/gi, "").replace(/\bevery\s*year\b/gi, "").replace(/\bdaily\b/gi, "").replace(/\bweekly\b/gi, "").replace(/\bmonthly\b/gi, "").replace(/\byearly\b/gi, "").replace(/\bannually\b/gi, "").replace(/\bbi-?weekly\b/gi, "").replace(/\bbi-?monthly\b/gi, "").replace(/\bat\s+\d{1,2}(:\d{2})?\s*(am|pm)?\b/gi, "").replace(/\b\d{1,2}\s*(am|pm)\b/gi, "").replace(/\btoday\b/gi, "").replace(/\btomorrow\b/gi, "").replace(/\btonight\b/gi, "").replace(/\bnext\s+week\b/gi, "").replace(/\bthis\s+weekend\b/gi, "").replace(/\bin\s+\d+\s+(days?|hours?|weeks?|months?)\b/gi, "").replace(/\bon\s+(sundays?|mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?)\b/gi, "").replace(/\bon\s+((?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)(?:\s*(?:,|and)\s*(?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat))*)/gi, "").replace(/\b((?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)(?:\s*(?:,|and)\s*(?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat))+)\s+to\s+/gi, "").replace(/\burgent\b/gi, "").replace(/\basap\b/gi, "").replace(/\bimmediately\b/gi, "").replace(/\bimportant\b/gi, "").replace(/\bhigh\s+priority\b/gi, "").replace(/\blow\s+priority\b/gi, "").replace(/\bno\s+rush\b/gi, "").replace(/\s+to\s+$/gi, "").replace(/^\s*to\s+/gi, "").replace(/[.!]+$/, "").replace(/\s+/g, " ").trim();
   if (title && title.length > 0) {
     title = title.charAt(0).toUpperCase() + title.slice(1);
     confidence += 25;
@@ -26920,6 +26920,29 @@ function ReminderApp({ initialData: initialData2 }) {
   const hydrationAutoCreateAppliedRef = (0, import_react3.useRef)(/* @__PURE__ */ new Set());
   const pendingAutoCreateRef = (0, import_react3.useRef)(null);
   const pendingCompletionRef = (0, import_react3.useRef)(null);
+  const HYDRATION_DEDUP_KEY = "__reminder_hydration_sigs";
+  const isHydrationSignatureSeen = (sig) => {
+    if (hydrationAppliedRef.current.has(sig)) return true;
+    try {
+      const stored = sessionStorage.getItem(HYDRATION_DEDUP_KEY);
+      if (stored) {
+        const sigs = JSON.parse(stored);
+        if (sigs.includes(sig)) return true;
+      }
+    } catch {
+    }
+    return false;
+  };
+  const markHydrationSignature = (sig) => {
+    hydrationAppliedRef.current.add(sig);
+    try {
+      const stored = sessionStorage.getItem(HYDRATION_DEDUP_KEY);
+      const sigs = stored ? JSON.parse(stored) : [];
+      if (!sigs.includes(sig)) sigs.push(sig);
+      sessionStorage.setItem(HYDRATION_DEDUP_KEY, JSON.stringify(sigs.slice(-20)));
+    } catch {
+    }
+  };
   const [editing, setEditing] = (0, import_react3.useState)(null);
   const [search, setSearch] = (0, import_react3.useState)("");
   const [searchExpanded, setSearchExpanded] = (0, import_react3.useState)(false);
@@ -27105,10 +27128,10 @@ function ReminderApp({ initialData: initialData2 }) {
     const effectiveAction = actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "create" || actionRaw === "open" ? actionRaw : infer.action;
     const effectiveQuery = completeQueryRaw || infer.query || "";
     const signature = JSON.stringify({ prefill, action: effectiveAction || "", query: effectiveQuery });
-    if (hydrationAppliedRef.current.has(signature)) return;
+    if (isHydrationSignatureSeen(signature)) return;
     const hasAny = Boolean(prefill) || Boolean(effectiveAction) || Boolean(effectiveQuery);
     if (!hasAny) return;
-    hydrationAppliedRef.current.add(signature);
+    markHydrationSignature(signature);
     if (effectiveAction === "complete" && effectiveQuery) {
       const target = bestMatchReminder(effectiveQuery, false);
       if (target) {
@@ -27159,13 +27182,22 @@ function ReminderApp({ initialData: initialData2 }) {
   (0, import_react3.useEffect)(() => {
     const pending = pendingAutoCreateRef.current;
     if (!pending) return;
-    if (hydrationAutoCreateAppliedRef.current.has(pending.signature)) {
+    if (hydrationAutoCreateAppliedRef.current.has(pending.signature) || isHydrationSignatureSeen(pending.signature)) {
       pendingAutoCreateRef.current = null;
       return;
     }
     if (!input || input.trim() !== pending.text.trim()) return;
     if (!parsed) return;
+    const recentDuplicate = reminders.some((r) => {
+      const age = Date.now() - new Date(r.createdAt).getTime();
+      return age < 5e3 && normalizeQuery(r.title) === normalizeQuery(parsed.title);
+    });
+    if (recentDuplicate) {
+      pendingAutoCreateRef.current = null;
+      return;
+    }
     hydrationAutoCreateAppliedRef.current.add(pending.signature);
+    markHydrationSignature(pending.signature);
     pendingAutoCreateRef.current = null;
     trackEvent("hydration_autocreate", {
       inputLength: input.length,

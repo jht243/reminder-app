@@ -379,8 +379,8 @@ const parseCSV = (content: string): Partial<Reminder>[] => {
   return results;
 };
 
-// Full natural language parser
-const parseNaturalLanguage = (input: string): ParsedReminder => {
+// Full natural language parser (exported for local scripts / tests)
+export const parseNaturalLanguage = (input: string): ParsedReminder => {
   const lower = input.toLowerCase();
   const today = new Date();
   let confidence = 0;
@@ -746,6 +746,8 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
   // Order matters: remove longer/more specific patterns first
   let title = input
     // Remove common reminder prefixes FIRST
+    .replace(/^(add|set|create)\s+a?\s*reminders?\s+(to\s+|for\s+)?/gi, "")
+    .replace(/^a?\s*reminders?\s+(to\s+|for\s+)/gi, "")
     .replace(/^remind\s+me\s+(to\s+)?/gi, "")
     .replace(/^don't\s+forget\s+(to\s+)?/gi, "")
     .replace(/^i\s+need\s+to\s+/gi, "")
@@ -793,6 +795,7 @@ const parseNaturalLanguage = (input: string): ParsedReminder => {
     // Clean up whitespace and connectors
     .replace(/\s+to\s+$/gi, "")  // trailing "to"
     .replace(/^\s*to\s+/gi, "")  // leading "to"
+    .replace(/[.!]+$/, "")       // trailing punctuation
     .replace(/\s+/g, " ")
     .trim();
   
@@ -1023,6 +1026,28 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const hydrationAutoCreateAppliedRef = useRef<Set<string>>(new Set());
   const pendingAutoCreateRef = useRef<{ signature: string; text: string } | null>(null);
   const pendingCompletionRef = useRef<{ action: "complete" | "uncomplete"; query: string } | null>(null);
+
+  const HYDRATION_DEDUP_KEY = "__reminder_hydration_sigs";
+  const isHydrationSignatureSeen = (sig: string): boolean => {
+    if (hydrationAppliedRef.current.has(sig)) return true;
+    try {
+      const stored = sessionStorage.getItem(HYDRATION_DEDUP_KEY);
+      if (stored) {
+        const sigs: string[] = JSON.parse(stored);
+        if (sigs.includes(sig)) return true;
+      }
+    } catch {}
+    return false;
+  };
+  const markHydrationSignature = (sig: string) => {
+    hydrationAppliedRef.current.add(sig);
+    try {
+      const stored = sessionStorage.getItem(HYDRATION_DEDUP_KEY);
+      const sigs: string[] = stored ? JSON.parse(stored) : [];
+      if (!sigs.includes(sig)) sigs.push(sig);
+      sessionStorage.setItem(HYDRATION_DEDUP_KEY, JSON.stringify(sigs.slice(-20)));
+    } catch {}
+  };
   
   // Edit mode (only after creation)
   const [editing, setEditing] = useState<Reminder | null>(null);
@@ -1319,12 +1344,12 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     const effectiveQuery = completeQueryRaw || infer.query || "";
 
     const signature = JSON.stringify({ prefill, action: effectiveAction || "", query: effectiveQuery });
-    if (hydrationAppliedRef.current.has(signature)) return;
+    if (isHydrationSignatureSeen(signature)) return;
 
     const hasAny = Boolean(prefill) || Boolean(effectiveAction) || Boolean(effectiveQuery);
     if (!hasAny) return;
 
-    hydrationAppliedRef.current.add(signature);
+    markHydrationSignature(signature);
 
     // Execute hydration action
     if (effectiveAction === "complete" && effectiveQuery) {
@@ -1388,7 +1413,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   useEffect(() => {
     const pending = pendingAutoCreateRef.current;
     if (!pending) return;
-    if (hydrationAutoCreateAppliedRef.current.has(pending.signature)) {
+    if (hydrationAutoCreateAppliedRef.current.has(pending.signature) || isHydrationSignatureSeen(pending.signature)) {
       pendingAutoCreateRef.current = null;
       return;
     }
@@ -1396,7 +1421,18 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     if (!input || input.trim() !== pending.text.trim()) return;
     if (!parsed) return;
 
+    // Guard: skip if a reminder with the same title was created very recently
+    const recentDuplicate = reminders.some(r => {
+      const age = Date.now() - new Date(r.createdAt).getTime();
+      return age < 5000 && normalizeQuery(r.title) === normalizeQuery(parsed.title);
+    });
+    if (recentDuplicate) {
+      pendingAutoCreateRef.current = null;
+      return;
+    }
+
     hydrationAutoCreateAppliedRef.current.add(pending.signature);
+    markHydrationSignature(pending.signature);
     pendingAutoCreateRef.current = null;
     trackEvent("hydration_autocreate", {
       inputLength: input.length,
