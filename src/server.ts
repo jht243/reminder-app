@@ -189,7 +189,7 @@ function widgetMeta(widget: ReminderWidget, bustCache: boolean = false) {
   return {
     "openai/outputTemplate": templateUri,
     "openai/widgetDescription":
-      "Create Reminders App - An AI-powered reminder app with natural language input. No input is required to open the app: prompts like 'create a reminder', 'open the reminder app', or 'show my reminders' should open the widget immediately. If you do provide details (e.g. 'Call mom tomorrow at 5pm'), they'll be parsed automatically. Features gamification with points, streaks, and achievements. Supports recurring reminders, categories, and priority levels.",
+      "Create Reminders App - An AI-powered reminder app with natural language input. No input is required to open the app: prompts like 'create a reminder', 'open the reminder app', or 'show my reminders' should open the widget immediately with no arguments. When the user provides reminder details, always pass their full text in natural_input and extract title, due_date (YYYY-MM-DD), due_time (HH:MM), and recurrence when possible. The widget parser handles typos, varied grammar, relative dates, and recurrence detection internally.",
     "openai/componentDescriptions": {
       "task-input": "Natural language input for creating reminders - just type what you need to remember.",
       "reminder-list": "Organized display of reminders with category filters, search, and sorting.",
@@ -274,28 +274,48 @@ widgets.forEach((widget) => {
 const toolInputSchema = {
   type: "object",
   properties: {
-    title: { type: "string", description: "The reminder title or what to be reminded about." },
-    description: { type: "string", description: "Optional detailed description." },
-    due_date: { type: "string", description: "Due date in YYYY-MM-DD format." },
-    due_time: { type: "string", description: "Due time in HH:MM format." },
-    priority: { type: "string", enum: ["low", "medium", "high", "urgent"], description: "Priority level." },
-    tags: { type: "array", items: { type: "string" }, description: "Tags for categorization." },
-    recurrence: { type: "string", enum: ["none", "daily", "weekly", "monthly"], description: "Recurrence pattern." },
+    natural_input: {
+      type: "string",
+      description: "ALWAYS pass the user's original reminder text here exactly as they wrote it, including any dates, times, recurrence, and typos. Examples: 'call mom tomorrow at 5pm', 'take vitamins daily at 9am', 'pay rent on friday'. The widget's parser handles all natural language interpretation, date resolution, and typo correction.",
+    },
+    title: {
+      type: "string",
+      description: "Short task name extracted from the user's message. Only the action/subject, not dates or times. Examples: 'call mom', 'take vitamins', 'pay rent'. If unsure, omit and let natural_input handle it.",
+    },
+    due_date: {
+      type: "string",
+      description: "Due date in YYYY-MM-DD format. Convert relative references: 'tomorrow' → tomorrow's date, 'friday' → next Friday's date, 'next week' → next Monday's date. Omit if no date is mentioned.",
+    },
+    due_time: {
+      type: "string",
+      description: "Due time in HH:MM (24-hour) format. Convert from natural language: '5pm' → '17:00', '9am' → '09:00', 'noon' → '12:00', 'midnight' → '00:00'. Omit if no time is mentioned.",
+    },
+    priority: {
+      type: "string",
+      enum: ["low", "medium", "high", "urgent"],
+      description: "Priority level. Only set if the user explicitly mentions priority or urgency. 'urgent'/'asap' → 'urgent', 'important' → 'high', 'no rush'/'whenever' → 'low'. Omit otherwise.",
+    },
+    recurrence: {
+      type: "string",
+      enum: ["none", "daily", "weekly", "monthly"],
+      description: "Recurrence pattern. Set when the user says 'daily', 'every day', 'weekly', 'every week', 'monthly', 'every month', etc. Omit if no recurrence is mentioned.",
+    },
     recurrence_days: {
       type: "array",
       items: { type: "number" },
-      description: "For weekly recurrence: list of weekday numbers (0=Sun..6=Sat), e.g. [2,4] for Tue/Thu.",
+      description: "For weekly recurrence on specific days: list of weekday numbers (0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat). Example: 'every tuesday and thursday' → [2, 4]. Only set with weekly recurrence.",
     },
-    natural_input: { type: "string", description: "Natural language input like 'remind me to call mom tomorrow at 3pm'." },
     action: {
       type: "string",
       enum: ["open", "create", "complete", "uncomplete"],
-      description: "Optional intent for the widget to apply on open. 'open'/'create' prefill input, 'complete' marks a reminder complete, 'uncomplete' reverses completion.",
+      description: "Intent for the widget. Use 'create' when the user provides reminder details to add. Use 'open' when the user just wants to see their reminders. Use 'complete' when the user says they finished a task. Omit to let the widget infer from context.",
     },
     complete_query: {
       type: "string",
-      description: "If action is 'complete' or 'uncomplete', this is the reminder title/query to match (e.g. 'mailed the check to my landlord').",
+      description: "When action is 'complete' or 'uncomplete', the reminder title or phrase to match against existing reminders. Example: user says 'I finished calling mom' → complete_query: 'call mom'.",
     },
+    description: { type: "string", description: "Optional detailed description for the reminder. Only set if the user provides extra context beyond the task name." },
+    tags: { type: "array", items: { type: "string" }, description: "Optional tags for categorization. Only set if the user explicitly mentions categories or labels." },
   },
   required: [],
   additionalProperties: false,
@@ -303,24 +323,24 @@ const toolInputSchema = {
 } as const;
 
 const toolInputParser = z.object({
+  natural_input: z.string().optional(),
   title: z.string().optional(),
-  description: z.string().optional(),
   due_date: z.string().optional(),
   due_time: z.string().optional(),
   priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
-  tags: z.array(z.string()).optional(),
   recurrence: z.enum(["none", "daily", "weekly", "monthly"]).optional(),
   recurrence_days: z.array(z.number().int().min(0).max(6)).optional(),
-  natural_input: z.string().optional(),
   action: z.enum(["open", "create", "complete", "uncomplete"]).optional(),
   complete_query: z.string().optional(),
+  description: z.string().optional(),
+  tags: z.array(z.string()).optional(),
 });
 
 const tools: Tool[] = [
   ...widgets.map((widget) => ({
   name: widget.id,
   description:
-    "Open Create Reminders App. No input is required: prompts like 'create a reminder', 'open the reminder app', or 'show my reminders' should open the widget immediately. If the user provides reminder details (e.g. 'Call mom tomorrow at 3pm'), they will be parsed and pre-filled. Use this tool to create, view, and manage reminders (search/filter, recurring, snooze, gamification).",
+    "Open Create Reminders App. No input is required: prompts like 'create a reminder', 'open the reminder app', or 'show my reminders' should open the widget immediately with no arguments. When the user provides reminder details (e.g. 'Call mom tomorrow at 5pm', 'set a daily reminder to take vitamins at 9am'), always pass their full text in natural_input and extract structured fields (title, due_date, due_time, recurrence) when possible. The widget handles typos, varied grammar, and date parsing internally.",
   inputSchema: toolInputSchema,
   outputSchema: {
     type: "object",
