@@ -26860,14 +26860,6 @@ var persistState = (reminders, stats) => {
   } catch (e) {
     console.error("[Persist] localStorage error:", e);
   }
-  if (window.openai?.callTool && window.openai?.__enableSaveRemindersTool === true) {
-    try {
-      window.openai.callTool("save_reminders", state).catch((e) => {
-        console.log("[Persist] callTool not available or failed:", e);
-      });
-    } catch (e) {
-    }
-  }
 };
 var loadInitialState = (initialData2) => {
   const coerceReminders = (value) => {
@@ -26887,19 +26879,6 @@ var loadInitialState = (initialData2) => {
     achievements: [...DEFAULT_ACHIEVEMENTS],
     completedTasks: []
   };
-  if (initialData2?.reminders && Array.isArray(initialData2.reminders)) {
-    const hasSavedData = initialData2?.has_saved_data === true;
-    const remindersFromServer = coerceReminders(initialData2.reminders);
-    const len = remindersFromServer.length;
-    if (hasSavedData || len > 0) {
-      console.log("[Load] Using initialData from server:", len, "reminders", { hasSavedData });
-      return {
-        reminders: remindersFromServer,
-        stats: initialData2.stats && typeof initialData2.stats === "object" ? initialData2.stats : defaultStats
-      };
-    }
-    console.log("[Load] Ignoring empty initialData from server (avoiding wipe)");
-  }
   try {
     const widgetState = window.openai?.widgetState;
     const remindersFromWidget = coerceReminders(widgetState?.reminders ?? widgetState);

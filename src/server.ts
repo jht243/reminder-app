@@ -124,18 +124,11 @@ function classifyDevice(userAgent?: string | null): string {
 }
 
 function computeSummary(args: any) {
-  // Compute reminder summary
-  const title = args.title || "";
-  const dueDate = args.due_date || "";
-  const priority = args.priority || "medium";
-  const recurrence = args.recurrence || "none";
-  
   return {
-    title,
-    due_date: dueDate,
-    priority,
-    recurrence,
-    has_notification: args.notification !== "none"
+    title: args.title || "",
+    due_date: args.due_date || "",
+    priority: args.priority || "medium",
+    recurrence: args.recurrence || "none",
   };
 }
 
@@ -293,9 +286,6 @@ const toolInputSchema = {
       items: { type: "number" },
       description: "For weekly recurrence: list of weekday numbers (0=Sun..6=Sat), e.g. [2,4] for Tue/Thu.",
     },
-    notification: { type: "string", enum: ["none", "email", "sms", "both"], description: "Notification method." },
-    notification_email: { type: "string", description: "Email for notifications." },
-    notification_phone: { type: "string", description: "Phone for SMS notifications." },
     natural_input: { type: "string", description: "Natural language input like 'remind me to call mom tomorrow at 3pm'." },
     action: {
       type: "string",
@@ -321,62 +311,12 @@ const toolInputParser = z.object({
   tags: z.array(z.string()).optional(),
   recurrence: z.enum(["none", "daily", "weekly", "monthly"]).optional(),
   recurrence_days: z.array(z.number().int().min(0).max(6)).optional(),
-  notification: z.enum(["none", "email", "sms", "both"]).optional(),
-  notification_email: z.string().optional(),
-  notification_phone: z.string().optional(),
   natural_input: z.string().optional(),
   action: z.enum(["open", "create", "complete", "uncomplete"]).optional(),
   complete_query: z.string().optional(),
 });
 
-// Storage for user reminders (in-memory, persists during server lifetime)
-const userRemindersStore: Map<string, { reminders: any[], stats: any, savedAt: number }> = new Map();
-
-// Save reminders tool schema
-const saveRemindersSchema = {
-  type: "object",
-  properties: {
-    reminders: {
-      type: "array",
-      description: "Array of reminder objects to save.",
-      items: {
-        type: "object",
-        additionalProperties: true,
-      },
-    },
-    stats: { type: "object", description: "User stats object." },
-    savedAt: { type: "number", description: "Timestamp when saved." },
-  },
-  required: ["reminders"],
-  additionalProperties: true,
-  $schema: "http://json-schema.org/draft-07/schema#",
-} as const;
-
-// Create the save_reminders tool
-const saveRemindersTool: Tool = {
-  name: "save_reminders",
-  description: "Save user's reminders and stats for persistence. Called automatically by the widget.",
-  inputSchema: saveRemindersSchema,
-  outputSchema: {
-    type: "object",
-    properties: {
-      success: { type: "boolean" },
-      savedCount: { type: "number" },
-      savedAt: { type: "number" },
-    },
-  },
-  annotations: {
-    readOnlyHint: false,
-    destructiveHint: false,
-    idempotentHint: true,
-    openWorldHint: false,
-  },
-};
-
 const tools: Tool[] = [
-  // Add save_reminders tool
-  ...(process.env.EXPOSE_SAVE_TOOL === "1" ? [saveRemindersTool] : []),
-  // Add widget tools
   ...widgets.map((widget) => ({
   name: widget.id,
   description:
@@ -386,17 +326,14 @@ const tools: Tool[] = [
     type: "object",
     properties: {
       ready: { type: "boolean" },
-      timestamp: { type: "string" },
       title: { type: "string" },
       due_date: { type: "string" },
       due_time: { type: "string" },
       priority: { type: "string" },
       recurrence: { type: "string" },
-      notification: { type: "string" },
       natural_input: { type: "string" },
       action: { type: "string" },
       complete_query: { type: "string" },
-      input_source: { type: "string", enum: ["user", "default"] },
       summary: {
         type: "object",
         properties: {
@@ -404,7 +341,6 @@ const tools: Tool[] = [
           due_date: { type: ["string", "null"] },
           priority: { type: ["string", "null"] },
           recurrence: { type: ["string", "null"] },
-          has_notification: { type: ["boolean", "null"] },
         },
       },
       suggested_followups: {
@@ -529,43 +465,7 @@ function createReminderAppServer(): Server {
       let userAgentString: string | null = null;
       let deviceCategory = "Unknown";
       
-      // Log the full request to debug _meta location
-      console.log("Full request object:", JSON.stringify(request, null, 2));
-      
       try {
-        // Handle save_reminders tool for persistence
-        if (request.params.name === "save_reminders") {
-          const args = request.params.arguments as any || {};
-          const sessionId = (request as any)._meta?.sessionId || "default";
-          
-          // Store reminders in memory
-          userRemindersStore.set(sessionId, {
-            reminders: args.reminders || [],
-            stats: args.stats || {},
-            savedAt: Date.now(),
-          });
-          
-          console.log(`[Save] Saved ${args.reminders?.length || 0} reminders for session ${sessionId}`);
-          
-          return {
-            content: [
-              {
-                type: "text",
-                text: JSON.stringify({
-                  success: true,
-                  savedCount: args.reminders?.length || 0,
-                  savedAt: Date.now(),
-                }),
-              },
-            ],
-            structuredContent: {
-              success: true,
-              savedCount: args.reminders?.length || 0,
-              savedAt: Date.now(),
-            },
-          };
-        }
-        
         const widget = widgetsById.get(request.params.name);
 
         if (!widget) {
@@ -583,7 +483,6 @@ function createReminderAppServer(): Server {
         } catch (parseError: any) {
           logAnalytics("parameter_parse_error", {
             toolName: request.params.name,
-            params: request.params.arguments,
             error: parseError.message,
           });
           throw parseError;
@@ -597,9 +496,6 @@ function createReminderAppServer(): Server {
         userAgentString = typeof userAgent === "string" ? userAgent : null;
         deviceCategory = classifyDevice(userAgentString);
         
-        // Debug log
-        console.log("Captured meta:", { userLocation, userLocale, userAgent });
-
         // If ChatGPT didn't pass structured arguments, try to infer reminder details from freeform text in meta
         try {
           const candidates: any[] = [
@@ -653,50 +549,25 @@ function createReminderAppServer(): Server {
         if (args.priority) inferredQuery.push(`Priority: ${args.priority}`);
         if (args.natural_input) inferredQuery.push(`Input: ${args.natural_input.substring(0, 50)}`);
 
-        logAnalytics("tool_call_success", {
-          toolName: request.params.name,
-          params: args,
-          inferredQuery: inferredQuery.length > 0 ? inferredQuery.join(", ") : "Create Reminders App",
-          responseTime,
-
-          device: deviceCategory,
-          userLocation: userLocation
-            ? {
-                city: userLocation.city,
-                region: userLocation.region,
-                country: userLocation.country,
-                timezone: userLocation.timezone,
-              }
-            : null,
-          userLocale,
-          userAgent,
-        });
-
         // Use a stable template URI so toolOutput reliably hydrates the component
         const widgetMetadata = widgetMeta(widget, false);
         console.log(`[MCP] Tool called: ${request.params.name}, returning templateUri: ${(widgetMetadata as any)["openai/outputTemplate"]}`);
 
-        // Try to load saved reminders for this session
-        const sessionId = (request as any)._meta?.sessionId || "default";
-        const savedData = userRemindersStore.get(sessionId);
-        const hasSavedData = !!(savedData && Array.isArray(savedData.reminders) && savedData.reminders.length > 0);
-        
-        // Build structured content once so we can log it and return it.
-        // For the reminder app, expose fields relevant to reminder details
+        // Build structured content with only the fields the widget needs for hydration.
+        // Deliberately excludes notification PII and internal telemetry per OpenAI response-minimization guidelines.
         const structured = {
           ready: true,
-          timestamp: new Date().toISOString(),
-          ...args,
-          input_source: usedDefaults ? "default" : "user",
-          has_saved_data: hasSavedData,
-          // Only include reminders/stats if we actually have them.
-          ...(hasSavedData
-            ? {
-                reminders: savedData?.reminders || [],
-                stats: savedData?.stats || null,
-              }
-            : {}),
-          // Summary + follow-ups for natural language UX
+          ...(args.title ? { title: args.title } : {}),
+          ...(args.description ? { description: args.description } : {}),
+          ...(args.due_date ? { due_date: args.due_date } : {}),
+          ...(args.due_time ? { due_time: args.due_time } : {}),
+          ...(args.priority ? { priority: args.priority } : {}),
+          ...(args.tags ? { tags: args.tags } : {}),
+          ...(args.recurrence ? { recurrence: args.recurrence } : {}),
+          ...(args.recurrence_days ? { recurrence_days: args.recurrence_days } : {}),
+          ...(args.natural_input ? { natural_input: args.natural_input } : {}),
+          ...(args.action ? { action: args.action } : {}),
+          ...(args.complete_query ? { complete_query: args.complete_query } : {}),
           summary: computeSummary(args),
           suggested_followups: [
             "Show my reminders",
@@ -721,28 +592,24 @@ function createReminderAppServer(): Server {
         } as const;
 
         console.log("[MCP] Returning outputTemplate:", (metaForReturn as any)["openai/outputTemplate"]);
-        console.log("[MCP] Returning structuredContent:", structured);
 
-        // Log success analytics
         try {
-          // Check for "empty" result - when no main reminder inputs are provided
           const hasMainInputs = args.title || args.natural_input || args.due_date;
           
           if (!hasMainInputs) {
              logAnalytics("tool_call_empty", {
                toolName: request.params.name,
-               params: request.params.arguments || {},
-               reason: "No reminder details provided"
              });
           } else {
-          logAnalytics("tool_call_success", {
-            responseTime,
-            params: request.params.arguments || {},
-            inferredQuery: inferredQuery.join(", "),
-            userLocation,
-            userLocale,
-            device: deviceCategory,
-          });
+            logAnalytics("tool_call_success", {
+              responseTime,
+              device: deviceCategory,
+              hasTitle: !!args.title,
+              hasNaturalInput: !!args.natural_input,
+              priority: args.priority || "medium",
+              recurrence: args.recurrence || "none",
+              category: (args as any).category || "other",
+            });
           }
         } catch {}
 
@@ -756,10 +623,8 @@ function createReminderAppServer(): Server {
       } catch (error: any) {
         logAnalytics("tool_call_error", {
           error: error.message,
-          stack: error.stack,
           responseTime: Date.now() - startTime,
           device: deviceCategory,
-          userAgent: userAgentString,
         });
         throw error;
       }

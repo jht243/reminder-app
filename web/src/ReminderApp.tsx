@@ -956,16 +956,6 @@ const persistState = (reminders: Reminder[], stats: UserStats) => {
     console.error("[Persist] localStorage error:", e);
   }
   
-  // 3. Call save tool if available (for cross-session persistence)
-  if ((window as any).openai?.callTool && (window as any).openai?.__enableSaveRemindersTool === true) {
-    try {
-      (window as any).openai.callTool("save_reminders", state).catch((e: any) => {
-        console.log("[Persist] callTool not available or failed:", e);
-      });
-    } catch (e) {
-      // Tool may not exist, that's ok
-    }
-  }
 };
 
 // Helper to load initial state
@@ -984,24 +974,7 @@ const loadInitialState = (initialData: any): { reminders: Reminder[], stats: Use
     completedTasks: []
   };
   
-  // Priority 1: initialData from server (hydration)
-  // IMPORTANT: Do not let empty server hydration wipe local state. Only treat server reminders
-  // as authoritative if the server explicitly has saved data or if reminders are non-empty.
-  if (initialData?.reminders && Array.isArray(initialData.reminders)) {
-    const hasSavedData = initialData?.has_saved_data === true;
-    const remindersFromServer = coerceReminders(initialData.reminders);
-    const len = remindersFromServer.length;
-    if (hasSavedData || len > 0) {
-      console.log("[Load] Using initialData from server:", len, "reminders", { hasSavedData });
-      return {
-        reminders: remindersFromServer,
-        stats: (initialData.stats && typeof initialData.stats === "object") ? initialData.stats : defaultStats
-      };
-    }
-    console.log("[Load] Ignoring empty initialData from server (avoiding wipe)");
-  }
-  
-  // Priority 2: Check window.openai widget state
+  // Priority 1: Check window.openai widget state
   try {
     const widgetState = (window as any).openai?.widgetState;
     const remindersFromWidget = coerceReminders(widgetState?.reminders ?? widgetState);
