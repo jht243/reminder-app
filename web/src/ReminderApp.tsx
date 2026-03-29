@@ -746,6 +746,7 @@ export const parseNaturalLanguage = (input: string): ParsedReminder => {
   // Order matters: remove longer/more specific patterns first
   let title = input
     // Remove common reminder prefixes FIRST
+    .replace(/^(add|set|create)\s+(a\s+)?(daily\s+|weekly\s+|monthly\s+)?reminders?\s+(to\s+|for\s+)?/gi, "")
     .replace(/^(add|set|create)\s+a?\s*reminders?\s+(to\s+|for\s+)?/gi, "")
     .replace(/^a?\s*reminders?\s+(to\s+|for\s+)/gi, "")
     .replace(/^remind\s+me\s+(to\s+)?/gi, "")

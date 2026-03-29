@@ -80,3 +80,28 @@ console.log(
     ? "OK: duplicate hydration signature is deduped."
     : "FAIL: dedup mismatch"
 );
+
+function printParsed(label: string, prefill: string) {
+  const p = parseNaturalLanguage(prefill);
+  console.log(`\n${label}`);
+  console.log(`  prefill: ${JSON.stringify(prefill)}`);
+  console.log(`  title:            ${JSON.stringify(p.title)}`);
+  console.log(`  dueDate:          ${p.dueDate}`);
+  console.log(`  dueTime:          ${p.dueTime ?? "(none)"}`);
+  console.log(`  recurrence:       ${p.recurrence}`);
+  console.log(`  recurrenceInterval: ${p.recurrenceInterval ?? "(none)"}`);
+  console.log(`  recurrenceUnit:     ${p.recurrenceUnit ?? "(none)"}`);
+  console.log(`  confidence:       ${p.confidence}`);
+}
+
+console.log("\n\n=== Hydration case A: call mom tomorrow 5pm ===");
+printParsed(
+  "Expected: title Call mom, tomorrow, 17:00, daily/none as designed",
+  "Remind me to call mom tomorrow at 5pm."
+);
+
+console.log("\n\n=== Hydration case B: daily vitamins 9am ===");
+printParsed(
+  "Expected: title Take vitamins (or similar), daily, 09:00",
+  "Set a daily reminder to take vitamins at 9am."
+);
