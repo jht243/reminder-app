@@ -532,6 +532,26 @@ export const parseNaturalLanguage = (input: string): ParsedReminder => {
         break;
       }
     }
+
+    // Specific dates: "April 15th", "Jan 5", "December 25th", "on March 3rd"
+    const monthNames: Record<string, number> = {
+      january: 0, jan: 0, february: 1, feb: 1, march: 2, mar: 2,
+      april: 3, apr: 3, may: 4, june: 5, jun: 5, july: 6, jul: 6,
+      august: 7, aug: 7, september: 8, sep: 8, sept: 8,
+      october: 9, oct: 9, november: 10, nov: 10, december: 11, dec: 11,
+    };
+    const monthPattern = Object.keys(monthNames).join("|");
+    const specificDateMatch = lower.match(new RegExp(`\\b(?:on\\s+)?(${monthPattern})\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b`, "i"));
+    if (specificDateMatch) {
+      const monthNum = monthNames[specificDateMatch[1].toLowerCase()];
+      const dayNum = parseInt(specificDateMatch[2]);
+      if (monthNum !== undefined && dayNum >= 1 && dayNum <= 31) {
+        const target = new Date(today.getFullYear(), monthNum, dayNum);
+        if (target < today) target.setFullYear(target.getFullYear() + 1);
+        dueDate = formatLocalDate(target);
+        confidence += 20;
+      }
+    }
   }
   
   // Parse recurrence - Enhanced with custom intervals and semantic inference
@@ -783,6 +803,7 @@ export const parseNaturalLanguage = (input: string): ParsedReminder => {
     .replace(/\bin\s+\d+\s+(days?|hours?|weeks?|months?)\b/gi, "")
     .replace(/\bon\s+(sundays?|mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?)\b/gi, "")
     .replace(/\bon\s+((?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)(?:\s*(?:,|and)\s*(?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat))*)/gi, "")
+    .replace(/\b(?:on\s+)?(?:january|jan|february|feb|march|mar|april|apr|may|june|jun|july|jul|august|aug|september|sep|sept|october|oct|november|nov|december|dec)\s+\d{1,2}(?:st|nd|rd|th)?\b/gi, "")
     // Remove "days to" pattern (e.g., "tuesday and thursday to")
     .replace(/\b((?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)(?:\s*(?:,|and)\s*(?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat))+)\s+to\s+/gi, "")
     // Remove priority keywords

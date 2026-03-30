@@ -26489,6 +26489,44 @@ var parseNaturalLanguage = (input) => {
         break;
       }
     }
+    const monthNames = {
+      january: 0,
+      jan: 0,
+      february: 1,
+      feb: 1,
+      march: 2,
+      mar: 2,
+      april: 3,
+      apr: 3,
+      may: 4,
+      june: 5,
+      jun: 5,
+      july: 6,
+      jul: 6,
+      august: 7,
+      aug: 7,
+      september: 8,
+      sep: 8,
+      sept: 8,
+      october: 9,
+      oct: 9,
+      november: 10,
+      nov: 10,
+      december: 11,
+      dec: 11
+    };
+    const monthPattern = Object.keys(monthNames).join("|");
+    const specificDateMatch = lower.match(new RegExp(`\\b(?:on\\s+)?(${monthPattern})\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b`, "i"));
+    if (specificDateMatch) {
+      const monthNum = monthNames[specificDateMatch[1].toLowerCase()];
+      const dayNum = parseInt(specificDateMatch[2]);
+      if (monthNum !== void 0 && dayNum >= 1 && dayNum <= 31) {
+        const target = new Date(today.getFullYear(), monthNum, dayNum);
+        if (target < today) target.setFullYear(target.getFullYear() + 1);
+        dueDate = formatLocalDate(target);
+        confidence += 20;
+      }
+    }
   }
   let recurrence = "none";
   let recurrenceInterval;
@@ -26709,7 +26747,7 @@ var parseNaturalLanguage = (input) => {
   if (category !== "other") confidence += 15;
   const priority = detectPriority(input, dueDate);
   if (priority !== "medium") confidence += 10;
-  let title = input.replace(/^(add|set|create)\s+(a\s+)?(daily\s+|weekly\s+|monthly\s+)?reminders?\s+(to\s+|for\s+)?/gi, "").replace(/^(add|set|create)\s+a?\s*reminders?\s+(to\s+|for\s+)?/gi, "").replace(/^a?\s*reminders?\s+(to\s+|for\s+)/gi, "").replace(/^remind\s+me\s+(to\s+)?/gi, "").replace(/^don't\s+forget\s+(to\s+)?/gi, "").replace(/^i\s+need\s+to\s+/gi, "").replace(/^need\s+to\s+/gi, "").replace(/\bevery\s+\d+\s+days?\b/gi, "").replace(/\bevery\s+\d+\s+weeks?\b/gi, "").replace(/\bevery\s+\d+\s+months?\b/gi, "").replace(/\bevery\s+\d+\s+years?\b/gi, "").replace(/\bevery\s+other\s+(day|week|month|year)\b/gi, "").replace(/\bevery\s+(sundays?|mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?)(\s*(,|and)\s*(sundays?|mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?))*/gi, "").replace(/\bevery\s*day\b/gi, "").replace(/\bevery\s*week\b/gi, "").replace(/\bevery\s*month\b/gi, "").replace(/\bevery\s*year\b/gi, "").replace(/\bdaily\b/gi, "").replace(/\bweekly\b/gi, "").replace(/\bmonthly\b/gi, "").replace(/\byearly\b/gi, "").replace(/\bannually\b/gi, "").replace(/\bbi-?weekly\b/gi, "").replace(/\bbi-?monthly\b/gi, "").replace(/\bat\s+\d{1,2}(:\d{2})?\s*(am|pm)?\b/gi, "").replace(/\b\d{1,2}\s*(am|pm)\b/gi, "").replace(/\btoday\b/gi, "").replace(/\btomorrow\b/gi, "").replace(/\btonight\b/gi, "").replace(/\bnext\s+week\b/gi, "").replace(/\bthis\s+weekend\b/gi, "").replace(/\bin\s+\d+\s+(days?|hours?|weeks?|months?)\b/gi, "").replace(/\bon\s+(sundays?|mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?)\b/gi, "").replace(/\bon\s+((?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)(?:\s*(?:,|and)\s*(?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat))*)/gi, "").replace(/\b((?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)(?:\s*(?:,|and)\s*(?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat))+)\s+to\s+/gi, "").replace(/\burgent\b/gi, "").replace(/\basap\b/gi, "").replace(/\bimmediately\b/gi, "").replace(/\bimportant\b/gi, "").replace(/\bhigh\s+priority\b/gi, "").replace(/\blow\s+priority\b/gi, "").replace(/\bno\s+rush\b/gi, "").replace(/\s+to\s+$/gi, "").replace(/^\s*to\s+/gi, "").replace(/[.!]+$/, "").replace(/\s+/g, " ").trim();
+  let title = input.replace(/^(add|set|create)\s+(a\s+)?(daily\s+|weekly\s+|monthly\s+)?reminders?\s+(to\s+|for\s+)?/gi, "").replace(/^(add|set|create)\s+a?\s*reminders?\s+(to\s+|for\s+)?/gi, "").replace(/^a?\s*reminders?\s+(to\s+|for\s+)/gi, "").replace(/^remind\s+me\s+(to\s+)?/gi, "").replace(/^don't\s+forget\s+(to\s+)?/gi, "").replace(/^i\s+need\s+to\s+/gi, "").replace(/^need\s+to\s+/gi, "").replace(/\bevery\s+\d+\s+days?\b/gi, "").replace(/\bevery\s+\d+\s+weeks?\b/gi, "").replace(/\bevery\s+\d+\s+months?\b/gi, "").replace(/\bevery\s+\d+\s+years?\b/gi, "").replace(/\bevery\s+other\s+(day|week|month|year)\b/gi, "").replace(/\bevery\s+(sundays?|mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?)(\s*(,|and)\s*(sundays?|mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?))*/gi, "").replace(/\bevery\s*day\b/gi, "").replace(/\bevery\s*week\b/gi, "").replace(/\bevery\s*month\b/gi, "").replace(/\bevery\s*year\b/gi, "").replace(/\bdaily\b/gi, "").replace(/\bweekly\b/gi, "").replace(/\bmonthly\b/gi, "").replace(/\byearly\b/gi, "").replace(/\bannually\b/gi, "").replace(/\bbi-?weekly\b/gi, "").replace(/\bbi-?monthly\b/gi, "").replace(/\bat\s+\d{1,2}(:\d{2})?\s*(am|pm)?\b/gi, "").replace(/\b\d{1,2}\s*(am|pm)\b/gi, "").replace(/\btoday\b/gi, "").replace(/\btomorrow\b/gi, "").replace(/\btonight\b/gi, "").replace(/\bnext\s+week\b/gi, "").replace(/\bthis\s+weekend\b/gi, "").replace(/\bin\s+\d+\s+(days?|hours?|weeks?|months?)\b/gi, "").replace(/\bon\s+(sundays?|mondays?|tuesdays?|wednesdays?|thursdays?|fridays?|saturdays?)\b/gi, "").replace(/\bon\s+((?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)(?:\s*(?:,|and)\s*(?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat))*)/gi, "").replace(/\b(?:on\s+)?(?:january|jan|february|feb|march|mar|april|apr|may|june|jun|july|jul|august|aug|september|sep|sept|october|oct|november|nov|december|dec)\s+\d{1,2}(?:st|nd|rd|th)?\b/gi, "").replace(/\b((?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat)(?:\s*(?:,|and)\s*(?:sundays?|sun|mondays?|mon|tuesdays?|tue|tues|wednesdays?|wed|thursdays?|thu|thur|thurs|fridays?|fri|saturdays?|sat))+)\s+to\s+/gi, "").replace(/\burgent\b/gi, "").replace(/\basap\b/gi, "").replace(/\bimmediately\b/gi, "").replace(/\bimportant\b/gi, "").replace(/\bhigh\s+priority\b/gi, "").replace(/\blow\s+priority\b/gi, "").replace(/\bno\s+rush\b/gi, "").replace(/\s+to\s+$/gi, "").replace(/^\s*to\s+/gi, "").replace(/[.!]+$/, "").replace(/\s+/g, " ").trim();
   if (title && title.length > 0) {
     title = title.charAt(0).toUpperCase() + title.slice(1);
     confidence += 25;
