@@ -29485,6 +29485,33 @@ __report("widget_hydration_initial", {
 }).catch(() => {
 });
 renderApp(initialData);
+window.addEventListener("message", (event) => {
+  if (event.source !== window.parent) return;
+  const msg = event.data;
+  if (!msg || msg.jsonrpc !== "2.0") return;
+  if (msg.method === "ui/notifications/tool-result" || msg.method === "ui/notifications/tool-input") {
+    const payload = msg.params;
+    const data = payload?.structuredContent || payload;
+    if (data && typeof data === "object" && Object.keys(data).length > 0) {
+      if (__appliedLateHydration) return;
+      const merged = {
+        ...typeof __currentInitialData === "object" && __currentInitialData ? __currentInitialData : {},
+        ...data
+      };
+      __appliedLateHydration = true;
+      __mark("hydration_jsonrpc", { method: msg.method, keys: Object.keys(data) });
+      __report("widget_hydration_jsonrpc", {
+        method: msg.method,
+        dataKeys: Object.keys(data),
+        mergedKeys: Object.keys(merged),
+        hasNaturalInput: !!merged.natural_input,
+        lastLifecycle: __lastLifecycle
+      }).catch(() => {
+      });
+      renderApp(merged);
+    }
+  }
+}, { passive: true });
 window.addEventListener("openai:set_globals", (ev) => {
   const globals = ev?.detail?.globals;
   if (globals) {

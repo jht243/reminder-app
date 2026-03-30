@@ -189,7 +189,7 @@ function widgetMeta(widget: ReminderWidget, bustCache: boolean = false) {
   return {
     "openai/outputTemplate": templateUri,
     "openai/widgetDescription":
-      "Create Reminders App - An AI-powered reminder app with natural language input. No input is required to open the app: prompts like 'create a reminder', 'open the reminder app', or 'show my reminders' should open the widget immediately with no arguments. When the user provides reminder details, always pass their full text in natural_input and extract title, due_date (YYYY-MM-DD), due_time (HH:MM), and recurrence when possible. The widget parser handles typos, varied grammar, relative dates, and recurrence detection internally.",
+      "Create Reminders App - An AI-powered reminder app. When the user mentions a specific task (e.g. 'add a reminder to call mom', 'remind me to take vitamins at 9am'), pass the full message in natural_input and set action='create'. Only use action='open' with no arguments for generic prompts like 'show my reminders'.",
     "openai/componentDescriptions": {
       "task-input": "Natural language input for creating reminders - just type what you need to remember.",
       "reminder-list": "Organized display of reminders with category filters, search, and sorting.",
@@ -276,11 +276,11 @@ const toolInputSchema = {
   properties: {
     natural_input: {
       type: "string",
-      description: "ALWAYS pass the user's original reminder text here exactly as they wrote it, including any dates, times, recurrence, and typos. Examples: 'call mom tomorrow at 5pm', 'take vitamins daily at 9am', 'pay rent on friday'. The widget's parser handles all natural language interpretation, date resolution, and typo correction.",
+      description: "REQUIRED when the user mentions any task or activity. Copy the user's COMPLETE message here verbatim — include prefixes like 'add a reminder to', 'remind me to', etc. Do NOT shorten or omit any part. Examples: user says 'Add a reminder to call mom' → natural_input='Add a reminder to call mom'. User says 'remind me to take vitamins daily at 9am' → natural_input='remind me to take vitamins daily at 9am'. The widget parser strips prefixes internally.",
     },
     title: {
       type: "string",
-      description: "Short task name extracted from the user's message. Only the action/subject, not dates or times. Examples: 'call mom', 'take vitamins', 'pay rent'. If unsure, omit and let natural_input handle it.",
+      description: "Short task name extracted from the user's message — only the action/subject, no dates or times. Examples: 'call mom', 'take vitamins', 'pay rent'. Always set this alongside natural_input when possible.",
     },
     due_date: {
       type: "string",
@@ -308,7 +308,7 @@ const toolInputSchema = {
     action: {
       type: "string",
       enum: ["open", "create", "complete", "uncomplete"],
-      description: "Intent for the widget. Use 'create' when the user provides reminder details to add. Use 'open' when the user just wants to see their reminders. Use 'complete' when the user says they finished a task. Omit to let the widget infer from context.",
+      description: "Use 'create' when the user mentions ANY specific task (e.g. 'add a reminder to call mom', 'remind me to pay rent'). Use 'open' ONLY for generic requests with no task details (e.g. 'open my reminders', 'show my reminders'). Use 'complete' when the user says they finished a task.",
     },
     complete_query: {
       type: "string",
@@ -340,7 +340,7 @@ const tools: Tool[] = [
   ...widgets.map((widget) => ({
   name: widget.id,
   description:
-    "Open Create Reminders App. No input is required: prompts like 'create a reminder', 'open the reminder app', or 'show my reminders' should open the widget immediately with no arguments. When the user provides reminder details (e.g. 'Call mom tomorrow at 5pm', 'set a daily reminder to take vitamins at 9am'), always pass their full text in natural_input and extract structured fields (title, due_date, due_time, recurrence) when possible. The widget handles typos, varied grammar, and date parsing internally.",
+    "Create Reminders App. IMPORTANT: If the user's message contains ANY task or activity (e.g. 'Add a reminder to call mom', 'remind me to take vitamins', 'set a reminder to pay rent on Friday'), you MUST pass their complete message in natural_input and set action='create'. Only use action='open' with no other arguments when the user says generic phrases like 'open my reminders', 'show my reminders', or 'open the reminder app' with NO specific task mentioned.",
   inputSchema: toolInputSchema,
   outputSchema: {
     type: "object",
