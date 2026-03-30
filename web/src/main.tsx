@@ -210,6 +210,31 @@ interface OpenAIGlobals {
   };
 }
 
+const isNonEmptyString = (v: unknown) => typeof v === "string" && v.trim().length > 0;
+const hasMeaningfulHydrationData = (data: any): boolean => {
+  if (!data || typeof data !== "object") return false;
+
+  // Fields that should trigger hydration/create behavior.
+  if (
+    isNonEmptyString(data.natural_input) ||
+    isNonEmptyString(data.title) ||
+    isNonEmptyString(data.complete_query) ||
+    isNonEmptyString(data.due_date) ||
+    isNonEmptyString(data.due_time) ||
+    isNonEmptyString(data.recurrence) ||
+    isNonEmptyString(data.description) ||
+    isNonEmptyString(data.priority)
+  ) {
+    return true;
+  }
+
+  if (Array.isArray(data.tags) && data.tags.length > 0) return true;
+  if (Array.isArray(data.recurrence_days) && data.recurrence_days.length > 0) return true;
+
+  // Action-only payloads are too weak and often arrive before real tool output.
+  return false;
+};
+
 // Hydration Helper
 const getHydrationData = (): any => {
   console.log("[Hydration] Starting hydration check...");
@@ -237,7 +262,12 @@ const getHydrationData = (): any => {
   ];
 
   for (const candidate of candidates) {
-    if (candidate && typeof candidate === 'object' && Object.keys(candidate).length > 0) {
+    if (
+      candidate &&
+      typeof candidate === "object" &&
+      Object.keys(candidate).length > 0 &&
+      hasMeaningfulHydrationData(candidate)
+    ) {
       console.log("[Hydration] Found data:", candidate);
       return candidate;
     }
@@ -316,23 +346,28 @@ __report("widget_hydration_initial", {
 renderApp(initialData);
 
 // Listen for MCP Apps bridge tool-result notifications (official docs pattern)
-window.addEventListener('message', (event: MessageEvent) => {
+window.addEventListener("message", (event: MessageEvent) => {
   if (event.source !== window.parent) return;
   const msg = event.data;
-  if (!msg || msg.jsonrpc !== '2.0') return;
+  if (!msg || msg.jsonrpc !== "2.0") return;
 
-  if (msg.method === 'ui/notifications/tool-result' || msg.method === 'ui/notifications/tool-input') {
+  if (msg.method === "ui/notifications/tool-result") {
     const payload = msg.params;
-    const data = payload?.structuredContent || payload;
-    if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+    const data = payload?.structuredContent;
+    if (
+      data &&
+      typeof data === "object" &&
+      Object.keys(data).length > 0 &&
+      hasMeaningfulHydrationData(data)
+    ) {
       if (__appliedLateHydration) return;
       const merged = {
-        ...(typeof __currentInitialData === 'object' && __currentInitialData ? __currentInitialData : {}),
+        ...(typeof __currentInitialData === "object" && __currentInitialData ? __currentInitialData : {}),
         ...data,
       };
       __appliedLateHydration = true;
-      __mark('hydration_jsonrpc', { method: msg.method, keys: Object.keys(data) });
-      __report('widget_hydration_jsonrpc', {
+      __mark("hydration_jsonrpc", { method: msg.method, keys: Object.keys(data) });
+      __report("widget_hydration_jsonrpc", {
         method: msg.method,
         dataKeys: Object.keys(data),
         mergedKeys: Object.keys(merged),
@@ -340,6 +375,13 @@ window.addEventListener('message', (event: MessageEvent) => {
         lastLifecycle: __lastLifecycle,
       }).catch(() => {});
       renderApp(merged);
+    } else {
+      __report("widget_hydration_jsonrpc_ignored", {
+        method: msg.method,
+        dataKeys: data && typeof data === "object" ? Object.keys(data) : [],
+        reason: "not_meaningful_or_empty",
+        lastLifecycle: __lastLifecycle,
+      }).catch(() => {});
     }
   }
 }, { passive: true });
@@ -368,7 +410,12 @@ window.addEventListener('openai:set_globals', (ev: any) => {
     ];
     
     for (const candidate of candidates) {
-      if (candidate && typeof candidate === 'object' && Object.keys(candidate).length > 0) {
+      if (
+        candidate &&
+        typeof candidate === "object" &&
+        Object.keys(candidate).length > 0 &&
+        hasMeaningfulHydrationData(candidate)
+      ) {
         // Apply late hydration at most once to avoid repeated remounts and analytics spam.
         if (__appliedLateHydration) {
           __log("[Hydration] Ignoring additional late hydration (already applied once)");

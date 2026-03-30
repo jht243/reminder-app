@@ -29442,6 +29442,16 @@ var ErrorBoundary = class extends import_react4.default.Component {
     return this.props.children;
   }
 };
+var isNonEmptyString = (v) => typeof v === "string" && v.trim().length > 0;
+var hasMeaningfulHydrationData = (data) => {
+  if (!data || typeof data !== "object") return false;
+  if (isNonEmptyString(data.natural_input) || isNonEmptyString(data.title) || isNonEmptyString(data.complete_query) || isNonEmptyString(data.due_date) || isNonEmptyString(data.due_time) || isNonEmptyString(data.recurrence) || isNonEmptyString(data.description) || isNonEmptyString(data.priority)) {
+    return true;
+  }
+  if (Array.isArray(data.tags) && data.tags.length > 0) return true;
+  if (Array.isArray(data.recurrence_days) && data.recurrence_days.length > 0) return true;
+  return false;
+};
 var getHydrationData = () => {
   console.log("[Hydration] Starting hydration check...");
   if (typeof window === "undefined") {
@@ -29461,7 +29471,7 @@ var getHydrationData = () => {
     oa.toolInput
   ];
   for (const candidate of candidates) {
-    if (candidate && typeof candidate === "object" && Object.keys(candidate).length > 0) {
+    if (candidate && typeof candidate === "object" && Object.keys(candidate).length > 0 && hasMeaningfulHydrationData(candidate)) {
       console.log("[Hydration] Found data:", candidate);
       return candidate;
     }
@@ -29527,10 +29537,10 @@ window.addEventListener("message", (event) => {
   if (event.source !== window.parent) return;
   const msg = event.data;
   if (!msg || msg.jsonrpc !== "2.0") return;
-  if (msg.method === "ui/notifications/tool-result" || msg.method === "ui/notifications/tool-input") {
+  if (msg.method === "ui/notifications/tool-result") {
     const payload = msg.params;
-    const data = payload?.structuredContent || payload;
-    if (data && typeof data === "object" && Object.keys(data).length > 0) {
+    const data = payload?.structuredContent;
+    if (data && typeof data === "object" && Object.keys(data).length > 0 && hasMeaningfulHydrationData(data)) {
       if (__appliedLateHydration) return;
       const merged = {
         ...typeof __currentInitialData === "object" && __currentInitialData ? __currentInitialData : {},
@@ -29547,6 +29557,14 @@ window.addEventListener("message", (event) => {
       }).catch(() => {
       });
       renderApp(merged);
+    } else {
+      __report("widget_hydration_jsonrpc_ignored", {
+        method: msg.method,
+        dataKeys: data && typeof data === "object" ? Object.keys(data) : [],
+        reason: "not_meaningful_or_empty",
+        lastLifecycle: __lastLifecycle
+      }).catch(() => {
+      });
     }
   }
 }, { passive: true });
@@ -29571,7 +29589,7 @@ window.addEventListener("openai:set_globals", (ev) => {
       globals.toolInput
     ];
     for (const candidate of candidates) {
-      if (candidate && typeof candidate === "object" && Object.keys(candidate).length > 0) {
+      if (candidate && typeof candidate === "object" && Object.keys(candidate).length > 0 && hasMeaningfulHydrationData(candidate)) {
         if (__appliedLateHydration) {
           __log("[Hydration] Ignoring additional late hydration (already applied once)");
           return;
