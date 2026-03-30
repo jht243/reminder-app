@@ -336,6 +336,59 @@ const toolInputParser = z.object({
   tags: z.array(z.string()).optional(),
 });
 
+const BOILERPLATE_NATURAL_INPUT_RE =
+  /^((add|set|create)\s+)?(a\s+)?(daily\s+|weekly\s+|monthly\s+)?reminders?\.?$/i;
+
+const isMeaningfulTaskText = (text: unknown): text is string => {
+  if (typeof text !== "string") return false;
+  const t = text.trim();
+  if (!t) return false;
+  if (t.length < 3) return false;
+  if (BOILERPLATE_NATURAL_INPUT_RE.test(t)) return false;
+  if (/^remind\s+me\.?$/i.test(t)) return false;
+  return true;
+};
+
+const normalizeActionForHydration = (
+  args: z.infer<typeof toolInputParser>
+): z.infer<typeof toolInputParser> => {
+  const next = { ...args };
+  const natural = (next.natural_input || "").trim();
+  const title = (next.title || "").trim();
+
+  const hasMeaningfulNatural = isMeaningfulTaskText(natural);
+  const hasMeaningfulTitle = isMeaningfulTaskText(title);
+
+  // If natural input is weak but title is good, synthesize a stronger prompt.
+  if (!hasMeaningfulNatural && hasMeaningfulTitle) {
+    const parts: string[] = [`remind me to ${title}`];
+    if (typeof next.recurrence === "string" && next.recurrence !== "none") {
+      parts.push(next.recurrence);
+    }
+    if (typeof next.due_date === "string" && next.due_date.trim()) {
+      parts.push(`on ${next.due_date.trim()}`);
+    }
+    if (typeof next.due_time === "string" && next.due_time.trim()) {
+      parts.push(`at ${next.due_time.trim()}`);
+    }
+    next.natural_input = parts.join(" ");
+  }
+
+  const hasAnyStrongCreateInput =
+    isMeaningfulTaskText(next.natural_input) || isMeaningfulTaskText(next.title) || !!next.due_date;
+
+  // Do not allow action=create with weak inputs; open safely instead.
+  if (next.action === "create" && !hasAnyStrongCreateInput) {
+    next.action = "open";
+    delete (next as any).natural_input;
+    delete (next as any).title;
+    delete (next as any).due_date;
+    delete (next as any).due_time;
+  }
+
+  return next;
+};
+
 const tools: Tool[] = [
   ...widgets.map((widget) => ({
   name: widget.id,
@@ -557,6 +610,8 @@ function createReminderAppServer(): Server {
         }
 
 
+        args = normalizeActionForHydration(args);
+
         const responseTime = Date.now() - startTime;
 
         // Check if we are using defaults (i.e. no arguments provided)
@@ -760,11 +815,17 @@ function humanizeEventName(event: string): string {
     widget_hydration_skip_no_data: "Hydration Skip (No Data)",
     widget_hydration_skip_empty: "Hydration Skip (Empty)",
     widget_hydration_skip_empty_title: "Hydration Skip (Empty Title)",
+    widget_hydration_skip_boilerplate_title: "Hydration Skip (Boilerplate Title)",
     widget_hydration_complete_found: "Hydration Complete Found",
     widget_hydration_complete_not_found: "Hydration Complete Not Found",
     widget_hydration_uncomplete_found: "Hydration Uncomplete Found",
     widget_hydration_uncomplete_not_found: "Hydration Uncomplete Not Found",
     widget_hydration_fallback_prefill: "Hydration Fallback Prefill",
+    widget_hydration_jsonrpc: "Hydration JSON-RPC",
+    widget_hydration_late_apply: "Hydration Late Apply",
+    widget_hydration_candidate_scored: "Hydration Candidate Scored",
+    widget_hydration_candidate_selected: "Hydration Candidate Selected",
+    widget_hydration_candidate_rejected: "Hydration Candidate Rejected",
   };
   return eventMap[event] || event;
 }

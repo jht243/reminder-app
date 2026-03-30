@@ -211,6 +211,10 @@ interface OpenAIGlobals {
 }
 
 const isNonEmptyString = (v: unknown) => typeof v === "string" && v.trim().length > 0;
+const isBoilerplateInput = (text: string): boolean =>
+  /^((add|set|create)\s+)?(a\s+)?(daily\s+|weekly\s+|monthly\s+)?reminders?\.?$/i.test(text) ||
+  /^remind\s+me\.?$/i.test(text);
+
 const hasMeaningfulHydrationData = (data: any): boolean => {
   if (!data || typeof data !== "object") return false;
 
@@ -233,6 +237,42 @@ const hasMeaningfulHydrationData = (data: any): boolean => {
 
   // Action-only payloads are too weak and often arrive before real tool output.
   return false;
+};
+
+const hydrationQualitySignals = (data: any) => {
+  const natural = typeof data?.natural_input === "string" ? data.natural_input.trim() : "";
+  const title = typeof data?.title === "string" ? data.title.trim() : "";
+  const hasNaturalInput = isNonEmptyString(natural) && !isBoilerplateInput(natural);
+  const hasTitle = isNonEmptyString(title) && !isBoilerplateInput(title);
+  const hasDateHint = isNonEmptyString(data?.due_date);
+  const hasTimeHint = isNonEmptyString(data?.due_time);
+  const hasRecurrenceHint = isNonEmptyString(data?.recurrence) && data.recurrence !== "none";
+  const hasQueryHint = isNonEmptyString(data?.complete_query);
+  const hasAction = isNonEmptyString(data?.action);
+
+  return {
+    hasNaturalInput,
+    hasTitle,
+    hasDateHint,
+    hasTimeHint,
+    hasRecurrenceHint,
+    hasQueryHint,
+    hasAction,
+  };
+};
+
+const scoreHydrationCandidate = (data: any): number => {
+  const q = hydrationQualitySignals(data);
+  let score = 0;
+  if (q.hasNaturalInput) score += 60;
+  if (q.hasTitle) score += 30;
+  if (q.hasDateHint) score += 20;
+  if (q.hasTimeHint) score += 15;
+  if (q.hasRecurrenceHint) score += 10;
+  if (q.hasQueryHint) score += 8;
+  if (q.hasAction) score += 2;
+  score += Math.min(Object.keys(data || {}).length, 10);
+  return score;
 };
 
 // Hydration Helper
@@ -297,6 +337,16 @@ const root = createRoot(container);
 let __appliedLateHydration = false;
 let __renderCount = 0;
 let __currentInitialData: any = null;
+type HydrationCandidate = {
+  source: string;
+  data: any;
+  score: number;
+  keys: string[];
+  atMs: number;
+};
+let __hydrationCandidates: HydrationCandidate[] = [];
+let __hydrationSettleTimer: number | null = null;
+const HYDRATION_SETTLE_MS = 350;
 
 const renderApp = (data: any) => {
   __renderCount += 1;
@@ -325,9 +375,93 @@ const renderApp = (data: any) => {
   );
 };
 
+const selectBestHydrationCandidate = (): HydrationCandidate | null => {
+  if (__hydrationCandidates.length === 0) return null;
+  return __hydrationCandidates
+    .slice()
+    .sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return b.atMs - a.atMs;
+    })[0];
+};
+
+const flushHydrationCandidates = () => {
+  __hydrationSettleTimer = null;
+  if (__appliedLateHydration) return;
+  const best = selectBestHydrationCandidate();
+  if (!best) return;
+
+  const merged = {
+    ...(typeof __currentInitialData === "object" && __currentInitialData ? __currentInitialData : {}),
+    ...best.data,
+  };
+  __appliedLateHydration = true;
+  __mark("hydration_candidate_selected", {
+    source: best.source,
+    score: best.score,
+    keys: best.keys,
+    candidateCount: __hydrationCandidates.length,
+  });
+  __report("widget_hydration_candidate_selected", {
+    source: best.source,
+    score: best.score,
+    keys: best.keys,
+    candidateCount: __hydrationCandidates.length,
+    quality: hydrationQualitySignals(best.data),
+    mergedKeys: Object.keys(merged),
+    lastLifecycle: __lastLifecycle,
+  }).catch(() => {});
+  __hydrationCandidates = [];
+  renderApp(merged);
+};
+
+const queueHydrationCandidate = (source: string, candidate: any) => {
+  const keys = candidate && typeof candidate === "object" ? Object.keys(candidate) : [];
+  if (!hasMeaningfulHydrationData(candidate)) {
+    __report("widget_hydration_candidate_rejected", {
+      source,
+      keys,
+      reason: "not_meaningful_or_empty",
+      lastLifecycle: __lastLifecycle,
+    }).catch(() => {});
+    return;
+  }
+  if (__appliedLateHydration) {
+    __report("widget_hydration_candidate_rejected", {
+      source,
+      keys,
+      reason: "already_applied",
+      lastLifecycle: __lastLifecycle,
+    }).catch(() => {});
+    return;
+  }
+
+  const score = scoreHydrationCandidate(candidate);
+  __hydrationCandidates.push({
+    source,
+    data: candidate,
+    score,
+    keys,
+    atMs: __sinceStartMs(),
+  });
+
+  __report("widget_hydration_candidate_scored", {
+    source,
+    keys,
+    score,
+    quality: hydrationQualitySignals(candidate),
+    lastLifecycle: __lastLifecycle,
+  }).catch(() => {});
+
+  if (__hydrationSettleTimer !== null) {
+    window.clearTimeout(__hydrationSettleTimer);
+  }
+  __hydrationSettleTimer = window.setTimeout(flushHydrationCandidates, HYDRATION_SETTLE_MS);
+};
+
 // Initial render
 const initialData = getHydrationData();
-__currentInitialData = initialData;
+__currentInitialData = {};
 __log("[Hydration] initialData keys", initialData && typeof initialData === "object" ? Object.keys(initialData) : []);
 __mark("hydration_initial", {
   initialDataKeys: initialData && typeof initialData === "object" ? Object.keys(initialData) : [],
@@ -343,7 +477,8 @@ __report("widget_hydration_initial", {
   openaiKeys: (window as any).openai ? Object.keys((window as any).openai) : [],
   lastLifecycle: __lastLifecycle,
 }).catch(() => {});
-renderApp(initialData);
+renderApp({});
+queueHydrationCandidate("initial", initialData);
 
 // Listen for MCP Apps bridge tool-result notifications (official docs pattern)
 window.addEventListener("message", (event: MessageEvent) => {
@@ -354,35 +489,11 @@ window.addEventListener("message", (event: MessageEvent) => {
   if (msg.method === "ui/notifications/tool-result") {
     const payload = msg.params;
     const data = payload?.structuredContent;
-    if (
-      data &&
-      typeof data === "object" &&
-      Object.keys(data).length > 0 &&
-      hasMeaningfulHydrationData(data)
-    ) {
-      if (__appliedLateHydration) return;
-      const merged = {
-        ...(typeof __currentInitialData === "object" && __currentInitialData ? __currentInitialData : {}),
-        ...data,
-      };
-      __appliedLateHydration = true;
-      __mark("hydration_jsonrpc", { method: msg.method, keys: Object.keys(data) });
-      __report("widget_hydration_jsonrpc", {
-        method: msg.method,
-        dataKeys: Object.keys(data),
-        mergedKeys: Object.keys(merged),
-        hasNaturalInput: !!(merged as any).natural_input,
-        lastLifecycle: __lastLifecycle,
-      }).catch(() => {});
-      renderApp(merged);
-    } else {
-      __report("widget_hydration_jsonrpc_ignored", {
-        method: msg.method,
-        dataKeys: data && typeof data === "object" ? Object.keys(data) : [],
-        reason: "not_meaningful_or_empty",
-        lastLifecycle: __lastLifecycle,
-      }).catch(() => {});
-    }
+    __mark("hydration_jsonrpc", {
+      method: msg.method,
+      keys: data && typeof data === "object" ? Object.keys(data) : [],
+    });
+    queueHydrationCandidate("jsonrpc_tool_result", data);
   }
 }, { passive: true });
 
@@ -409,43 +520,8 @@ window.addEventListener('openai:set_globals', (ev: any) => {
       globals.toolInput
     ];
     
-    for (const candidate of candidates) {
-      if (
-        candidate &&
-        typeof candidate === "object" &&
-        Object.keys(candidate).length > 0 &&
-        hasMeaningfulHydrationData(candidate)
-      ) {
-        // Apply late hydration at most once to avoid repeated remounts and analytics spam.
-        if (__appliedLateHydration) {
-          __log("[Hydration] Ignoring additional late hydration (already applied once)");
-          return;
-        }
-
-        const merged = {
-          ...(typeof __currentInitialData === "object" && __currentInitialData ? __currentInitialData : {}),
-          ...(candidate as any),
-        };
-
-        console.log("[Hydration] Re-rendering with late data (merged overlay):", merged);
-        __appliedLateHydration = true;
-        __mark("hydration_late_apply", {
-          candidateKeys: Object.keys(candidate),
-          mergedKeys: Object.keys(merged),
-        });
-        __report("widget_hydration_late_apply", {
-          candidateKeys: Object.keys(candidate),
-          mergedKeys: Object.keys(merged),
-          hydrationPrefill: {
-            hasNaturalInput: !!(merged as any).natural_input,
-            hasAction: !!(merged as any).action,
-            hasCompleteQuery: !!(merged as any).complete_query,
-          },
-          lastLifecycle: __lastLifecycle,
-        }).catch(() => {});
-        renderApp(merged);
-        return;
-      }
+    for (let i = 0; i < candidates.length; i++) {
+      queueHydrationCandidate(`set_globals_${i}`, candidates[i]);
     }
   }
 });

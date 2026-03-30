@@ -1,107 +1,137 @@
 /**
- * Local check: same two prompts as ChatGPT hydration prefill → parseNaturalLanguage.
+ * Deterministic local hydration checks.
  * Run: pnpm exec tsx scripts/test-hydration-prompts.ts
  */
 import { parseNaturalLanguage } from "../web/src/ReminderApp.tsx";
 
-const HYDRATION_DEDUP_KEY = "__reminder_hydration_sigs";
+let failures = 0;
+const fail = (msg: string) => {
+  failures += 1;
+  console.error(`FAIL: ${msg}`);
+};
+const pass = (msg: string) => console.log(`PASS: ${msg}`);
 
-function mockSessionStorage() {
-  const mem = new Map<string, string>();
-  (globalThis as any).sessionStorage = {
-    getItem: (k: string) => mem.get(k) ?? null,
-    setItem: (k: string, v: string) => void mem.set(k, v),
-  };
+const formatLocalDate = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+const tomorrow = new Date(today);
+tomorrow.setDate(tomorrow.getDate() + 1);
+const in3Days = new Date(today);
+in3Days.setDate(in3Days.getDate() + 3);
+
+const expectParse = (prompt: string, expected: { title: string; dueDate: string }) => {
+  const parsed = parseNaturalLanguage(prompt);
+  if (parsed.title !== expected.title) {
+    fail(`${JSON.stringify(prompt)} title expected ${JSON.stringify(expected.title)} got ${JSON.stringify(parsed.title)}`);
+  } else {
+    pass(`${JSON.stringify(prompt)} title => ${parsed.title}`);
+  }
+  if (parsed.dueDate !== expected.dueDate) {
+    fail(`${JSON.stringify(prompt)} dueDate expected ${expected.dueDate} got ${parsed.dueDate}`);
+  } else {
+    pass(`${JSON.stringify(prompt)} dueDate => ${parsed.dueDate}`);
+  }
+};
+
+console.log("=== Target prompt regression checks ===");
+expectParse("remind me to call mom", {
+  title: "Call mom",
+  dueDate: formatLocalDate(today),
+});
+expectParse("remind me to call dad tomorrow", {
+  title: "Call dad",
+  dueDate: formatLocalDate(tomorrow),
+});
+expectParse("remind me to call my uncle in 3 days", {
+  title: "Call my uncle",
+  dueDate: formatLocalDate(in3Days),
+});
+
+console.log("\n=== Existing behavior invariant ===");
+const invariant = parseNaturalLanguage("remind me to call mom");
+if (invariant.title === "Call mom") {
+  pass("Existing 'remind me to call mom' behavior unchanged");
+} else {
+  fail(`Invariant broke: expected 'Call mom' got ${JSON.stringify(invariant.title)}`);
 }
 
-function simulateHydrationDedup(prefill: string) {
-  const refSet = new Set<string>();
-  const isHydrationSignatureSeen = (sig: string): boolean => {
-    if (refSet.has(sig)) return true;
-    try {
-      const stored = sessionStorage.getItem(HYDRATION_DEDUP_KEY);
-      if (stored) {
-        const sigs: string[] = JSON.parse(stored);
-        if (sigs.includes(sig)) return true;
-      }
-    } catch {}
-    return false;
+console.log("\n=== Event-order candidate scoring simulation ===");
+const isNonEmptyString = (v: unknown) => typeof v === "string" && v.trim().length > 0;
+const isBoilerplateInput = (text: string): boolean =>
+  /^((add|set|create)\s+)?(a\s+)?(daily\s+|weekly\s+|monthly\s+)?reminders?\.?$/i.test(text) ||
+  /^remind\s+me\.?$/i.test(text);
+const hydrationQualitySignals = (data: any) => {
+  const natural = typeof data?.natural_input === "string" ? data.natural_input.trim() : "";
+  const title = typeof data?.title === "string" ? data.title.trim() : "";
+  return {
+    hasNaturalInput: isNonEmptyString(natural) && !isBoilerplateInput(natural),
+    hasTitle: isNonEmptyString(title) && !isBoilerplateInput(title),
+    hasDateHint: isNonEmptyString(data?.due_date),
+    hasTimeHint: isNonEmptyString(data?.due_time),
+    hasRecurrenceHint: isNonEmptyString(data?.recurrence) && data.recurrence !== "none",
+    hasQueryHint: isNonEmptyString(data?.complete_query),
+    hasAction: isNonEmptyString(data?.action),
   };
-  const markHydrationSignature = (sig: string) => {
-    refSet.add(sig);
-    try {
-      const stored = sessionStorage.getItem(HYDRATION_DEDUP_KEY);
-      const sigs: string[] = stored ? JSON.parse(stored) : [];
-      if (!sigs.includes(sig)) sigs.push(sig);
-      sessionStorage.setItem(HYDRATION_DEDUP_KEY, JSON.stringify(sigs.slice(-20)));
-    } catch {}
-  };
-
-  // Mirrors ReminderApp hydration: infer from prefill → create intent, empty query
-  const infer = { action: "create" as const };
-  const effectiveAction = infer.action;
-  const effectiveQuery = "";
-  const signature = JSON.stringify({
-    prefill,
-    action: effectiveAction || "",
-    query: effectiveQuery,
-  });
-
-  const firstAlreadySeen = isHydrationSignatureSeen(signature);
-  if (!firstAlreadySeen) markHydrationSignature(signature);
-  const secondAlreadySeen = isHydrationSignatureSeen(signature);
-
-  return { signature, firstAlreadySeen, secondAlreadySeen };
+};
+const scoreHydrationCandidate = (data: any): number => {
+  const q = hydrationQualitySignals(data);
+  let score = 0;
+  if (q.hasNaturalInput) score += 60;
+  if (q.hasTitle) score += 30;
+  if (q.hasDateHint) score += 20;
+  if (q.hasTimeHint) score += 15;
+  if (q.hasRecurrenceHint) score += 10;
+  if (q.hasQueryHint) score += 8;
+  if (q.hasAction) score += 2;
+  score += Math.min(Object.keys(data || {}).length, 10);
+  return score;
+};
+const weakCandidate = { action: "create", natural_input: "remind me" };
+const strongCandidate = {
+  action: "create",
+  natural_input: "remind me to call dad tomorrow",
+  title: "call dad",
+  due_date: formatLocalDate(tomorrow),
+};
+const weakScore = scoreHydrationCandidate(weakCandidate);
+const strongScore = scoreHydrationCandidate(strongCandidate);
+if (strongScore > weakScore) {
+  pass(`Strong candidate wins (${strongScore} > ${weakScore})`);
+} else {
+  fail(`Candidate scoring broken (${strongScore} <= ${weakScore})`);
 }
 
-console.log("=== parseNaturalLanguage (widget input after hydration prefill) ===\n");
-
-const prompt1 = "Add a reminder to call mom.";
-const r1 = parseNaturalLanguage(prompt1);
-console.log(`Prompt 1: ${JSON.stringify(prompt1)}`);
-console.log(`  title:   ${JSON.stringify(r1.title)}`);
-console.log(`  expect:  "Call mom" (not "Reminder to call mom")\n`);
-
-const prompt2 = "Add a reminder to call mom tomorrow.";
-const r2 = parseNaturalLanguage(prompt2);
-console.log(`Prompt 2: ${JSON.stringify(prompt2)}`);
-console.log(`  title:   ${JSON.stringify(r2.title)}`);
-console.log(`  dueDate: ${r2.dueDate} (tomorrow vs today)`);
-console.log(`  expect:  title "Call mom", dueDate = tomorrow\n`);
-
-console.log("=== duplicate hydration (same signature twice, sessionStorage + ref) ===\n");
-mockSessionStorage();
-const dedup = simulateHydrationDedup(prompt2);
-console.log(`signature: ${dedup.signature}`);
-console.log(`1st hydration — already seen (skip): ${dedup.firstAlreadySeen} (expect false)`);
-console.log(`2nd hydration — already seen (skip): ${dedup.secondAlreadySeen} (expect true)`);
-console.log(
-  !dedup.firstAlreadySeen && dedup.secondAlreadySeen
-    ? "OK: duplicate hydration signature is deduped."
-    : "FAIL: dedup mismatch"
-);
-
-function printParsed(label: string, prefill: string) {
-  const p = parseNaturalLanguage(prefill);
-  console.log(`\n${label}`);
-  console.log(`  prefill: ${JSON.stringify(prefill)}`);
-  console.log(`  title:            ${JSON.stringify(p.title)}`);
-  console.log(`  dueDate:          ${p.dueDate}`);
-  console.log(`  dueTime:          ${p.dueTime ?? "(none)"}`);
-  console.log(`  recurrence:       ${p.recurrence}`);
-  console.log(`  recurrenceInterval: ${p.recurrenceInterval ?? "(none)"}`);
-  console.log(`  recurrenceUnit:     ${p.recurrenceUnit ?? "(none)"}`);
-  console.log(`  confidence:       ${p.confidence}`);
+console.log("\n=== Dedupe signature strength simulation ===");
+const buildHydrationSignature = (prefill: string, action: string, query: string, data: any) => {
+  const structuredHint = {
+    hasTitle: typeof data.title === "string" && data.title.trim().length > 0 ? 1 : 0,
+    hasDueDate: typeof data.due_date === "string" && data.due_date.trim().length > 0 ? 1 : 0,
+    hasDueTime: typeof data.due_time === "string" && data.due_time.trim().length > 0 ? 1 : 0,
+    hasRecurrence: typeof data.recurrence === "string" && data.recurrence.trim().length > 0 ? 1 : 0,
+    prefillWords: prefill ? prefill.trim().split(/\s+/).length : 0,
+  };
+  return JSON.stringify({ prefill, action, query, hint: structuredHint });
+};
+const weakSig = buildHydrationSignature("remind me to call dad tomorrow", "create", "", {
+  action: "create",
+  natural_input: "remind me to call dad tomorrow",
+});
+const strongSig = buildHydrationSignature("remind me to call dad tomorrow", "create", "", {
+  action: "create",
+  natural_input: "remind me to call dad tomorrow",
+  title: "call dad",
+  due_date: formatLocalDate(tomorrow),
+});
+if (weakSig !== strongSig) {
+  pass("Weak vs strong payload signatures differ");
+} else {
+  fail("Weak and strong signatures collide");
 }
 
-console.log("\n\n=== Hydration case A: call mom tomorrow 5pm ===");
-printParsed(
-  "Expected: title Call mom, tomorrow, 17:00, daily/none as designed",
-  "Remind me to call mom tomorrow at 5pm."
-);
-
-console.log("\n\n=== Hydration case B: daily vitamins 9am ===");
-printParsed(
-  "Expected: title Take vitamins (or similar), daily, 09:00",
-  "Set a daily reminder to take vitamins at 9am."
-);
+if (failures > 0) {
+  console.error(`\n${failures} test(s) failed.`);
+  process.exit(1);
+}
+console.log("\nAll hydration tests passed.");

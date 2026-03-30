@@ -27178,7 +27178,19 @@ function ReminderApp({ initialData: initialData2 }) {
     const effectiveAction = actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "create" || actionRaw === "open" ? actionRaw : infer.action;
     const effectiveQuery = completeQueryRaw || infer.query || "";
     logH("resolved", { prefill, actionRaw, effectiveAction, effectiveQuery, infer });
-    const signature = JSON.stringify({ prefill, action: effectiveAction || "", query: effectiveQuery });
+    const structuredHint = {
+      hasTitle: typeof initialData2.title === "string" && initialData2.title.trim().length > 0 ? 1 : 0,
+      hasDueDate: typeof initialData2.due_date === "string" && initialData2.due_date.trim().length > 0 ? 1 : 0,
+      hasDueTime: typeof initialData2.due_time === "string" && initialData2.due_time.trim().length > 0 ? 1 : 0,
+      hasRecurrence: typeof initialData2.recurrence === "string" && initialData2.recurrence.trim().length > 0 ? 1 : 0,
+      prefillWords: prefill ? prefill.trim().split(/\s+/).length : 0
+    };
+    const signature = JSON.stringify({
+      prefill,
+      action: effectiveAction || "",
+      query: effectiveQuery,
+      hint: structuredHint
+    });
     if (isHydrationSignatureSeen(signature)) {
       logH("skip_duplicate", { signature });
       return;
@@ -27221,30 +27233,51 @@ function ReminderApp({ initialData: initialData2 }) {
     const wantsCreate = effectiveAction === "create" || effectiveAction === "open" || !effectiveAction;
     if (wantsCreate && prefill && prefill.trim()) {
       const directParsed = parseNaturalLanguage(prefill);
+      const structuredTitle = typeof initialData2.title === "string" ? initialData2.title.trim() : "";
+      const structuredDueDate = typeof initialData2.due_date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(initialData2.due_date.trim()) ? initialData2.due_date.trim() : "";
+      const structuredDueTime = typeof initialData2.due_time === "string" && /^\d{2}:\d{2}$/.test(initialData2.due_time.trim()) ? initialData2.due_time.trim() : "";
+      const structuredRecurrence = typeof initialData2.recurrence === "string" && ["none", "daily", "weekly", "monthly"].includes(initialData2.recurrence.trim()) ? initialData2.recurrence.trim() : void 0;
       logH("direct_parse", {
         h_prefill: prefill,
         h_title: directParsed.title,
         h_dueDate: directParsed.dueDate,
         h_dueTime: directParsed.dueTime,
         h_recurrence: directParsed.recurrence,
-        h_confidence: directParsed.confidence
+        h_confidence: directParsed.confidence,
+        h_structured: {
+          title: structuredTitle || null,
+          due_date: structuredDueDate || null,
+          due_time: structuredDueTime || null,
+          recurrence: structuredRecurrence || null
+        }
       });
-      if (directParsed.title && directParsed.title.trim()) {
+      const parsedTitle = directParsed.title ? directParsed.title.trim() : "";
+      const normalizedTitle = parsedTitle.toLowerCase();
+      const isBoilerplateTitle = /^(remind me|add a reminder|set a reminder|create a reminder|reminder)$/i.test(normalizedTitle);
+      const finalTitle = isBoilerplateTitle && structuredTitle ? structuredTitle : parsedTitle;
+      const finalDueDate = structuredDueDate || directParsed.dueDate;
+      const finalDueTime = structuredDueTime || directParsed.dueTime;
+      const finalRecurrence = structuredRecurrence ?? directParsed.recurrence;
+      if (finalTitle && finalTitle.trim()) {
+        if (isBoilerplateTitle && !structuredTitle) {
+          logH("skip_boilerplate_title", { h_title: directParsed.title, h_prefill: prefill });
+          return;
+        }
         const recentDuplicate = reminders.some((r) => {
           const age = Date.now() - new Date(r.createdAt).getTime();
-          return age < 5e3 && normalizeQuery(r.title) === normalizeQuery(directParsed.title);
+          return age < 5e3 && normalizeQuery(r.title) === normalizeQuery(finalTitle);
         });
         if (recentDuplicate) {
-          logH("skip_recent_duplicate", { h_title: directParsed.title });
+          logH("skip_recent_duplicate", { h_title: finalTitle });
         } else {
           const newReminder = {
             id: generateId(),
-            title: directParsed.title,
-            dueDate: directParsed.dueDate,
-            dueTime: directParsed.dueTime,
+            title: finalTitle,
+            dueDate: finalDueDate,
+            dueTime: finalDueTime,
             priority: directParsed.priority,
             category: directParsed.category,
-            recurrence: directParsed.recurrence,
+            recurrence: finalRecurrence,
             recurrenceInterval: directParsed.recurrenceInterval,
             recurrenceUnit: directParsed.recurrenceUnit,
             recurrenceDays: directParsed.recurrenceDays,
@@ -27256,13 +27289,15 @@ function ReminderApp({ initialData: initialData2 }) {
           resetCategoryFilteringToShowNewItems();
           setInput("");
           setParsed(null);
-          const recurrenceText = formatRecurrence(directParsed);
-          const msg = recurrenceText ? `Created ${recurrenceText.toLowerCase()} reminder!` : `Created "${directParsed.title}"!`;
+          const recurrenceText = finalRecurrence !== "none" ? String(finalRecurrence) : "";
+          const msg = recurrenceText ? `Created ${recurrenceText.toLowerCase()} reminder!` : `Created "${finalTitle}"!`;
           setToast(msg);
           logH("autocreate_done", {
-            h_title: directParsed.title,
-            h_dueDate: directParsed.dueDate,
-            h_recurrence: directParsed.recurrence,
+            h_title: finalTitle,
+            h_dueDate: finalDueDate,
+            h_dueTime: finalDueTime || null,
+            h_recurrence: finalRecurrence,
+            h_usedStructuredTitle: isBoilerplateTitle && !!structuredTitle,
             h_confidence: directParsed.confidence
           });
           return;
@@ -29443,6 +29478,7 @@ var ErrorBoundary = class extends import_react4.default.Component {
   }
 };
 var isNonEmptyString = (v) => typeof v === "string" && v.trim().length > 0;
+var isBoilerplateInput = (text) => /^((add|set|create)\s+)?(a\s+)?(daily\s+|weekly\s+|monthly\s+)?reminders?\.?$/i.test(text) || /^remind\s+me\.?$/i.test(text);
 var hasMeaningfulHydrationData = (data) => {
   if (!data || typeof data !== "object") return false;
   if (isNonEmptyString(data.natural_input) || isNonEmptyString(data.title) || isNonEmptyString(data.complete_query) || isNonEmptyString(data.due_date) || isNonEmptyString(data.due_time) || isNonEmptyString(data.recurrence) || isNonEmptyString(data.description) || isNonEmptyString(data.priority)) {
@@ -29451,6 +29487,39 @@ var hasMeaningfulHydrationData = (data) => {
   if (Array.isArray(data.tags) && data.tags.length > 0) return true;
   if (Array.isArray(data.recurrence_days) && data.recurrence_days.length > 0) return true;
   return false;
+};
+var hydrationQualitySignals = (data) => {
+  const natural = typeof data?.natural_input === "string" ? data.natural_input.trim() : "";
+  const title = typeof data?.title === "string" ? data.title.trim() : "";
+  const hasNaturalInput = isNonEmptyString(natural) && !isBoilerplateInput(natural);
+  const hasTitle = isNonEmptyString(title) && !isBoilerplateInput(title);
+  const hasDateHint = isNonEmptyString(data?.due_date);
+  const hasTimeHint = isNonEmptyString(data?.due_time);
+  const hasRecurrenceHint = isNonEmptyString(data?.recurrence) && data.recurrence !== "none";
+  const hasQueryHint = isNonEmptyString(data?.complete_query);
+  const hasAction = isNonEmptyString(data?.action);
+  return {
+    hasNaturalInput,
+    hasTitle,
+    hasDateHint,
+    hasTimeHint,
+    hasRecurrenceHint,
+    hasQueryHint,
+    hasAction
+  };
+};
+var scoreHydrationCandidate = (data) => {
+  const q = hydrationQualitySignals(data);
+  let score = 0;
+  if (q.hasNaturalInput) score += 60;
+  if (q.hasTitle) score += 30;
+  if (q.hasDateHint) score += 20;
+  if (q.hasTimeHint) score += 15;
+  if (q.hasRecurrenceHint) score += 10;
+  if (q.hasQueryHint) score += 8;
+  if (q.hasAction) score += 2;
+  score += Math.min(Object.keys(data || {}).length, 10);
+  return score;
 };
 var getHydrationData = () => {
   console.log("[Hydration] Starting hydration check...");
@@ -29492,6 +29561,9 @@ var root = (0, import_client.createRoot)(container);
 var __appliedLateHydration = false;
 var __renderCount = 0;
 var __currentInitialData = null;
+var __hydrationCandidates = [];
+var __hydrationSettleTimer = null;
+var HYDRATION_SETTLE_MS = 350;
 var renderApp = (data) => {
   __renderCount += 1;
   __currentInitialData = data;
@@ -29514,8 +29586,87 @@ var renderApp = (data) => {
     /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(import_react4.default.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(ErrorBoundary, { children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(App, { initialData: data }) }) })
   );
 };
+var selectBestHydrationCandidate = () => {
+  if (__hydrationCandidates.length === 0) return null;
+  return __hydrationCandidates.slice().sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return b.atMs - a.atMs;
+  })[0];
+};
+var flushHydrationCandidates = () => {
+  __hydrationSettleTimer = null;
+  if (__appliedLateHydration) return;
+  const best = selectBestHydrationCandidate();
+  if (!best) return;
+  const merged = {
+    ...typeof __currentInitialData === "object" && __currentInitialData ? __currentInitialData : {},
+    ...best.data
+  };
+  __appliedLateHydration = true;
+  __mark("hydration_candidate_selected", {
+    source: best.source,
+    score: best.score,
+    keys: best.keys,
+    candidateCount: __hydrationCandidates.length
+  });
+  __report("widget_hydration_candidate_selected", {
+    source: best.source,
+    score: best.score,
+    keys: best.keys,
+    candidateCount: __hydrationCandidates.length,
+    quality: hydrationQualitySignals(best.data),
+    mergedKeys: Object.keys(merged),
+    lastLifecycle: __lastLifecycle
+  }).catch(() => {
+  });
+  __hydrationCandidates = [];
+  renderApp(merged);
+};
+var queueHydrationCandidate = (source, candidate) => {
+  const keys = candidate && typeof candidate === "object" ? Object.keys(candidate) : [];
+  if (!hasMeaningfulHydrationData(candidate)) {
+    __report("widget_hydration_candidate_rejected", {
+      source,
+      keys,
+      reason: "not_meaningful_or_empty",
+      lastLifecycle: __lastLifecycle
+    }).catch(() => {
+    });
+    return;
+  }
+  if (__appliedLateHydration) {
+    __report("widget_hydration_candidate_rejected", {
+      source,
+      keys,
+      reason: "already_applied",
+      lastLifecycle: __lastLifecycle
+    }).catch(() => {
+    });
+    return;
+  }
+  const score = scoreHydrationCandidate(candidate);
+  __hydrationCandidates.push({
+    source,
+    data: candidate,
+    score,
+    keys,
+    atMs: __sinceStartMs()
+  });
+  __report("widget_hydration_candidate_scored", {
+    source,
+    keys,
+    score,
+    quality: hydrationQualitySignals(candidate),
+    lastLifecycle: __lastLifecycle
+  }).catch(() => {
+  });
+  if (__hydrationSettleTimer !== null) {
+    window.clearTimeout(__hydrationSettleTimer);
+  }
+  __hydrationSettleTimer = window.setTimeout(flushHydrationCandidates, HYDRATION_SETTLE_MS);
+};
 var initialData = getHydrationData();
-__currentInitialData = initialData;
+__currentInitialData = {};
 __log("[Hydration] initialData keys", initialData && typeof initialData === "object" ? Object.keys(initialData) : []);
 __mark("hydration_initial", {
   initialDataKeys: initialData && typeof initialData === "object" ? Object.keys(initialData) : []
@@ -29532,7 +29683,8 @@ __report("widget_hydration_initial", {
   lastLifecycle: __lastLifecycle
 }).catch(() => {
 });
-renderApp(initialData);
+renderApp({});
+queueHydrationCandidate("initial", initialData);
 window.addEventListener("message", (event) => {
   if (event.source !== window.parent) return;
   const msg = event.data;
@@ -29540,32 +29692,11 @@ window.addEventListener("message", (event) => {
   if (msg.method === "ui/notifications/tool-result") {
     const payload = msg.params;
     const data = payload?.structuredContent;
-    if (data && typeof data === "object" && Object.keys(data).length > 0 && hasMeaningfulHydrationData(data)) {
-      if (__appliedLateHydration) return;
-      const merged = {
-        ...typeof __currentInitialData === "object" && __currentInitialData ? __currentInitialData : {},
-        ...data
-      };
-      __appliedLateHydration = true;
-      __mark("hydration_jsonrpc", { method: msg.method, keys: Object.keys(data) });
-      __report("widget_hydration_jsonrpc", {
-        method: msg.method,
-        dataKeys: Object.keys(data),
-        mergedKeys: Object.keys(merged),
-        hasNaturalInput: !!merged.natural_input,
-        lastLifecycle: __lastLifecycle
-      }).catch(() => {
-      });
-      renderApp(merged);
-    } else {
-      __report("widget_hydration_jsonrpc_ignored", {
-        method: msg.method,
-        dataKeys: data && typeof data === "object" ? Object.keys(data) : [],
-        reason: "not_meaningful_or_empty",
-        lastLifecycle: __lastLifecycle
-      }).catch(() => {
-      });
-    }
+    __mark("hydration_jsonrpc", {
+      method: msg.method,
+      keys: data && typeof data === "object" ? Object.keys(data) : []
+    });
+    queueHydrationCandidate("jsonrpc_tool_result", data);
   }
 }, { passive: true });
 window.addEventListener("openai:set_globals", (ev) => {
@@ -29588,36 +29719,8 @@ window.addEventListener("openai:set_globals", (ev) => {
       globals.result?.structuredContent,
       globals.toolInput
     ];
-    for (const candidate of candidates) {
-      if (candidate && typeof candidate === "object" && Object.keys(candidate).length > 0 && hasMeaningfulHydrationData(candidate)) {
-        if (__appliedLateHydration) {
-          __log("[Hydration] Ignoring additional late hydration (already applied once)");
-          return;
-        }
-        const merged = {
-          ...typeof __currentInitialData === "object" && __currentInitialData ? __currentInitialData : {},
-          ...candidate
-        };
-        console.log("[Hydration] Re-rendering with late data (merged overlay):", merged);
-        __appliedLateHydration = true;
-        __mark("hydration_late_apply", {
-          candidateKeys: Object.keys(candidate),
-          mergedKeys: Object.keys(merged)
-        });
-        __report("widget_hydration_late_apply", {
-          candidateKeys: Object.keys(candidate),
-          mergedKeys: Object.keys(merged),
-          hydrationPrefill: {
-            hasNaturalInput: !!merged.natural_input,
-            hasAction: !!merged.action,
-            hasCompleteQuery: !!merged.complete_query
-          },
-          lastLifecycle: __lastLifecycle
-        }).catch(() => {
-        });
-        renderApp(merged);
-        return;
-      }
+    for (let i = 0; i < candidates.length; i++) {
+      queueHydrationCandidate(`set_globals_${i}`, candidates[i]);
     }
   }
 });

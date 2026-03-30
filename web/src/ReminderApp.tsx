@@ -1381,7 +1381,19 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
 
     logH("resolved", { prefill, actionRaw, effectiveAction, effectiveQuery, infer });
 
-    const signature = JSON.stringify({ prefill, action: effectiveAction || "", query: effectiveQuery });
+    const structuredHint = {
+      hasTitle: typeof initialData.title === "string" && initialData.title.trim().length > 0 ? 1 : 0,
+      hasDueDate: typeof initialData.due_date === "string" && initialData.due_date.trim().length > 0 ? 1 : 0,
+      hasDueTime: typeof initialData.due_time === "string" && initialData.due_time.trim().length > 0 ? 1 : 0,
+      hasRecurrence: typeof initialData.recurrence === "string" && initialData.recurrence.trim().length > 0 ? 1 : 0,
+      prefillWords: prefill ? prefill.trim().split(/\s+/).length : 0,
+    };
+    const signature = JSON.stringify({
+      prefill,
+      action: effectiveAction || "",
+      query: effectiveQuery,
+      hint: structuredHint,
+    });
     if (isHydrationSignatureSeen(signature)) {
       logH("skip_duplicate", { signature });
       return;
@@ -1431,6 +1443,20 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     const wantsCreate = effectiveAction === "create" || effectiveAction === "open" || !effectiveAction;
     if (wantsCreate && prefill && prefill.trim()) {
       const directParsed = parseNaturalLanguage(prefill);
+      const structuredTitle = typeof initialData.title === "string" ? initialData.title.trim() : "";
+      const structuredDueDate =
+        typeof initialData.due_date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(initialData.due_date.trim())
+          ? initialData.due_date.trim()
+          : "";
+      const structuredDueTime =
+        typeof initialData.due_time === "string" && /^\d{2}:\d{2}$/.test(initialData.due_time.trim())
+          ? initialData.due_time.trim()
+          : "";
+      const structuredRecurrence =
+        typeof initialData.recurrence === "string" &&
+        ["none", "daily", "weekly", "monthly"].includes(initialData.recurrence.trim())
+          ? (initialData.recurrence.trim() as RecurrenceType)
+          : undefined;
       logH("direct_parse", {
         h_prefill: prefill,
         h_title: directParsed.title,
@@ -1438,25 +1464,45 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
         h_dueTime: directParsed.dueTime,
         h_recurrence: directParsed.recurrence,
         h_confidence: directParsed.confidence,
+        h_structured: {
+          title: structuredTitle || null,
+          due_date: structuredDueDate || null,
+          due_time: structuredDueTime || null,
+          recurrence: structuredRecurrence || null,
+        },
       });
 
-      if (directParsed.title && directParsed.title.trim()) {
-        const recentDuplicate = reminders.some(r => {
+      const parsedTitle = directParsed.title ? directParsed.title.trim() : "";
+      const normalizedTitle = parsedTitle.toLowerCase();
+      const isBoilerplateTitle =
+        /^(remind me|add a reminder|set a reminder|create a reminder|reminder)$/i.test(normalizedTitle);
+      const finalTitle = isBoilerplateTitle && structuredTitle ? structuredTitle : parsedTitle;
+      const finalDueDate = structuredDueDate || directParsed.dueDate;
+      const finalDueTime = structuredDueTime || directParsed.dueTime;
+      const finalRecurrence = structuredRecurrence ?? directParsed.recurrence;
+
+      if (finalTitle && finalTitle.trim()) {
+        if (isBoilerplateTitle && !structuredTitle) {
+          logH("skip_boilerplate_title", { h_title: directParsed.title, h_prefill: prefill });
+          return;
+        }
+
+        const recentDuplicate = reminders.some((r) => {
           const age = Date.now() - new Date(r.createdAt).getTime();
-          return age < 5000 && normalizeQuery(r.title) === normalizeQuery(directParsed.title);
+          return age < 5000 && normalizeQuery(r.title) === normalizeQuery(finalTitle);
         });
 
         if (recentDuplicate) {
-          logH("skip_recent_duplicate", { h_title: directParsed.title });
+          logH("skip_recent_duplicate", { h_title: finalTitle });
         } else {
           const newReminder: Reminder = {
             id: generateId(),
-            title: directParsed.title,
-            dueDate: directParsed.dueDate,
-            dueTime: directParsed.dueTime,
+            title: finalTitle,
+            dueDate: finalDueDate,
+            dueTime: finalDueTime,
             priority: directParsed.priority,
             category: directParsed.category,
-            recurrence: directParsed.recurrence,
+            recurrence: finalRecurrence,
             recurrenceInterval: directParsed.recurrenceInterval,
             recurrenceUnit: directParsed.recurrenceUnit,
             recurrenceDays: directParsed.recurrenceDays,
@@ -1469,16 +1515,18 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
           setInput("");
           setParsed(null);
 
-          const recurrenceText = formatRecurrence(directParsed);
+          const recurrenceText = finalRecurrence !== "none" ? String(finalRecurrence) : "";
           const msg = recurrenceText
             ? `Created ${recurrenceText.toLowerCase()} reminder!`
-            : `Created "${directParsed.title}"!`;
+            : `Created "${finalTitle}"!`;
           setToast(msg);
 
           logH("autocreate_done", {
-            h_title: directParsed.title,
-            h_dueDate: directParsed.dueDate,
-            h_recurrence: directParsed.recurrence,
+            h_title: finalTitle,
+            h_dueDate: finalDueDate,
+            h_dueTime: finalDueTime || null,
+            h_recurrence: finalRecurrence,
+            h_usedStructuredTitle: isBoilerplateTitle && !!structuredTitle,
             h_confidence: directParsed.confidence,
           });
           return;
