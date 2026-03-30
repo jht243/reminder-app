@@ -1410,25 +1410,13 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     const wantsCreate = effectiveAction === "create" || effectiveAction === "open" || !effectiveAction;
     if (wantsCreate && prefill && prefill.trim()) {
       const directParsed = parseNaturalLanguage(prefill);
-
-      // Merge structured fields from initialData when the model already extracted them.
-      // These override the parser's output because the model had full conversation context.
-      const structuredDueDate = typeof initialData.due_date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(initialData.due_date) ? initialData.due_date : "";
-      const structuredDueTime = typeof initialData.due_time === "string" && /^\d{2}:\d{2}$/.test(initialData.due_time) ? initialData.due_time : "";
-      const structuredRecurrence = typeof initialData.recurrence === "string" && ["daily","weekly","monthly","none"].includes(initialData.recurrence) ? initialData.recurrence : "";
-
-      const finalDueDate = structuredDueDate || directParsed.dueDate;
-      const finalDueTime = structuredDueTime || directParsed.dueTime;
-      const finalRecurrence = (structuredRecurrence && structuredRecurrence !== "none") ? structuredRecurrence as any : directParsed.recurrence;
-
       logH("direct_parse", {
         h_prefill: prefill,
         h_title: directParsed.title,
-        h_dueDate: finalDueDate,
-        h_dueTime: finalDueTime || null,
-        h_recurrence: finalRecurrence,
+        h_dueDate: directParsed.dueDate,
+        h_dueTime: directParsed.dueTime,
+        h_recurrence: directParsed.recurrence,
         h_confidence: directParsed.confidence,
-        h_structured: { due_date: structuredDueDate || null, due_time: structuredDueTime || null, recurrence: structuredRecurrence || null },
       });
 
       if (directParsed.title && directParsed.title.trim()) {
@@ -1443,11 +1431,11 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
           const newReminder: Reminder = {
             id: generateId(),
             title: directParsed.title,
-            dueDate: finalDueDate,
-            dueTime: finalDueTime,
+            dueDate: directParsed.dueDate,
+            dueTime: directParsed.dueTime,
             priority: directParsed.priority,
             category: directParsed.category,
-            recurrence: finalRecurrence,
+            recurrence: directParsed.recurrence,
             recurrenceInterval: directParsed.recurrenceInterval,
             recurrenceUnit: directParsed.recurrenceUnit,
             recurrenceDays: directParsed.recurrenceDays,
@@ -1468,9 +1456,8 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
 
           logH("autocreate_done", {
             h_title: directParsed.title,
-            h_dueDate: finalDueDate,
-            h_dueTime: finalDueTime || null,
-            h_recurrence: finalRecurrence,
+            h_dueDate: directParsed.dueDate,
+            h_recurrence: directParsed.recurrence,
             h_confidence: directParsed.confidence,
           });
           return;
