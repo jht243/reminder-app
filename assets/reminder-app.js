@@ -26917,8 +26917,6 @@ function ReminderApp({ initialData: initialData2 }) {
   const [parsed, setParsed] = (0, import_react3.useState)(null);
   const inputRef = (0, import_react3.useRef)(null);
   const hydrationAppliedRef = (0, import_react3.useRef)(/* @__PURE__ */ new Set());
-  const hydrationAutoCreateAppliedRef = (0, import_react3.useRef)(/* @__PURE__ */ new Set());
-  const pendingAutoCreateRef = (0, import_react3.useRef)(null);
   const pendingCompletionRef = (0, import_react3.useRef)(null);
   const HYDRATION_DEDUP_KEY = "__reminder_hydration_sigs";
   const isHydrationSignatureSeen = (sig) => {
@@ -27120,92 +27118,126 @@ function ReminderApp({ initialData: initialData2 }) {
     return parts.join(" ");
   };
   (0, import_react3.useEffect)(() => {
-    if (!initialData2 || typeof initialData2 !== "object") return;
+    const logH = (step, data = {}) => {
+      console.log(`[Hydration] ${step}`, data);
+      trackEvent(`hydration_${step}`, data);
+    };
+    if (!initialData2 || typeof initialData2 !== "object") {
+      logH("skip_no_data", { initialData: String(initialData2) });
+      return;
+    }
+    logH("start", {
+      keys: Object.keys(initialData2),
+      natural_input: initialData2.natural_input ?? null,
+      title: initialData2.title ?? null,
+      action: initialData2.action ?? null,
+      complete_query: initialData2.complete_query ?? null
+    });
     const prefill = buildPrefillText(initialData2);
     const actionRaw = typeof initialData2.action === "string" ? initialData2.action : "";
     const completeQueryRaw = typeof initialData2.complete_query === "string" ? initialData2.complete_query : "";
     const infer = prefill ? inferActionFromNaturalInput(prefill) : {};
     const effectiveAction = actionRaw === "complete" || actionRaw === "uncomplete" || actionRaw === "create" || actionRaw === "open" ? actionRaw : infer.action;
     const effectiveQuery = completeQueryRaw || infer.query || "";
+    logH("resolved", { prefill, actionRaw, effectiveAction, effectiveQuery, infer });
     const signature = JSON.stringify({ prefill, action: effectiveAction || "", query: effectiveQuery });
-    if (isHydrationSignatureSeen(signature)) return;
+    if (isHydrationSignatureSeen(signature)) {
+      logH("skip_duplicate", { signature });
+      return;
+    }
     const hasAny = Boolean(prefill) || Boolean(effectiveAction) || Boolean(effectiveQuery);
-    if (!hasAny) return;
+    if (!hasAny) {
+      logH("skip_empty", { prefill, effectiveAction, effectiveQuery });
+      return;
+    }
     markHydrationSignature(signature);
     if (effectiveAction === "complete" && effectiveQuery) {
       const target = bestMatchReminder(effectiveQuery, false);
       if (target) {
         complete(target);
         setToast(`Marked "${target.title}" as complete`);
-        trackEvent("hydration_complete", { query: effectiveQuery, found: true });
+        logH("complete_found", { query: effectiveQuery, matchedTitle: target.title });
         setInput("");
         return;
       } else {
-        trackEvent("hydration_complete", { query: effectiveQuery, found: false });
+        logH("complete_not_found", { query: effectiveQuery });
       }
     } else if (effectiveAction === "uncomplete" && effectiveQuery) {
       const target = bestMatchReminder(effectiveQuery, true);
       if (target) {
         uncomplete(target);
         setToast(`Marked "${target.title}" as incomplete`);
-        trackEvent("hydration_uncomplete", { query: effectiveQuery, found: true });
+        logH("uncomplete_found", { query: effectiveQuery, matchedTitle: target.title });
         setInput("");
         return;
+      } else {
+        logH("uncomplete_not_found", { query: effectiveQuery });
       }
-    }
-    if (prefill) {
-      setInput(prefill);
-      try {
-        inputRef.current?.focus();
-        inputRef.current?.setSelectionRange(prefill.length, prefill.length);
-      } catch {
-      }
-      trackEvent("hydration_prefill", {
-        hasNaturalInput: !!initialData2?.natural_input,
-        action: effectiveAction || ""
-      });
-    }
-    const wantsCreate = effectiveAction === "create" || effectiveAction === "open" || !effectiveAction;
-    if (wantsCreate && prefill && prefill.trim()) {
-      pendingAutoCreateRef.current = { signature, text: prefill };
     }
     if (effectiveAction === "complete" || effectiveAction === "uncomplete") {
       const query = effectiveQuery || prefill;
       if (typeof query === "string" && query.trim()) {
-        pendingCompletionRef.current = {
-          action: effectiveAction,
-          query: query.trim()
-        };
+        pendingCompletionRef.current = { action: effectiveAction, query: query.trim() };
       }
     }
+    const wantsCreate = effectiveAction === "create" || effectiveAction === "open" || !effectiveAction;
+    if (wantsCreate && prefill && prefill.trim()) {
+      const directParsed = parseNaturalLanguage(prefill);
+      logH("direct_parse", {
+        prefill,
+        title: directParsed.title,
+        dueDate: directParsed.dueDate,
+        dueTime: directParsed.dueTime,
+        recurrence: directParsed.recurrence,
+        confidence: directParsed.confidence
+      });
+      if (directParsed.title && directParsed.title.trim()) {
+        const recentDuplicate = reminders.some((r) => {
+          const age = Date.now() - new Date(r.createdAt).getTime();
+          return age < 5e3 && normalizeQuery(r.title) === normalizeQuery(directParsed.title);
+        });
+        if (recentDuplicate) {
+          logH("skip_recent_duplicate", { title: directParsed.title });
+        } else {
+          const newReminder = {
+            id: generateId(),
+            title: directParsed.title,
+            dueDate: directParsed.dueDate,
+            dueTime: directParsed.dueTime,
+            priority: directParsed.priority,
+            category: directParsed.category,
+            recurrence: directParsed.recurrence,
+            recurrenceInterval: directParsed.recurrenceInterval,
+            recurrenceUnit: directParsed.recurrenceUnit,
+            recurrenceDays: directParsed.recurrenceDays,
+            completed: false,
+            createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+            pointsAwarded: 0
+          };
+          setReminders((prev) => [...prev, newReminder]);
+          resetCategoryFilteringToShowNewItems();
+          setInput("");
+          setParsed(null);
+          const recurrenceText = formatRecurrence(directParsed);
+          const msg = recurrenceText ? `Created ${recurrenceText.toLowerCase()} reminder!` : `Created "${directParsed.title}"!`;
+          setToast(msg);
+          logH("autocreate_done", {
+            title: directParsed.title,
+            dueDate: directParsed.dueDate,
+            recurrence: directParsed.recurrence,
+            confidence: directParsed.confidence
+          });
+          return;
+        }
+      } else {
+        logH("skip_empty_title", { prefill });
+      }
+    }
+    if (prefill) {
+      setInput(prefill);
+      logH("fallback_prefill", { prefill });
+    }
   }, [initialData2]);
-  (0, import_react3.useEffect)(() => {
-    const pending = pendingAutoCreateRef.current;
-    if (!pending) return;
-    if (hydrationAutoCreateAppliedRef.current.has(pending.signature) || isHydrationSignatureSeen(pending.signature)) {
-      pendingAutoCreateRef.current = null;
-      return;
-    }
-    if (!input || input.trim() !== pending.text.trim()) return;
-    if (!parsed) return;
-    const recentDuplicate = reminders.some((r) => {
-      const age = Date.now() - new Date(r.createdAt).getTime();
-      return age < 5e3 && normalizeQuery(r.title) === normalizeQuery(parsed.title);
-    });
-    if (recentDuplicate) {
-      pendingAutoCreateRef.current = null;
-      return;
-    }
-    hydrationAutoCreateAppliedRef.current.add(pending.signature);
-    markHydrationSignature(pending.signature);
-    pendingAutoCreateRef.current = null;
-    trackEvent("hydration_autocreate", {
-      inputLength: input.length,
-      confidence: parsed.confidence,
-      recurrence: parsed.recurrence
-    });
-    createFromParsed();
-  }, [input, parsed]);
   (0, import_react3.useEffect)(() => {
     persistState(reminders, stats);
   }, [reminders, stats]);

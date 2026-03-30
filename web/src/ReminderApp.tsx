@@ -1024,8 +1024,6 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const hydrationAppliedRef = useRef<Set<string>>(new Set());
-  const hydrationAutoCreateAppliedRef = useRef<Set<string>>(new Set());
-  const pendingAutoCreateRef = useRef<{ signature: string; text: string } | null>(null);
   const pendingCompletionRef = useRef<{ action: "complete" | "uncomplete"; query: string } | null>(null);
 
   const HYDRATION_DEDUP_KEY = "__reminder_hydration_sigs";
@@ -1332,7 +1330,23 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
   };
 
   useEffect(() => {
-    if (!initialData || typeof initialData !== "object") return;
+    const logH = (step: string, data: Record<string, any> = {}) => {
+      console.log(`[Hydration] ${step}`, data);
+      trackEvent(`hydration_${step}`, data);
+    };
+
+    if (!initialData || typeof initialData !== "object") {
+      logH("skip_no_data", { initialData: String(initialData) });
+      return;
+    }
+
+    logH("start", {
+      keys: Object.keys(initialData),
+      natural_input: initialData.natural_input ?? null,
+      title: initialData.title ?? null,
+      action: initialData.action ?? null,
+      complete_query: initialData.complete_query ?? null,
+    });
 
     const prefill = buildPrefillText(initialData);
     const actionRaw = typeof initialData.action === "string" ? initialData.action : "";
@@ -1344,105 +1358,122 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
         : infer.action;
     const effectiveQuery = completeQueryRaw || infer.query || "";
 
+    logH("resolved", { prefill, actionRaw, effectiveAction, effectiveQuery, infer });
+
     const signature = JSON.stringify({ prefill, action: effectiveAction || "", query: effectiveQuery });
-    if (isHydrationSignatureSeen(signature)) return;
+    if (isHydrationSignatureSeen(signature)) {
+      logH("skip_duplicate", { signature });
+      return;
+    }
 
     const hasAny = Boolean(prefill) || Boolean(effectiveAction) || Boolean(effectiveQuery);
-    if (!hasAny) return;
+    if (!hasAny) {
+      logH("skip_empty", { prefill, effectiveAction, effectiveQuery });
+      return;
+    }
 
     markHydrationSignature(signature);
 
-    // Execute hydration action
+    // ── Complete / Uncomplete ──
     if (effectiveAction === "complete" && effectiveQuery) {
       const target = bestMatchReminder(effectiveQuery, false);
       if (target) {
         complete(target);
         setToast(`Marked "${target.title}" as complete`);
-        trackEvent("hydration_complete", { query: effectiveQuery, found: true });
-        // Clear input since we handled the action
+        logH("complete_found", { query: effectiveQuery, matchedTitle: target.title });
         setInput("");
-        return; // Done
+        return;
       } else {
-        // Fallback: If we can't find the item to complete, just prefill the input
-        // so the user can see what was intended or create a new one
-        trackEvent("hydration_complete", { query: effectiveQuery, found: false });
+        logH("complete_not_found", { query: effectiveQuery });
       }
     } else if (effectiveAction === "uncomplete" && effectiveQuery) {
       const target = bestMatchReminder(effectiveQuery, true);
       if (target) {
         uncomplete(target);
         setToast(`Marked "${target.title}" as incomplete`);
-        trackEvent("hydration_uncomplete", { query: effectiveQuery, found: true });
+        logH("uncomplete_found", { query: effectiveQuery, matchedTitle: target.title });
         setInput("");
         return;
+      } else {
+        logH("uncomplete_not_found", { query: effectiveQuery });
       }
-    }
-
-    if (prefill) {
-      setInput(prefill);
-      try {
-        inputRef.current?.focus();
-        inputRef.current?.setSelectionRange(prefill.length, prefill.length);
-      } catch {
-        // ignore
-      }
-      trackEvent("hydration_prefill", {
-        hasNaturalInput: !!initialData?.natural_input,
-        action: effectiveAction || "",
-      });
-    }
-
-    // Auto-create reminders when hydration indicates creation intent.
-    // This should only run once per unique hydration payload.
-    const wantsCreate = effectiveAction === "create" || effectiveAction === "open" || !effectiveAction;
-    if (wantsCreate && prefill && prefill.trim()) {
-      pendingAutoCreateRef.current = { signature, text: prefill };
     }
 
     if (effectiveAction === "complete" || effectiveAction === "uncomplete") {
       const query = effectiveQuery || prefill;
       if (typeof query === "string" && query.trim()) {
-        pendingCompletionRef.current = {
-          action: effectiveAction,
-          query: query.trim(),
-        };
+        pendingCompletionRef.current = { action: effectiveAction, query: query.trim() };
       }
+    }
+
+    // ── Create: parse and add the reminder directly (no multi-effect chain) ──
+    const wantsCreate = effectiveAction === "create" || effectiveAction === "open" || !effectiveAction;
+    if (wantsCreate && prefill && prefill.trim()) {
+      const directParsed = parseNaturalLanguage(prefill);
+      logH("direct_parse", {
+        prefill,
+        title: directParsed.title,
+        dueDate: directParsed.dueDate,
+        dueTime: directParsed.dueTime,
+        recurrence: directParsed.recurrence,
+        confidence: directParsed.confidence,
+      });
+
+      if (directParsed.title && directParsed.title.trim()) {
+        const recentDuplicate = reminders.some(r => {
+          const age = Date.now() - new Date(r.createdAt).getTime();
+          return age < 5000 && normalizeQuery(r.title) === normalizeQuery(directParsed.title);
+        });
+
+        if (recentDuplicate) {
+          logH("skip_recent_duplicate", { title: directParsed.title });
+        } else {
+          const newReminder: Reminder = {
+            id: generateId(),
+            title: directParsed.title,
+            dueDate: directParsed.dueDate,
+            dueTime: directParsed.dueTime,
+            priority: directParsed.priority,
+            category: directParsed.category,
+            recurrence: directParsed.recurrence,
+            recurrenceInterval: directParsed.recurrenceInterval,
+            recurrenceUnit: directParsed.recurrenceUnit,
+            recurrenceDays: directParsed.recurrenceDays,
+            completed: false,
+            createdAt: new Date().toISOString(),
+            pointsAwarded: 0,
+          };
+          setReminders(prev => [...prev, newReminder]);
+          resetCategoryFilteringToShowNewItems();
+          setInput("");
+          setParsed(null);
+
+          const recurrenceText = formatRecurrence(directParsed);
+          const msg = recurrenceText
+            ? `Created ${recurrenceText.toLowerCase()} reminder!`
+            : `Created "${directParsed.title}"!`;
+          setToast(msg);
+
+          logH("autocreate_done", {
+            title: directParsed.title,
+            dueDate: directParsed.dueDate,
+            recurrence: directParsed.recurrence,
+            confidence: directParsed.confidence,
+          });
+          return;
+        }
+      } else {
+        logH("skip_empty_title", { prefill });
+      }
+    }
+
+    // Fallback: if we didn't auto-create, at least prefill the input
+    if (prefill) {
+      setInput(prefill);
+      logH("fallback_prefill", { prefill });
     }
   }, [initialData]);
 
-  // Apply auto-create once parsing has produced a ParsedReminder.
-  useEffect(() => {
-    const pending = pendingAutoCreateRef.current;
-    if (!pending) return;
-    if (hydrationAutoCreateAppliedRef.current.has(pending.signature) || isHydrationSignatureSeen(pending.signature)) {
-      pendingAutoCreateRef.current = null;
-      return;
-    }
-    // Wait until input is actually set and parsing has run.
-    if (!input || input.trim() !== pending.text.trim()) return;
-    if (!parsed) return;
-
-    // Guard: skip if a reminder with the same title was created very recently
-    const recentDuplicate = reminders.some(r => {
-      const age = Date.now() - new Date(r.createdAt).getTime();
-      return age < 5000 && normalizeQuery(r.title) === normalizeQuery(parsed.title);
-    });
-    if (recentDuplicate) {
-      pendingAutoCreateRef.current = null;
-      return;
-    }
-
-    hydrationAutoCreateAppliedRef.current.add(pending.signature);
-    markHydrationSignature(pending.signature);
-    pendingAutoCreateRef.current = null;
-    trackEvent("hydration_autocreate", {
-      inputLength: input.length,
-      confidence: parsed.confidence,
-      recurrence: parsed.recurrence,
-    });
-    createFromParsed();
-  }, [input, parsed]);
-  
   // Persist whenever reminders or stats change
   useEffect(() => {
     persistState(reminders, stats);
