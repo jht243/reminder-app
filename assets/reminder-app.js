@@ -27128,10 +27128,10 @@ function ReminderApp({ initialData: initialData2 }) {
     }
     logH("start", {
       keys: Object.keys(initialData2),
-      natural_input: initialData2.natural_input ?? null,
-      title: initialData2.title ?? null,
-      action: initialData2.action ?? null,
-      complete_query: initialData2.complete_query ?? null
+      h_natural_input: initialData2.natural_input ?? null,
+      h_title: initialData2.title ?? null,
+      h_action: initialData2.action ?? null,
+      h_complete_query: initialData2.complete_query ?? null
     });
     const prefill = buildPrefillText(initialData2);
     const actionRaw = typeof initialData2.action === "string" ? initialData2.action : "";
@@ -27156,7 +27156,7 @@ function ReminderApp({ initialData: initialData2 }) {
       if (target) {
         complete(target);
         setToast(`Marked "${target.title}" as complete`);
-        logH("complete_found", { query: effectiveQuery, matchedTitle: target.title });
+        logH("complete_found", { h_query: effectiveQuery, h_matchedTitle: target.title });
         setInput("");
         return;
       } else {
@@ -27167,7 +27167,7 @@ function ReminderApp({ initialData: initialData2 }) {
       if (target) {
         uncomplete(target);
         setToast(`Marked "${target.title}" as incomplete`);
-        logH("uncomplete_found", { query: effectiveQuery, matchedTitle: target.title });
+        logH("uncomplete_found", { h_query: effectiveQuery, h_matchedTitle: target.title });
         setInput("");
         return;
       } else {
@@ -27184,12 +27184,12 @@ function ReminderApp({ initialData: initialData2 }) {
     if (wantsCreate && prefill && prefill.trim()) {
       const directParsed = parseNaturalLanguage(prefill);
       logH("direct_parse", {
-        prefill,
-        title: directParsed.title,
-        dueDate: directParsed.dueDate,
-        dueTime: directParsed.dueTime,
-        recurrence: directParsed.recurrence,
-        confidence: directParsed.confidence
+        h_prefill: prefill,
+        h_title: directParsed.title,
+        h_dueDate: directParsed.dueDate,
+        h_dueTime: directParsed.dueTime,
+        h_recurrence: directParsed.recurrence,
+        h_confidence: directParsed.confidence
       });
       if (directParsed.title && directParsed.title.trim()) {
         const recentDuplicate = reminders.some((r) => {
@@ -27197,7 +27197,7 @@ function ReminderApp({ initialData: initialData2 }) {
           return age < 5e3 && normalizeQuery(r.title) === normalizeQuery(directParsed.title);
         });
         if (recentDuplicate) {
-          logH("skip_recent_duplicate", { title: directParsed.title });
+          logH("skip_recent_duplicate", { h_title: directParsed.title });
         } else {
           const newReminder = {
             id: generateId(),
@@ -27222,10 +27222,10 @@ function ReminderApp({ initialData: initialData2 }) {
           const msg = recurrenceText ? `Created ${recurrenceText.toLowerCase()} reminder!` : `Created "${directParsed.title}"!`;
           setToast(msg);
           logH("autocreate_done", {
-            title: directParsed.title,
-            dueDate: directParsed.dueDate,
-            recurrence: directParsed.recurrence,
-            confidence: directParsed.confidence
+            h_title: directParsed.title,
+            h_dueDate: directParsed.dueDate,
+            h_recurrence: directParsed.recurrence,
+            h_confidence: directParsed.confidence
           });
           return;
         }

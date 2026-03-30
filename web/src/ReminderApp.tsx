@@ -1342,10 +1342,10 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
 
     logH("start", {
       keys: Object.keys(initialData),
-      natural_input: initialData.natural_input ?? null,
-      title: initialData.title ?? null,
-      action: initialData.action ?? null,
-      complete_query: initialData.complete_query ?? null,
+      h_natural_input: initialData.natural_input ?? null,
+      h_title: initialData.title ?? null,
+      h_action: initialData.action ?? null,
+      h_complete_query: initialData.complete_query ?? null,
     });
 
     const prefill = buildPrefillText(initialData);
@@ -1380,7 +1380,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       if (target) {
         complete(target);
         setToast(`Marked "${target.title}" as complete`);
-        logH("complete_found", { query: effectiveQuery, matchedTitle: target.title });
+        logH("complete_found", { h_query: effectiveQuery, h_matchedTitle: target.title });
         setInput("");
         return;
       } else {
@@ -1391,7 +1391,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
       if (target) {
         uncomplete(target);
         setToast(`Marked "${target.title}" as incomplete`);
-        logH("uncomplete_found", { query: effectiveQuery, matchedTitle: target.title });
+        logH("uncomplete_found", { h_query: effectiveQuery, h_matchedTitle: target.title });
         setInput("");
         return;
       } else {
@@ -1411,12 +1411,12 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
     if (wantsCreate && prefill && prefill.trim()) {
       const directParsed = parseNaturalLanguage(prefill);
       logH("direct_parse", {
-        prefill,
-        title: directParsed.title,
-        dueDate: directParsed.dueDate,
-        dueTime: directParsed.dueTime,
-        recurrence: directParsed.recurrence,
-        confidence: directParsed.confidence,
+        h_prefill: prefill,
+        h_title: directParsed.title,
+        h_dueDate: directParsed.dueDate,
+        h_dueTime: directParsed.dueTime,
+        h_recurrence: directParsed.recurrence,
+        h_confidence: directParsed.confidence,
       });
 
       if (directParsed.title && directParsed.title.trim()) {
@@ -1426,7 +1426,7 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
         });
 
         if (recentDuplicate) {
-          logH("skip_recent_duplicate", { title: directParsed.title });
+          logH("skip_recent_duplicate", { h_title: directParsed.title });
         } else {
           const newReminder: Reminder = {
             id: generateId(),
@@ -1455,10 +1455,10 @@ export default function ReminderApp({ initialData }: { initialData?: any }) {
           setToast(msg);
 
           logH("autocreate_done", {
-            title: directParsed.title,
-            dueDate: directParsed.dueDate,
-            recurrence: directParsed.recurrence,
-            confidence: directParsed.confidence,
+            h_title: directParsed.title,
+            h_dueDate: directParsed.dueDate,
+            h_recurrence: directParsed.recurrence,
+            h_confidence: directParsed.confidence,
           });
           return;
         }

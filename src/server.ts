@@ -751,6 +751,20 @@ function humanizeEventName(event: string): string {
     widget_load: "Widget Load",
     widget_hydration_success: "Hydration Success",
     widget_hydration_error: "Hydration Error",
+    widget_hydration_start: "Hydration Start",
+    widget_hydration_resolved: "Hydration Resolved",
+    widget_hydration_direct_parse: "Hydration Direct Parse",
+    widget_hydration_autocreate_done: "Hydration Auto-Create Done",
+    widget_hydration_skip_duplicate: "Hydration Skip (Duplicate)",
+    widget_hydration_skip_recent_duplicate: "Hydration Skip (Recent Duplicate)",
+    widget_hydration_skip_no_data: "Hydration Skip (No Data)",
+    widget_hydration_skip_empty: "Hydration Skip (Empty)",
+    widget_hydration_skip_empty_title: "Hydration Skip (Empty Title)",
+    widget_hydration_complete_found: "Hydration Complete Found",
+    widget_hydration_complete_not_found: "Hydration Complete Not Found",
+    widget_hydration_uncomplete_found: "Hydration Uncomplete Found",
+    widget_hydration_uncomplete_not_found: "Hydration Uncomplete Not Found",
+    widget_hydration_fallback_prefill: "Hydration Fallback Prefill",
   };
   return eventMap[event] || event;
 }
