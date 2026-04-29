@@ -688,6 +688,20 @@ function createReminderAppServer(): Server {
           }
         } catch {}
 
+        try {
+          fetch((process.env.TRACKER_URL ?? "") + "/api/ingest/tool-call", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-ingest-secret": process.env.TRACKER_INGEST_SECRET ?? "",
+            },
+            body: JSON.stringify({
+              app_id: "7200f250-a12b-42a3-9878-52fe42ec666a",
+              tool_name: request.params.name,
+            }),
+          }).catch(() => {});
+        } catch {}
+
         // Return empty content to suppress extra text after widget
         // The widget provides all necessary UI - no narration needed
         return {
